@@ -21,7 +21,7 @@ namespace PortableUi.Wacs
         const int QuickJsUpdateGas = 5000000;
         int addonInitGas = QuickJsEvalGas, updateGas = QuickJsUpdateGas;
         public const string QuickJsSha256 =
-            "D47ACC0EB5D3AAA5E763099B725771A9286FC6CA3769E8D417FDED701AEBFE34";
+            "0975D550E2B8A9BA9CBBBEB6B5914157C793631218C222F8BDDF12EB70905835";
         const int MaxHostCallsPerExport = 64;
         readonly UiSession session;
         readonly IUiCommitTarget target;

@@ -18,6 +18,9 @@ namespace PortableUi.Unity
         bool active;
         bool disposed;
         public UiSession Session { get; set; }
+        // Async integration installs a main-thread queue sink, never a worker session.
+        public Action<ulong, UiEventMask> InputSink { get; set; }
+        public long CommitCount { get; private set; }
 
         public PortableUiNativeTarget(RectTransform canvasRoot, INativeUiWidgetFactory widgetFactory)
         {
@@ -105,6 +108,7 @@ namespace PortableUi.Unity
                     }
                 currentWidgets = nextWidgets;
                 currentSnapshot = proposed;
+                ++CommitCount;
                 return true;
             }
             catch (Exception exception)
@@ -162,7 +166,11 @@ namespace PortableUi.Unity
         }
 
         public void Queue(ulong handle, UiEventMask kind)
-        { if (active && !disposed) Session?.QueueEvent(handle, kind, Array.Empty<byte>()); }
+        {
+            if (!active || disposed) return;
+            if (InputSink != null) InputSink(handle, kind);
+            else Session?.QueueEvent(handle, kind, Array.Empty<byte>());
+        }
 
         static RectTransform NewRoot(string name, Transform parent)
         {

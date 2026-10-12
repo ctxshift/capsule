@@ -7,7 +7,7 @@ using System.Text;
 namespace PortableUi.Wasmtime
 {
     // Experimental native C ABI backend; no reflection-generated delegates or managed Wasmtime dependency.
-    public sealed class WasmtimeUiGuest : IUiGuest
+    public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiSchedulingDiagnostics
     {
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
@@ -31,6 +31,9 @@ namespace PortableUi.Wasmtime
         GCHandle self;
         bool terminal, disposed;
         string callbackError;
+        public bool SupportsScheduling { get; }
+        public long? NextWakeTimestamp { get; private set; }
+        public long UpdateCalls { get; private set; }
         public UiSession Session
         {
             get;
@@ -45,15 +48,16 @@ namespace PortableUi.Wasmtime
             get;
             private set;
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false)
         {
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
-            using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != "D47ACC0EB5D3AAA5E763099B725771A9286FC6CA3769E8D417FDED701AEBFE34") throw new ArgumentException("Pinned carrier changed");
+            using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != "0975D550E2B8A9BA9CBBBEB6B5914157C793631218C222F8BDDF12EB70905835") throw new ArgumentException("Pinned carrier changed");
             this.sdk = (byte[])sdk.Clone();
             this.source = (byte[])source.Clone();
             this.target = target;
             this.observations = observations;
             this.actions = actions;
+            SupportsScheduling = scheduling;
             grant = activation.Grant;
             Session = new UiSession(activation.ConsumeOwner(), theme);
             lock (BootstrapLock)
@@ -244,7 +248,14 @@ namespace PortableUi.Wasmtime
         }
         public bool Update(out string error)
         {
-            if (!Call("portable_ui_update", 0, 0, 0, 1, 20000000, out int result, out error)) return false;
+            ++UpdateCalls;
+            if (!Call(SupportsScheduling ? "portable_ui_update_v2" : "portable_ui_update", 0, 0, 0, 1, 20000000, out int result, out error)) return false;
+            if (SupportsScheduling && result >= 0)
+            {
+                NextWakeTimestamp = result == 0 ? (long?)null : Stopwatch.GetTimestamp() +
+                    (long)((result - 1) * (Stopwatch.Frequency / 1000.0));
+                return true;
+            }
             if (result == 0) return true;
             error = ReadError();
             terminal = true;
