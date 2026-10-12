@@ -24,6 +24,8 @@ namespace PortableUi.Wacs
         readonly IUiCommitTarget target;
         readonly IUiObservationAdapter observations;
         readonly IUiActionAdapter actions;
+        readonly UiCapabilityGrant grant;
+        readonly IUiInputIntentAdapter inputs;
         readonly UiPackageLease package;
         readonly byte[] javascript;
         readonly byte[] sdk;
@@ -45,23 +47,26 @@ namespace PortableUi.Wacs
                 actionAdapter, packageLease, null, null) { }
 
         public static WacsUiGuest FromJavaScript(byte[] hostCarrier, byte[] hostSdk, byte[] script,
-            uint ownerNonce, IUiTheme theme, IUiCommitTarget commitTarget,
+            UiAddonActivation activation, IUiTheme theme, IUiCommitTarget commitTarget,
             IUiObservationAdapter observationAdapter, IUiActionAdapter actionAdapter,
-            UiPackageLease packageLease = null)
+            UiPackageLease packageLease = null, IUiInputIntentAdapter inputAdapter = null)
         {
+            if (activation == null) throw new ArgumentNullException(nameof(activation));
+            if (activation.Grant.HasInput && inputAdapter == null)
+                throw new ArgumentNullException(nameof(inputAdapter));
             if (script == null) throw new ArgumentNullException(nameof(script));
             if (hostSdk == null) throw new ArgumentNullException(nameof(hostSdk));
             if (!TrustedWasmCarrier.TryCreate(hostCarrier, QuickJsSha256,
                     out var approved, out var failure))
                 throw new ArgumentException(failure, nameof(hostCarrier));
-            return new WacsUiGuest(approved, ownerNonce, theme, commitTarget,
-                observationAdapter, actionAdapter, packageLease, script, hostSdk);
+            return new WacsUiGuest(approved, activation.ConsumeOwner(), theme, commitTarget,
+                observationAdapter, actionAdapter, packageLease, script, hostSdk, activation.Grant, inputAdapter);
         }
 
         WacsUiGuest(TrustedWasmCarrier carrier, uint ownerNonce, IUiTheme theme,
             IUiCommitTarget commitTarget, IUiObservationAdapter observationAdapter,
             IUiActionAdapter actionAdapter, UiPackageLease packageLease, byte[] script,
-            byte[] hostSdk)
+            byte[] hostSdk, UiCapabilityGrant capabilityGrant = null, IUiInputIntentAdapter inputAdapter = null)
         {
             if (commitTarget == null || observationAdapter == null || actionAdapter == null)
                 throw new ArgumentNullException("Guest adapters must be supplied.");
@@ -85,6 +90,8 @@ namespace PortableUi.Wacs
             target = commitTarget;
             observations = observationAdapter;
             actions = actionAdapter;
+            grant = capabilityGrant;
+            inputs = inputAdapter;
             package = packageLease;
             javascript = script == null ? null : (byte[])script.Clone();
             sdk = hostSdk == null ? null : (byte[])hostSdk.Clone();
@@ -244,6 +251,8 @@ namespace PortableUi.Wacs
             if (capacity < 264 || !Bounds(pointer, capacity, 272))
                 return -Reject("Invalid observation buffer.");
             if (!observations.TryDequeue(out var topic, out var schema, out var payload)) return 0;
+            if (grant != null && !grant.AllowsObservation(topic, schema))
+                return -Reject("Observation capability denied.");
             if (payload == null || payload.Length > 256)
                 return -Reject("Observation payload quota exceeded.");
             int start = unchecked((int)(uint)pointer);
@@ -262,8 +271,20 @@ namespace PortableUi.Wacs
             Charge();
             if (capability <= 0 || capability > ushort.MaxValue || !Bounds(pointer, length, 256))
                 return Reject("Invalid action request.");
+            // Zero source is the private wire discriminator for an input intent.
+            // It never falls back to the UI action route or inherits action grants.
+            bool input = handle == 0 && grant != null;
+            if (grant != null && !(input ? grant.AllowsInput((ushort)capability) :
+                    grant.AllowsAction((ushort)capability)))
+                return Reject(input ? "Input capability denied." : "Action capability denied.");
             var bytes = new byte[length];
             Buffer.BlockCopy(memory.Data, unchecked((int)(uint)pointer), bytes, 0, length);
+            if (input)
+            {
+                try { return inputs != null && inputs.TryRequestInput((ushort)capability, bytes)
+                    ? 0 : Reject("Input rejected by adapter."); }
+                catch (Exception error) { return Reject(error.Message); }
+            }
             var result = session.RequestAction(unchecked((ulong)handle),
                 (ushort)capability, bytes, actions);
             return result.Success ? 0 : Reject(result.Detail, (int)result.Error);

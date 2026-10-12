@@ -108,6 +108,12 @@ namespace PortableUi
         bool TryRequest(ushort capability, ulong sourceHandle, byte[] copiedPayload);
     }
 
+    // Trusted input adapter routes permitted intents; it never grants gameplay authority.
+    public interface IUiInputIntentAdapter
+    {
+        bool TryRequestInput(ushort capability, byte[] copiedPayload);
+    }
+
     // Game-defined observation topics and payloads stay outside the generic UI schema.
     public interface IUiObservationAdapter
     {
