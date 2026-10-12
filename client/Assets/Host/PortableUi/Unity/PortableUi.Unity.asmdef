@@ -1,0 +1,6 @@
+{
+  "name": "PortableUi.Unity",
+  "rootNamespace": "PortableUi.Unity",
+  "references": ["PortableUi.Core", "Unity.ugui", "Unity.TextMeshPro"],
+  "autoReferenced": true
+}

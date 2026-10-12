@@ -1,0 +1,11 @@
+{
+  "name": "PortableUi.Wacs",
+  "rootNamespace": "PortableUi.Wacs",
+  "references": ["PortableUi.Core", "PortableUi.Package"],
+  "autoReferenced": true,
+  "noEngineReferences": true,
+  "overrideReferences": true,
+  "precompiledReferences": ["Wacs.Core.dll", "FluentValidation.dll", "Microsoft.Extensions.ObjectPool.dll", "System.Runtime.CompilerServices.Unsafe.dll"],
+  "defineConstraints": [],
+  "versionDefines": []
+}
