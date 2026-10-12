@@ -1,0 +1,11 @@
+{
+  "name": "PortableUi.Core",
+  "rootNamespace": "PortableUi",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true,
+  "overrideReferences": true,
+  "precompiledReferences": [],
+  "defineConstraints": [],
+  "versionDefines": []
+}
