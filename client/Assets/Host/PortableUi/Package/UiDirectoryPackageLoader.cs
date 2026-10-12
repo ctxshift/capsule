@@ -7,7 +7,7 @@ namespace PortableUi.Package
     // Reads one directory revision. No archive extraction, implicit file access or path exposure to guests.
     public static class UiDirectoryPackageLoader
     {
-        public const int MaxModuleBytes = 1024 * 1024;
+        public const int MaxScriptBytes = 64 * 1024;
         public const int MaxDataBytes = 64 * 1024;
         public const int MaxImageBytes = 2 * 1024 * 1024;
         public const int MaxTotalBytes = 4 * 1024 * 1024;
@@ -66,9 +66,9 @@ namespace PortableUi.Package
                 if (found.Count != declared.Count)
                 { error = "Declared package file missing."; return false; }
                 int total = manifestBytes.Length;
-                if (!TryRead(root, manifest.EntryPath, MaxModuleBytes, out var module, out error))
+                if (!TryRead(root, manifest.EntryPath, MaxScriptBytes, out var script, out error))
                     return false;
-                total = checked(total + module.Length);
+                total = checked(total + script.Length);
                 var data = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
                 var images = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
                 var descriptors = new Dictionary<string, UiPackageImageDescriptor>(
@@ -94,7 +94,7 @@ namespace PortableUi.Package
                         descriptors.Add(asset.Key, descriptor);
                     }
                 }
-                revision = new UiPackageRevision(manifest, manifestBytes, module,
+                revision = new UiPackageRevision(manifest, manifestBytes, script,
                     data, images, descriptors);
                 return true;
             }

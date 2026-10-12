@@ -11,7 +11,8 @@ namespace PortableUi.Wacs
         public const int MaxMemoryPages = 128;
         public const int MaxTableElements = 1024;
 
-        public static bool TryParse(TrustedWasmCarrier carrier, out Module module, out string failure)
+        public static bool TryParse(TrustedWasmCarrier carrier, out Module module, out string failure,
+            bool quickJsCarrier = false)
         {
             module = null;
             failure = null;
@@ -43,9 +44,10 @@ namespace PortableUi.Wacs
                     { failure = "Table must declare at most 1024 elements."; return false; }
                 foreach (var import in module.Imports)
                 {
-                    if (import.ModuleName != "portable_ui_v1" ||
-                        !(import.Desc is Module.ImportDesc.FuncDesc) ||
-                        !AllowedImport(import.Name))
+                    if (!(import.Desc is Module.ImportDesc.FuncDesc) ||
+                        !(import.ModuleName == "portable_ui_v1" && AllowedImport(import.Name) ||
+                          quickJsCarrier && import.ModuleName == "wasi_snapshot_preview1" &&
+                          AllowedQuickJsWasi(import.Name)))
                     { failure = "Unsupported import: " + import.ModuleName + "." + import.Name; return false; }
                 }
                 return true;
@@ -62,5 +64,13 @@ namespace PortableUi.Wacs
             name == "ui_submit" || name == "ui_next_event" ||
             name == "game_next_observation" || name == "game_request_action" ||
             name == "package_read_data" || name == "package_acquire_image";
+
+        // Fixed libc imports of the host-pinned QuickJS carrier. No filesystem,
+        // process, network, environment or descriptor capability is granted.
+        static bool AllowedQuickJsWasi(string name) =>
+            name == "args_get" || name == "args_sizes_get" ||
+            name == "clock_time_get" || name == "fd_fdstat_get" ||
+            name == "fd_seek" || name == "fd_write" ||
+            name == "proc_exit" || name == "fd_close";
     }
 }

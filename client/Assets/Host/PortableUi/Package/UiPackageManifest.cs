@@ -71,7 +71,7 @@ namespace PortableUi.Package
             var entry = String(root, "entry");
             var assetArray = root["assets"] as JArray;
             if (!ValidKey(id) || !ValidPath(entry) ||
-                !entry.EndsWith(".wasm", StringComparison.OrdinalIgnoreCase) ||
+                !entry.EndsWith(".js", StringComparison.OrdinalIgnoreCase) ||
                 assetArray == null || assetArray.Count > MaxAssets)
             { error = "Invalid identity, entry path or asset count."; return false; }
             var assets = new List<UiPackageDeclaration>(assetArray.Count);

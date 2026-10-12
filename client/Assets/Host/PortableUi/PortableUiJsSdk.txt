@@ -1,0 +1,114 @@
+// Private protocol adapter for the TypeScript-source runtime proof. This is not the
+// supported addon authoring API; the future React renderer will use the same
+// opaque BigInt handles and atomic PUI1 commands below TSX components.
+(() => {
+  const native = globalThis.portableUi;
+  const utf8 = value => {
+    const bytes = [];
+    for (const character of value) {
+      const code = character.codePointAt(0);
+      if (code < 128) bytes.push(code);
+      else if (code < 2048) bytes.push(192 | (code >> 6), 128 | (code & 63));
+      else if (code < 65536) bytes.push(224 | (code >> 12), 128 | ((code >> 6) & 63), 128 | (code & 63));
+      else bytes.push(240 | (code >> 18), 128 | ((code >> 12) & 63),
+        128 | ((code >> 6) & 63), 128 | (code & 63));
+    }
+    return bytes;
+  };
+  const fixed = value => {
+    if (!Number.isFinite(value) || Math.abs(value) > 8192) throw RangeError('invalid geometry');
+    return Math.round(value * 64);
+  };
+  const u16 = (bytes, value) => bytes.push(value & 255, (value >> 8) & 255);
+  const u32 = (bytes, value) => {
+    for (let i = 0; i < 4; i++) bytes.push((value >>> (8 * i)) & 255);
+  };
+  const u64 = (bytes, value) => {
+    if (typeof value !== 'bigint') throw TypeError('handle must be BigInt');
+    for (let i = 0; i < 8; i++) bytes.push(Number((value >> BigInt(8 * i)) & 255n));
+  };
+  const key = (bytes, value) => {
+    const encoded = utf8(value);
+    if (encoded.length > 96) throw RangeError('key too long');
+    bytes.push(encoded.length, ...encoded);
+  };
+  const text = (bytes, value) => {
+    const encoded = utf8(value);
+    if (encoded.length > 512) throw RangeError('text too long');
+    u16(bytes, encoded.length);
+    bytes.push(...encoded);
+  };
+  const queued = [];
+  const create = (kind, parent, rect, asset, label, events) => {
+    const handle = native.reserve();
+    const body = [];
+    u64(body, handle); u64(body, parent);
+    body.push(kind);
+    for (const number of [rect.x, rect.y, rect.width, rect.height]) u32(body, fixed(number));
+    key(body, ''); key(body, asset || ''); text(body, label || ''); u16(body, events || 0);
+    queued.push([1, body]);
+    return handle;
+  };
+  const setText = (handle, value) => {
+    const body = [];
+    u64(body, handle); text(body, value);
+    queued.push([2, body]);
+  };
+  const flush = () => {
+    if (queued.length === 0) return;
+    if (queued.length > 256) throw RangeError('too many commands');
+    const bytes = [80, 85, 73, 49, 1, 0, 0, 0];
+    u16(bytes, queued.length); u16(bytes, 0); u32(bytes, 0);
+    for (const [opcode, body] of queued) {
+      bytes.push(opcode, 0); u16(bytes, body.length); bytes.push(...body);
+    }
+    if (bytes.length > 65536) throw RangeError('command packet too large');
+    const packet = Uint8Array.from(bytes);
+    new DataView(packet.buffer).setUint32(12, packet.length, true);
+    native.submit(packet);
+    queued.length = 0;
+  };
+  const observations = () => {
+    const result = [];
+    for (let i = 0; i < 16; i++) {
+      const message = native.nextObservation();
+      if (message.length === 0) break;
+      if (message.length < 8) throw Error('truncated observation');
+      const view = new DataView(message.buffer, message.byteOffset, message.byteLength);
+      const length = view.getUint16(4, true);
+      if (message.length !== 8 + length) throw Error('observation length mismatch');
+      result.push({topic: view.getUint16(0, true), schema: view.getUint16(2, true),
+        payload: message.slice(8)});
+    }
+    return result;
+  };
+  const events = () => {
+    const result = [];
+    for (let i = 0; i < 16; i++) {
+      const message = native.nextEvent();
+      if (message.length === 0) break;
+      if (message.length < 16) throw Error('truncated event');
+      const view = new DataView(message.buffer, message.byteOffset, message.byteLength);
+      const length = view.getUint16(4, true);
+      if (message.length !== 16 + length) throw Error('event length mismatch');
+      result.push({kind: view.getUint16(2, true), handle: view.getBigUint64(8, true),
+        payload: message.slice(16)});
+    }
+    return result;
+  };
+  Object.defineProperty(globalThis, 'ui', {value: Object.freeze({
+    Event: Object.freeze({Activate: 1, Close: 2, Hover: 4, DragStart: 8, Drop: 16, Focus: 32}),
+    window: (rect, title, events = 0) => create(1, 0n, rect, '', title, events),
+    panel: (parent, rect) => create(2, parent, rect, '', '', 0),
+    text: (parent, rect, label) => create(3, parent, rect, '', label, 0),
+    image: (parent, rect, asset) => create(4, parent, rect, asset, '', 0),
+    portrait: (parent, rect, asset) => create(5, parent, rect, asset, '', 0),
+    slot: (parent, rect, asset, events = 0) => create(6, parent, rect, asset, '', events),
+    progress: (parent, rect) => create(7, parent, rect, '', '', 0),
+    setText, flush, observations, events,
+    requestAction: (handle, capability, payload = new Uint8Array(0)) =>
+      native.requestAction(handle, capability, payload),
+    readData: key => native.readData(key),
+    acquireImage: key => native.acquireImage(key)
+  }), writable: false, configurable: false});
+})();

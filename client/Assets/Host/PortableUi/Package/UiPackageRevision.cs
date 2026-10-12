@@ -8,7 +8,7 @@ namespace PortableUi.Package
     // All bytes are private copies. A revision can be retained while a replacement is validated.
     public sealed class UiPackageRevision
     {
-        readonly byte[] module;
+        readonly byte[] script;
         readonly Dictionary<string, byte[]> data;
         readonly Dictionary<string, byte[]> images;
         readonly Dictionary<string, UiPackageImageDescriptor> descriptors;
@@ -22,7 +22,7 @@ namespace PortableUi.Package
             Dictionary<string, UiPackageImageDescriptor> imageDescriptors)
         {
             Manifest = manifest;
-            module = (byte[])entry.Clone();
+            script = (byte[])entry.Clone();
             data = Clone(dataBytes);
             images = Clone(imageBytes);
             descriptors = new Dictionary<string, UiPackageImageDescriptor>(imageDescriptors,
@@ -32,7 +32,7 @@ namespace PortableUi.Package
                 var ordered = new List<KeyValuePair<string, byte[]>>
                 {
                     new KeyValuePair<string, byte[]>(UiPackageManifest.FileName, manifestBytes),
-                    new KeyValuePair<string, byte[]>(manifest.EntryPath, module)
+                    new KeyValuePair<string, byte[]>(manifest.EntryPath, script)
                 };
                 foreach (var asset in manifest.Declarations)
                 {
@@ -66,7 +66,7 @@ namespace PortableUi.Package
             return copy;
         }
 
-        public byte[] CopyModule() => (byte[])module.Clone();
+        public byte[] CopyScript() => (byte[])script.Clone();
         public bool TryCopyData(string key, out byte[] bytes)
         {
             bytes = null;

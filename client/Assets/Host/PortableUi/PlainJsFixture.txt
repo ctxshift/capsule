@@ -1,0 +1,32 @@
+// tools/portable-ui-quickjs/fixture.ts
+var HealthObservation = 1;
+var UseFixtureSlot = 1;
+var windowHandle = 0n;
+var slotHandle = 0n;
+var healthHandle = 0n;
+var health = 72;
+var shownHealth = -1;
+globalThis.portableUiUpdate = () => {
+  for (const observation of ui.observations()) {
+    if (observation.topic === HealthObservation && observation.schema === 1 && observation.payload.length >= 2) {
+      const view = new DataView(observation.payload.buffer);
+      health = view.getUint16(0, true);
+    }
+  }
+  if (windowHandle === 0n) {
+    windowHandle = ui.window({ x: 80, y: 210, width: 460, height: 260 }, "Inventory");
+    ui.portrait(windowHandle, { x: 28, y: 68, width: 106, height: 106 }, "player-portrait-fixture-aelith");
+    slotHandle = ui.slot(windowHandle, { x: 184, y: 74, width: 55, height: 55 }, "merchant-sword", ui.Event.Activate);
+    healthHandle = ui.text(windowHandle, { x: 184, y: 142, width: 240, height: 32 }, `Fixture health ${health}/100`);
+    ui.flush();
+    shownHealth = health;
+  }
+  if (health !== shownHealth) {
+    ui.setText(healthHandle, `Fixture health ${health}/100`);
+    ui.flush();
+    shownHealth = health;
+  }
+  for (const event of ui.events())
+    if (event.kind === ui.Event.Activate && event.handle === slotHandle)
+      ui.requestAction(slotHandle, UseFixtureSlot);
+};
