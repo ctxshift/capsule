@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Text;
 using PortableUi.Package;
 using Wacs.Core.Runtime;
@@ -28,14 +29,14 @@ namespace PortableUi.Wacs
         public UiSession Session => session;
         public string LastImportFailure => importFailure ?? string.Empty;
 
-        public WacsUiGuest(byte[] copiedSource, uint ownerNonce, IUiTheme theme,
+        public WacsUiGuest(TrustedWasmCarrier carrier, uint ownerNonce, IUiTheme theme,
             IUiCommitTarget commitTarget, IUiObservationAdapter observationAdapter,
             IUiActionAdapter actionAdapter, UiPackageLease packageLease = null)
         {
             if (commitTarget == null || observationAdapter == null || actionAdapter == null)
                 throw new ArgumentNullException("Guest adapters must be supplied.");
-            if (!WacsModulePolicy.TryParse(copiedSource, out var module, out var failure))
-                throw new ArgumentException(failure, nameof(copiedSource));
+            if (!WacsModulePolicy.TryParse(carrier, out var module, out var failure))
+                throw new ArgumentException(failure, nameof(carrier));
             session = new UiSession(ownerNonce, theme);
             target = commitTarget;
             observations = observationAdapter;
@@ -53,7 +54,7 @@ namespace PortableUi.Wacs
             runtime.RegisterModule(GuestName, runtime.InstantiateModule(module,
                 new RuntimeOptions { SkipStartFunction = true }));
             if (!runtime.TryGetExportedMemory((GuestName, "memory"), out memory))
-                throw new ArgumentException("Guest must export its bounded memory.", nameof(copiedSource));
+                throw new ArgumentException("Guest must export its bounded memory.", nameof(carrier));
         }
 
         public bool Initialize(out string failure)
@@ -83,7 +84,9 @@ namespace PortableUi.Wacs
             }
             catch (Exception error)
             {
-                failure = importFailure ?? (name + " trapped: " + error.Message);
+                while (error is TargetInvocationException && error.InnerException != null)
+                    error = error.InnerException;
+                failure = importFailure ?? (name + " trapped: " + error.GetType().Name + ": " + error.Message);
                 return false;
             }
         }

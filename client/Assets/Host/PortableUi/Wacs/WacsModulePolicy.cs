@@ -11,15 +11,15 @@ namespace PortableUi.Wacs
         public const int MaxMemoryPages = 128;
         public const int MaxTableElements = 1024;
 
-        public static bool TryParse(byte[] source, out Module module, out string failure)
+        public static bool TryParse(TrustedWasmCarrier carrier, out Module module, out string failure)
         {
             module = null;
             failure = null;
-            if (source == null || source.Length < 8 || source.Length > MaxModuleBytes)
-            { failure = "Module must be 8 bytes through 1 MiB."; return false; }
+            if (carrier == null)
+            { failure = "Host-approved Wasm carrier is required."; return false; }
             try
             {
-                using (var stream = new MemoryStream((byte[])source.Clone(), false))
+                using (var stream = new MemoryStream(carrier.CopyApprovedBytes(), false))
                     module = BinaryModuleParser.ParseWasm(stream);
                 if (module.StartIndex != global::Wacs.Core.Types.FuncIdx.Default)
                 { failure = "Start function is forbidden in this prototype."; return false; }
