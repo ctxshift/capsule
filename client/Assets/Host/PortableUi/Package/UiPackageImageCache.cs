@@ -73,6 +73,10 @@ namespace PortableUi.Package
                 image = existing.Image;
                 return true;
             }
+            // Reserve against the inspected RGBA size before asking a native decoder
+            // to allocate. Actual reported resident size is checked again below.
+            if (descriptor.DecodedBytes > MaxResidentBytes - residentBytes)
+            { error = "Decoded image cache quota exceeded."; return false; }
             IUiDecodedImage decoded = null;
             try
             {
@@ -133,6 +137,19 @@ namespace PortableUi.Package
         internal UiPackageLease(UiPackageImageCache cache, UiPackageRevision revision, long generation)
         { this.cache = cache; Revision = revision; Generation = generation; }
 
+        // Candidates validate every declared image, including images not referenced
+        // by the initial UI. The host disposes this lease when preparation fails.
+        public bool TryPrepareImages(out string error)
+        {
+            error = null;
+            if (disposed || cache.IsDisposed)
+            { error = "Package generation disposed."; return false; }
+            foreach (var declaration in Revision.Manifest.Declarations)
+                if (declaration.Kind == UiPackageAssetKind.Image &&
+                    !TryAcquireImage(declaration.Key, out _, out error)) return false;
+            return true;
+        }
+
         public bool TryAcquireImage(string key, out UiPackageImageHandle handle, out string error)
         {
             handle = default; error = null;
@@ -162,7 +179,7 @@ namespace PortableUi.Package
         public bool TryCopyData(string key, out byte[] bytes)
         {
             bytes = null;
-            return !disposed && Revision.TryCopyData(key, out bytes);
+            return !disposed && !cache.IsDisposed && Revision.TryCopyData(key, out bytes);
         }
 
         // Wire-friendly opaque token. Its text is an ABI key, not a filesystem path.

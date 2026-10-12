@@ -128,7 +128,10 @@ namespace PortableUi.Package
             { error = "Package file byte quota exceeded."; return false; }
             using (var stream = new FileStream(full, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                bytes = new byte[(int)file.Length];
+                long openedLength = stream.Length;
+                if (openedLength < 0 || openedLength > maxBytes)
+                { error = "Opened package file byte quota exceeded."; return false; }
+                bytes = new byte[(int)openedLength];
                 int at = 0;
                 while (at < bytes.Length)
                 {
