@@ -1,0 +1,1 @@
+{"name":"PortableUi.Wasmtime","rootNamespace":"PortableUi.Wasmtime","references":["PortableUi.Core","PortableUi.Package"],"autoReferenced":true}

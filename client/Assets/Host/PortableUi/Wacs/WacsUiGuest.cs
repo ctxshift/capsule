@@ -9,16 +9,19 @@ using Wacs.Core.Runtime.Types;
 namespace PortableUi.Wacs
 {
     // A single interpreted guest. This assembly has no Unity or Host dependency.
-    public sealed class WacsUiGuest : IDisposable
+    public sealed class WacsUiGuest : IUiGuest
     {
         const string Namespace = "portable_ui_v1";
         const string GuestName = "portable_ui_guest";
         const int GasPerExport = 200000;
         const int QuickJsInitGas = 2000000;
         const int QuickJsEvalGas = 5000000;
+        const int ExperimentalReactGas = 20000000;
+        const int QuickJsHostSdkGas = 200000000;
         const int QuickJsUpdateGas = 5000000;
+        int addonInitGas = QuickJsEvalGas, updateGas = QuickJsUpdateGas;
         public const string QuickJsSha256 =
-            "005FACE7448194E77DBC2A730C69F2AE5FAF60B9B39D42AC1D1236C6EF67DA7D";
+            "D47ACC0EB5D3AAA5E763099B725771A9286FC6CA3769E8D417FDED701AEBFE34";
         const int MaxHostCallsPerExport = 64;
         readonly UiSession session;
         readonly IUiCommitTarget target;
@@ -34,6 +37,7 @@ namespace PortableUi.Wacs
         MemoryInstance memory;
         int calls;
         bool disposed;
+        bool shuttingDown;
         bool terminal;
         string importFailure;
 
@@ -49,7 +53,8 @@ namespace PortableUi.Wacs
         public static WacsUiGuest FromJavaScript(byte[] hostCarrier, byte[] hostSdk, byte[] script,
             UiAddonActivation activation, IUiTheme theme, IUiCommitTarget commitTarget,
             IUiObservationAdapter observationAdapter, IUiActionAdapter actionAdapter,
-            UiPackageLease packageLease = null, IUiInputIntentAdapter inputAdapter = null)
+            UiPackageLease packageLease = null, IUiInputIntentAdapter inputAdapter = null,
+            bool experimentalReactBudget = false)
         {
             if (activation == null) throw new ArgumentNullException(nameof(activation));
             if (activation.Grant.HasInput && inputAdapter == null)
@@ -59,8 +64,10 @@ namespace PortableUi.Wacs
             if (!TrustedWasmCarrier.TryCreate(hostCarrier, QuickJsSha256,
                     out var approved, out var failure))
                 throw new ArgumentException(failure, nameof(hostCarrier));
-            return new WacsUiGuest(approved, activation.ConsumeOwner(), theme, commitTarget,
+            var guest = new WacsUiGuest(approved, activation.ConsumeOwner(), theme, commitTarget,
                 observationAdapter, actionAdapter, packageLease, script, hostSdk, activation.Grant, inputAdapter);
+            if (experimentalReactBudget) { guest.addonInitGas = ExperimentalReactGas; guest.updateGas = ExperimentalReactGas; }
+            return guest;
         }
 
         WacsUiGuest(TrustedWasmCarrier carrier, uint ownerNonce, IUiTheme theme,
@@ -72,8 +79,8 @@ namespace PortableUi.Wacs
                 throw new ArgumentNullException("Guest adapters must be supplied.");
             if (script != null && (script.Length == 0 || script.Length > 65536))
                 throw new ArgumentException("JavaScript bundle must be 1..65536 bytes.", nameof(script));
-            if (script != null && (hostSdk.Length == 0 || hostSdk.Length > 65536))
-                throw new ArgumentException("Host JS SDK must be 1..65536 bytes.", nameof(hostSdk));
+            if (script != null && (hostSdk.Length == 0 || hostSdk.Length > 524288))
+                throw new ArgumentException("Host JS SDK must be 1..524288 bytes.", nameof(hostSdk));
             if (script != null)
             {
                 try { StrictUtf8.GetString(script); }
@@ -118,18 +125,35 @@ namespace PortableUi.Wacs
             return Invoke("ui_init", 0, out failure);
         }
 
-        public bool Update(out string failure) => javascript == null ?
-            Invoke("ui_update", 0, out failure) :
-            Invoke("portable_ui_update", 0, out failure, QuickJsUpdateGas);
+        bool firstJavaScriptUpdate = true;
+        public bool Update(out string failure)
+        {
+            if (javascript == null) return Invoke("ui_update", 0, out failure);
+            int gas = firstJavaScriptUpdate ? addonInitGas : updateGas;
+            firstJavaScriptUpdate = false;
+            return Invoke("portable_ui_update", 0, out failure, gas);
+        }
+
+        public bool SetViewport(int width, int height, out string failure)
+        {
+            if (width < 1 || height < 1 || width > 4096 || height > 4096)
+            { failure = "Viewport outside logical layout bounds."; return false; }
+            return EvaluateJavaScript(StrictUtf8.GetBytes("globalThis.__portableSetViewport?.(" + width + "," + height + ");"), "portable_ui_eval", out failure);
+        }
 
         bool InitializeJavaScript(out string failure)
         {
+            InitializationTrace?.Invoke("QuickJS init begin");
             if (!Invoke("portable_ui_init", 0, out failure, QuickJsInitGas)) return false;
+            InitializationTrace?.Invoke("Host SDK eval begin");
             if (!EvaluateJavaScript(sdk, "portable_ui_bootstrap", out failure)) return false;
-            return EvaluateJavaScript(javascript, "portable_ui_eval", out failure);
+            InitializationTrace?.Invoke("Addon eval begin");
+            return EvaluateJavaScript(javascript, "portable_ui_eval", out failure, addonInitGas);
         }
 
-        bool EvaluateJavaScript(byte[] source, string export, out string failure)
+        public Action<string> InitializationTrace { get; set; }
+
+        bool EvaluateJavaScript(byte[] source, string export, out string failure, int gasLimit = QuickJsEvalGas)
         {
             try
             {
@@ -139,12 +163,12 @@ namespace PortableUi.Wacs
                 var alloc = runtime.CreateInvokerFunc<int, int>(allocAddress,
                     new InvokerOptions { GasLimit = GasPerExport });
                 int pointer = alloc(source.Length + 1);
-                if (pointer == 0 || !Bounds(pointer, source.Length + 1, 65537))
+                if (pointer == 0 || !Bounds(pointer, source.Length + 1, 524289))
                 { failure = "QuickJS source allocation failed."; return false; }
                 Buffer.BlockCopy(source, 0, memory.Data, pointer, source.Length);
                 memory.Data[pointer + source.Length] = 0;
                 var evaluate = runtime.CreateInvokerFunc<int, int, int>(evalAddress,
-                    new InvokerOptions { GasLimit = QuickJsEvalGas });
+                    new InvokerOptions { GasLimit = export == "portable_ui_bootstrap" ? QuickJsHostSdkGas : gasLimit });
                 calls = 0;
                 int result = evaluate(pointer, source.Length);
                 string sourceError = result == 0 ? null : ReadJavaScriptError();
@@ -269,6 +293,7 @@ namespace PortableUi.Wacs
         int RequestAction(long handle, int capability, int pointer, int length)
         {
             Charge();
+            if (shuttingDown) return Reject("Addon is unloading.");
             if (capability <= 0 || capability > ushort.MaxValue || !Bounds(pointer, length, 256))
                 return Reject("Invalid action request.");
             // Zero source is the private wire discriminator for an input intent.
@@ -406,6 +431,9 @@ namespace PortableUi.Wacs
         public void Dispose()
         {
             if (disposed) return;
+            shuttingDown = true;
+            if (javascript != null && !terminal)
+                EvaluateJavaScript(StrictUtf8.GetBytes("globalThis.portableUiDispose?.();"), "portable_ui_eval", out _);
             disposed = true;
             session.Unload(target);
             if (runtime is IDisposable disposable) disposable.Dispose();

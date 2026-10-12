@@ -92,7 +92,7 @@ namespace PortableUi
                 if (!ValidEvents(command.Events)) return new UiResult(UiError.InvalidCommand, "Unknown event mask.");
                 if (command.Parent == 0)
                 {
-                    if (command.Kind != UiNodeKind.Window && command.Kind != UiNodeKind.Panel)
+                    if (command.Kind != UiNodeKind.Window && command.Kind != UiNodeKind.Panel && command.Kind != UiNodeKind.Box && command.Kind != UiNodeKind.ClipBox)
                         return new UiResult(UiError.InvalidCommand, "Root must be a window or panel.");
                     int roots = 0;
                     foreach (var node in next.Values) if (node.Parent == 0) ++roots;
@@ -124,14 +124,16 @@ namespace PortableUi
                     if (current.Kind != UiNodeKind.Text && current.Kind != UiNodeKind.Window)
                         return new UiResult(UiError.InvalidCommand, "Node has no text.");
                     next[handle] = current.With(text: command.Text); break;
+                case UiOpcode.SetStyle:
+                    var allowedStyle = CheckTheme(command.Style, false);
+                    if (!allowedStyle.Success) return allowedStyle;
+                    next[handle] = current.With(style: command.Style); break;
                 case UiOpcode.SetImage:
                     if (current.Kind != UiNodeKind.Image && current.Kind != UiNodeKind.Portrait &&
                         current.Kind != UiNodeKind.Slot)
                         return new UiResult(UiError.InvalidCommand, "Node has no image.");
                     var asset = CheckTheme(command.Asset, true);
                     if (!asset.Success) return asset;
-                    if (string.IsNullOrEmpty(command.Asset))
-                        return new UiResult(UiError.InvalidCommand, "Image key required.");
                     next[handle] = current.With(asset: command.Asset); break;
                 case UiOpcode.SetProgress:
                     if (current.Kind != UiNodeKind.Progress || command.Value > 10000)

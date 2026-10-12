@@ -52,83 +52,88 @@ namespace PortableUi.Unity
         {
             error = null;
             if (disposed) { error = "Native target disposed."; return false; }
-            if (SameTopology(proposed) && TryIncremental(proposed, out error)) return true;
-            if (SameTopology(proposed)) return false;
+            var staged = new Dictionary<ulong, NativeUiWidget>();
             RectTransform stage = null;
             try
             {
-                stage = NewRoot("Candidate", layer);
-                stage.gameObject.SetActive(false);
-                var created = new Dictionary<ulong, NativeUiWidget>();
+                // Prepare new widgets off-tree before touching retained keyed objects.
                 foreach (var node in proposed.Nodes)
                 {
-                    Transform parent = node.Parent == 0 ? stage : created[node.Parent].Rect;
-                    var widget = factory.Create(node.Kind, parent);
+                    if (!string.IsNullOrEmpty(node.AssetKey) &&
+                        (!factory.TryGetSprite(node.AssetKey, out var sprite) || !sprite))
+                        throw new InvalidOperationException("Asset key unavailable: " + node.AssetKey);
+                    if (currentWidgets.ContainsKey(node.Handle)) continue;
+                    if (!stage) { stage = NewRoot("Candidate", layer); stage.gameObject.SetActive(false); }
+                    NativeUiWidget widget;
+                    if (node.Kind == UiNodeKind.Box || node.Kind == UiNodeKind.ClipBox)
+                    {
+                        var box = new GameObject("Box", typeof(RectTransform));
+                        box.transform.SetParent(stage, false);
+                        if (node.Kind == UiNodeKind.ClipBox) box.AddComponent<RectMask2D>();
+                        widget = new NativeUiWidget((RectTransform)box.transform, null, null, null);
+                    }
+                    else widget = factory.Create(node.Kind, stage);
                     if (!widget.Rect) throw new InvalidOperationException("Factory returned no RectTransform.");
                     ApplyNode(widget, node);
-                    widget.Rect.gameObject.AddComponent<PortableUiNodeInput>()
-                        .Bind(this, node.Handle, node.Events);
+                    widget.Rect.gameObject.AddComponent<PortableUiNodeInput>().Bind(this, node.Handle, node.Events);
                     if (widget.CloseButton)
                     {
                         ulong id = node.Handle;
                         widget.CloseButton.onClick.AddListener(() => Queue(id, UiEventMask.Close));
                     }
-                    created.Add(node.Handle, widget);
+                    staged.Add(node.Handle, widget);
                 }
-                var previous = current;
-                current = stage;
+                var nextWidgets = new Dictionary<ulong, NativeUiWidget>();
+                foreach (var node in proposed.Nodes)
+                {
+                    var widget = currentWidgets.TryGetValue(node.Handle, out var retained) ? retained : staged[node.Handle];
+                    if (currentWidgets.ContainsKey(node.Handle)) ApplyNode(widget, node);
+                    nextWidgets.Add(node.Handle, widget);
+                }
+                if (!current) current = NewRoot("Active", layer);
+                foreach (var node in proposed.Nodes)
+                {
+                    var rect = nextWidgets[node.Handle].Rect;
+                    rect.SetParent(node.Parent == 0 ? current : nextWidgets[node.Parent].Rect, false);
+                    rect.SetAsLastSibling();
+                }
+                foreach (var old in currentWidgets)
+                    if (!nextWidgets.ContainsKey(old.Key))
+                    {
+                        old.Value.Rect.gameObject.SetActive(false);
+                        UnityEngine.Object.Destroy(old.Value.Rect.gameObject);
+                    }
+                currentWidgets = nextWidgets;
                 currentSnapshot = proposed;
-                currentWidgets = created;
-                stage.gameObject.SetActive(true);
-                if (previous) { previous.gameObject.SetActive(false); UnityEngine.Object.Destroy(previous.gameObject); }
                 return true;
             }
             catch (Exception exception)
             {
+                // Restore retained properties/parents if a native adapter rejects the batch.
+                if (currentSnapshot != null)
+                    foreach (var old in currentSnapshot.Nodes)
+                        try
+                        {
+                            var widget = currentWidgets[old.Handle];
+                            ApplyNode(widget, old);
+                            widget.Rect.SetParent(old.Parent == 0 ? current : currentWidgets[old.Parent].Rect, false);
+                            widget.Rect.SetAsLastSibling();
+                        }
+                        catch { }
+                foreach (var item in staged.Values)
+                    if (item.Rect) { item.Rect.gameObject.SetActive(false); UnityEngine.Object.Destroy(item.Rect.gameObject); }
                 error = exception.Message;
-                if (stage) { stage.gameObject.SetActive(false); UnityEngine.Object.Destroy(stage.gameObject); }
                 return false;
             }
+            finally { if (stage) UnityEngine.Object.Destroy(stage.gameObject); }
         }
 
-        bool SameTopology(UiSnapshot next)
+        public bool TryGetNativeWidget(ulong handle, out RectTransform rect)
         {
-            if (currentSnapshot == null || currentSnapshot.Nodes.Count != next.Nodes.Count) return false;
-            foreach (var node in next.Nodes)
-            {
-                if (!currentWidgets.ContainsKey(node.Handle)) return false;
-                bool found = false;
-                foreach (var old in currentSnapshot.Nodes)
-                    if (old.Handle == node.Handle)
-                    { found = old.Parent == node.Parent && old.Kind == node.Kind; break; }
-                if (!found) return false;
-            }
+            rect = null;
+            if (!currentWidgets.TryGetValue(handle, out var widget) || !widget.Rect) return false;
+            rect = widget.Rect;
             return true;
-        }
-
-        bool TryIncremental(UiSnapshot next, out string error)
-        {
-            error = null;
-            try
-            {
-                // Validate keys before mutating any live node.
-                foreach (var node in next.Nodes)
-                    if (!string.IsNullOrEmpty(node.AssetKey) &&
-                        (!factory.TryGetSprite(node.AssetKey, out var sprite) || !sprite))
-                        throw new InvalidOperationException("Asset key unavailable: " + node.AssetKey);
-                foreach (var node in next.Nodes) ApplyNode(currentWidgets[node.Handle], node);
-                currentSnapshot = next;
-                return true;
-            }
-            catch (Exception exception)
-            {
-                // All normally fallible asset lookups were validated first; restore prior values on
-                // an unexpected native component exception.
-                foreach (var old in currentSnapshot.Nodes)
-                    try { ApplyNode(currentWidgets[old.Handle], old); } catch { }
-                error = exception.Message;
-                return false;
-            }
         }
 
         void ApplyNode(NativeUiWidget widget, UiNode node)
@@ -149,6 +154,7 @@ namespace PortableUi.Unity
                 widget.Image.enabled = false;
             }
             if (widget.Fill) widget.Fill.fillAmount = node.Progress / 10000f;
+            if (factory is INativeUiStyleAdapter styled) styled.ApplyStyle(widget, node);
             var input = widget.Rect.GetComponent<PortableUiNodeInput>();
             if (input) input.Bind(this, node.Handle, node.Events);
             widget.Rect.gameObject.SetActive(node.Visible);

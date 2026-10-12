@@ -7,7 +7,7 @@ namespace PortableUi
     public enum UiOpcode : byte
     {
         Create = 1, SetText = 2, SetImage = 3, SetProgress = 4,
-        SetVisible = 5, Remove = 6, SetEvents = 7, SetRect = 8, Raise = 9
+        SetVisible = 5, Remove = 6, SetEvents = 7, SetRect = 8, Raise = 9, SetStyle = 10
     }
 
     internal sealed class UiCommand
@@ -64,6 +64,8 @@ namespace PortableUi
                             break;
                         case UiOpcode.SetText:
                             command.Handle = body.U64(); command.Text = body.Text(); break;
+                        case UiOpcode.SetStyle:
+                            command.Handle = body.U64(); command.Style = body.Key(); break;
                         case UiOpcode.SetImage:
                             command.Handle = body.U64(); command.Asset = body.Key(); break;
                         case UiOpcode.SetProgress:
