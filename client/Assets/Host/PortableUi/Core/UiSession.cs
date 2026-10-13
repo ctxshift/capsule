@@ -31,7 +31,7 @@ namespace PortableUi
             theme = injectedTheme ?? throw new ArgumentNullException(nameof(injectedTheme));
         }
 
-        // Called by the trusted WACS import. Reservation has no visible UI effect.
+        // Called by the trusted guest import. Reservation has no visible UI effect.
         public UiResult ReserveHandle(out ulong handle)
         {
             handle = 0;
@@ -263,7 +263,7 @@ namespace PortableUi
             return UiResult.Ok;
         }
 
-        // The WACS adapter pulls events after native commit; never invoke guest code here.
+        // The guest adapter pulls events after native commit; never invoke guest code here.
         public bool TryPeekEvent(out UiEvent result)
         {
             while (events.Count > 0)
@@ -284,7 +284,7 @@ namespace PortableUi
             return true;
         }
 
-        // Host-side encoding. The WACS adapter copies this bounded buffer into validated guest memory.
+        // Host-side encoding. The guest adapter copies this bounded buffer into validated guest memory.
         public UiResult WriteNextEvent(byte[] destination, out int written)
         {
             written = 0;
