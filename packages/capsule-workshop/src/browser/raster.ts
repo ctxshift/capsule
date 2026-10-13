@@ -26,7 +26,21 @@ export function image(
   pixels.setAttribute('href', asset.url);
   pixels.setAttribute('width', String(asset.size[0]));
   pixels.setAttribute('height', String(asset.size[1]));
-  svg.append(pixels);
+  if (stretch) svg.append(pixels);
+  else {
+    // Clip in source coordinates before fitting the region. Clipping only the
+    // outer viewport can reveal neighboring atlas pixels in the letterbox.
+    const crop = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    crop.setAttribute('x', String(region[0]));
+    crop.setAttribute('y', String(region[1]));
+    crop.setAttribute('width', String(region[2]));
+    crop.setAttribute('height', String(region[3]));
+    crop.setAttribute('viewBox', region.join(' '));
+    crop.setAttribute('preserveAspectRatio', 'none');
+    crop.style.overflow = 'hidden';
+    crop.append(pixels);
+    svg.append(crop);
+  }
   return svg;
 }
 

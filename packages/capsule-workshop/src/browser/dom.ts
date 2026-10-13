@@ -7,6 +7,7 @@ export interface BrowserTheme {
   images: readonly string[];
   metrics(document: Document, style: string): TextMetrics;
   decorate(element: HTMLElement, node: UiNode, close: () => void): void;
+  update?(element: HTMLElement, node: UiNode): void;
 }
 
 export class DomTarget {
@@ -53,11 +54,11 @@ export class DomTarget {
       .filter((node) => node.kind === 1)
       .at(-1);
     if (event.key === 'Tab' && front) {
-      const controls = [
-        ...this.elements
+      const controls = Array.from(
+        this.elements
           .get(front.id)!
           .querySelectorAll<HTMLElement>('button,input,select'),
-      ];
+      );
       const index = controls.indexOf(
         this.stage.ownerDocument.activeElement as HTMLElement,
       );
@@ -225,6 +226,7 @@ export class DomTarget {
       (a, b) => depth(a) - depth(b),
     )) {
       const element = this.elements.get(node.id) ?? this.create(node);
+      this.theme.update?.(element, node);
       this.elements.set(node.id, element);
       element.dataset.style = node.style;
       element.style.pointerEvents =

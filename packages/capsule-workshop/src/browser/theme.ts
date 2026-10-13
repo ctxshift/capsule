@@ -1,4 +1,5 @@
 import type { BrowserTheme } from './dom';
+import type { UiNode } from './packet';
 import { frame, image, type ImageRegion } from './raster';
 import type { UiTheme, FontMetrics, Rgba } from '../theme';
 
@@ -12,7 +13,7 @@ export function createBrowserTheme(
     theme.assets.map((asset) => [
       asset.key,
       {
-        url: assetUrl(asset.key),
+        url: assetUrl(asset.image ?? asset.key),
         size: [asset.width, asset.height],
         region: asset.rect,
       } satisfies ImageRegion,
@@ -27,6 +28,20 @@ export function createBrowserTheme(
     theme.assets.find((item) => item.key === key)!;
   const framed = (document: Document, key: string) =>
     frame(document, asset(key), definition(key).border, definition(key).edge);
+  const renderedImages = new WeakMap<
+    HTMLElement,
+    { key: string; svg: SVGSVGElement }
+  >();
+  const updateImage = (element: HTMLElement, node: UiNode) => {
+    if (node.kind !== 4) return;
+    const previous = renderedImages.get(element);
+    if (previous?.key === node.asset) return;
+    const region = asset(node.asset);
+    const svg = image(element.ownerDocument, region, undefined, false);
+    if (previous) previous.svg.replaceWith(svg);
+    else element.append(svg);
+    renderedImages.set(element, { key: node.asset, svg });
+  };
   const advances = new Map(
     metrics.advances.map((glyph) => [glyph.code, glyph.value]),
   );
@@ -60,7 +75,8 @@ export function createBrowserTheme(
   return {
     css,
     fonts: [`${theme.font.sampleSize}px PortableThemeFont`],
-    images: [...art.values()].map((image) => image.url),
+    images: [...new Set([...art.values()].map((image) => image.url))],
+    update: updateImage,
     metrics(_document, style) {
       const text = theme.text.find(
         (text) => text.key === (style || theme.components.buttonLabel),
@@ -108,7 +124,8 @@ export function createBrowserTheme(
         highlight.className = 'highlight';
         highlight.append(image(document, asset(b.highlight)));
         element.append(overlay, highlight, framed(document, b.frame));
-      } else if (![2, 3, 8, 11, 12].includes(node.kind))
+      } else if (node.kind === 4) updateImage(element, node);
+      else if (![2, 3, 8, 11, 12].includes(node.kind))
         throw Error(
           'Browser control skin does not support primitive ' + node.kind,
         );
