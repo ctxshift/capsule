@@ -79,7 +79,7 @@ namespace PortableUi.Package
         public float AssetNumber(string key,string property) {foreach(var item in (JArray)value["assets"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown theme asset.");}
         public bool AssetAlphaAware(string key) {foreach(var item in (JArray)value["assets"])if((string)item["key"]==key)return(bool)item["alphaAware"];throw new ArgumentException("Unknown theme asset.");}
         public sealed class AssetRecipe
-        { public string Key,Path; public int Width,Height,X,Y,RectWidth,RectHeight,Border,Edge; public bool AlphaAware; }
+        { public string Key,ImageKey,Path; public int Width,Height,X,Y,RectWidth,RectHeight,Border,Edge; public bool AlphaAware; }
         public IEnumerable<AssetRecipe> CopyAssets()
         {
             foreach(var item in (JArray)value["assets"])
@@ -87,7 +87,11 @@ namespace PortableUi.Package
                 string path=(string)item["path"],key=(string)item["key"];
                 if(string.IsNullOrEmpty(path)||System.IO.Path.IsPathRooted(path)||path.Contains("..")||path.Contains("\\")||string.IsNullOrEmpty(key)||key.IndexOfAny(new[]{'/','\\','.'})>=0)throw new ArgumentException("Invalid theme asset path.");
                 var rect=(JArray)item["rect"];
-                yield return new AssetRecipe{Key=key,Path=path,Width=(int)item["width"],Height=(int)item["height"],X=(int)rect[0],Y=(int)rect[1],RectWidth=(int)rect[2],RectHeight=(int)rect[3],Border=(int)item["border"],Edge=(int)item["edge"],AlphaAware=(bool)item["alphaAware"]};
+                string imageKey = item["image"] == null ? key : (string)item["image"];
+                if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z0-9-]{1,64}$") ||
+                    string.IsNullOrEmpty(imageKey) || !System.Text.RegularExpressions.Regex.IsMatch(imageKey, "^[a-z0-9-]{1,64}$"))
+                    throw new ArgumentException("Invalid theme image key.");
+                yield return new AssetRecipe{Key=key,ImageKey=imageKey,Path=path,Width=(int)item["width"],Height=(int)item["height"],X=(int)rect[0],Y=(int)rect[1],RectWidth=(int)rect[2],RectHeight=(int)rect[3],Border=(int)item["border"],Edge=(int)item["edge"],AlphaAware=(bool)item["alphaAware"]};
             }
         }
     }

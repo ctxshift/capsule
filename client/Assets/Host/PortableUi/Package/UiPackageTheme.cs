@@ -30,16 +30,22 @@ namespace PortableUi.Package
             if (!revision.TryCopyData(themeKey, out var bytes))
                 throw new ArgumentException("Package theme data is not declared.");
             Definition = new UiControlTheme(new UTF8Encoding(false, true).GetString(bytes));
+            var sources = new Dictionary<string, UiControlTheme.AssetRecipe>(StringComparer.Ordinal);
             foreach (var recipe in Definition.CopyAssets())
             {
+                if (sources.TryGetValue(recipe.ImageKey, out var previous) &&
+                    (previous.Path != recipe.Path || previous.Width != recipe.Width || previous.Height != recipe.Height || previous.AlphaAware != recipe.AlphaAware))
+                    throw new ArgumentException("Conflicting theme image source.");
+                sources[recipe.ImageKey] = recipe;
                 bool found = false;
                 foreach (var declaration in revision.Manifest.Declarations)
-                    if (declaration.Key == recipe.Key && declaration.Path == recipe.Path && declaration.Kind == UiPackageAssetKind.Image)
+                    if (declaration.Key == recipe.ImageKey && declaration.Path == recipe.Path && declaration.Kind == UiPackageAssetKind.Image)
                         found = true;
                 if (!found || names.Contains(recipe.Key) ||
-                    !revision.TryCopyImage(recipe.Key, out _, out var image) ||
+                    !revision.TryCopyImage(recipe.ImageKey, out _, out var image) ||
                     image.Width != recipe.Width || image.Height != recipe.Height ||
-                    recipe.X < 0 || recipe.Y < 0 || recipe.RectWidth < 1 || recipe.RectHeight < 1 ||
+                    recipe.X < 0 || recipe.Y < 0 || recipe.RectWidth < 1 || recipe.RectHeight < 1 || recipe.Border < 0 ||
+                    2L * recipe.Border > Math.Min(recipe.RectWidth, recipe.RectHeight) ||
                     (long)recipe.X + recipe.RectWidth > image.Width || (long)recipe.Y + recipe.RectHeight > image.Height)
                     throw new ArgumentException("Theme recipe does not match a declared package image.");
                 names.Add(recipe.Key);

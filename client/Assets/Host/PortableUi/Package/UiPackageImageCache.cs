@@ -40,15 +40,20 @@ namespace PortableUi.Package
 
         readonly Dictionary<string, Entry> entries = new Dictionary<string, Entry>(StringComparer.Ordinal);
         readonly IUiImageDecoder decoder;
-        const long MaxResidentBytes = 64L * 1024 * 1024;
+        public const long DefaultMaxResidentBytes = 64L * 1024 * 1024;
+        readonly long maxResidentBytes;
         long nextGeneration;
         long residentBytes;
         bool disposed;
         public int CachedImageCount => entries.Count;
         internal bool IsDisposed => disposed;
 
-        public UiPackageImageCache(IUiImageDecoder decoder)
-        { this.decoder = decoder ?? throw new ArgumentNullException(nameof(decoder)); }
+        public UiPackageImageCache(IUiImageDecoder decoder, long maxResidentBytes = DefaultMaxResidentBytes)
+        {
+            this.decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+            if (maxResidentBytes < 4) throw new ArgumentOutOfRangeException(nameof(maxResidentBytes));
+            this.maxResidentBytes = maxResidentBytes;
+        }
 
         public UiPackageLease Open(UiPackageRevision revision)
         {
@@ -75,7 +80,7 @@ namespace PortableUi.Package
             }
             // Reserve against the inspected RGBA size before asking a native decoder
             // to allocate. Actual reported resident size is checked again below.
-            if (descriptor.DecodedBytes > MaxResidentBytes - residentBytes)
+            if (descriptor.DecodedBytes > maxResidentBytes - residentBytes)
             { error = "Decoded image cache quota exceeded."; return false; }
             IUiDecodedImage decoded = null;
             try
@@ -85,7 +90,7 @@ namespace PortableUi.Package
                     decoded.Height != descriptor.Height || decoded.ResidentBytes < 0 ||
                     decoded.ResidentBytes > descriptor.DecodedBytes)
                 { error = "Image decoder returned invalid dimensions or memory size."; return false; }
-                if (decoded.ResidentBytes > MaxResidentBytes - residentBytes)
+                if (decoded.ResidentBytes > maxResidentBytes - residentBytes)
                 { error = "Decoded image cache quota exceeded."; return false; }
                 entries.Add(cacheKey, new Entry { Image = decoded, References = 1 });
                 residentBytes += decoded.ResidentBytes;
