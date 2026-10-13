@@ -10,8 +10,7 @@ namespace PortableUi
         public const int MaxRoots = 16;
         public const int MaxEvents = 128;
         public const int MaxEventPayloadBytes = 256;
-        const ushort AllowedEvents = (ushort)(UiEventMask.Activate | UiEventMask.Close |
-            UiEventMask.Hover | UiEventMask.DragStart | UiEventMask.Drop | UiEventMask.Focus);
+        const ushort AllowedEvents = UiInputPayload.AllowedEvents;
         readonly uint owner;
         readonly IUiTheme theme;
         readonly Dictionary<ulong, UiNode> nodes = new Dictionary<ulong, UiNode>();
@@ -59,6 +58,10 @@ namespace PortableUi
                 if (!result.Success) return result;
             }
             var snapshot = Snapshot(proposed);
+            bool hasLayout = false;
+            foreach (var node in snapshot.Nodes) if (node.Layout != null) { hasLayout = true; break; }
+            if (hasLayout && !UiSnapshotValidator.Validate(snapshot, owner, theme, out string layoutError))
+                return new UiResult(UiError.InvalidCommand, layoutError);
             try
             {
                 if (!target.TryCommit(snapshot, out string failure))
@@ -79,7 +82,7 @@ namespace PortableUi
             List<ulong> consumed, ref int order)
         {
             var handle = command.Handle;
-            if (command.Opcode == UiOpcode.Create)
+            if (command.Opcode == UiOpcode.Create || command.Opcode == UiOpcode.CreateLayout)
             {
                 var identity = CheckIdentity(handle);
                 if (!identity.Success) return identity;
@@ -112,7 +115,7 @@ namespace PortableUi
                     string.IsNullOrEmpty(command.Asset))
                     return new UiResult(UiError.InvalidCommand, "Image requires an asset key.");
                 next.Add(handle, new UiNode(handle, command.Parent, command.Kind, command.Rect,
-                    command.Style, command.Asset, command.Text, 0, true, command.Events, ++order));
+                    command.Style, command.Asset, command.Text, 0, true, command.Events, ++order, command.Layout));
                 consumed.Add(handle);
                 return UiResult.Ok;
             }
@@ -120,8 +123,16 @@ namespace PortableUi
             if (!live.Success) return live;
             switch (command.Opcode)
             {
+                case UiOpcode.SetBrightness:
+                    if (command.Value < 8000 || command.Value > 12000)
+                        return new UiResult(UiError.InvalidCommand, "Brightness must be 8000..12000.");
+                    next[handle] = current.With(brightness: command.Value); break;
+                case UiOpcode.SetLayout:
+                    if (current.Layout == null) return new UiResult(UiError.InvalidCommand, "Layout mode is fixed at creation.");
+                    next[handle] = current.With(layout: command.Layout); break;
                 case UiOpcode.SetText:
-                    if (current.Kind != UiNodeKind.Text && current.Kind != UiNodeKind.Window)
+                    if (current.Kind != UiNodeKind.Text && current.Kind != UiNodeKind.Window &&
+                        current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select)
                         return new UiResult(UiError.InvalidCommand, "Node has no text.");
                     next[handle] = current.With(text: command.Text); break;
                 case UiOpcode.SetStyle:
@@ -136,7 +147,7 @@ namespace PortableUi
                     if (!asset.Success) return asset;
                     next[handle] = current.With(asset: command.Asset); break;
                 case UiOpcode.SetProgress:
-                    if (current.Kind != UiNodeKind.Progress || command.Value > 10000)
+                    if ((current.Kind != UiNodeKind.Progress && current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select) || command.Value > 10000)
                         return new UiResult(UiError.InvalidCommand, "Progress must be 0..10000 on a progress node.");
                     next[handle] = current.With(progress: command.Value); break;
                 case UiOpcode.SetVisible:
@@ -241,6 +252,8 @@ namespace PortableUi
                 return new UiResult(UiError.InvalidEvent, "Event kind must be one known bit.");
             if (copiedPayload == null || copiedPayload.Length > MaxEventPayloadBytes)
                 return new UiResult(UiError.QuotaExceeded, "Event payload exceeds 256 bytes.");
+            if (!UiInputPayload.Valid(kind, copiedPayload))
+                return new UiResult(UiError.InvalidEvent, "Malformed versioned input payload.");
             var result = CheckLive(handle, nodes, out var node);
             if (!result.Success) return result;
             if (!EffectivelyVisible(node) || (node.Events & kind) == 0)

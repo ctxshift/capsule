@@ -2,6 +2,14 @@ using System;
 namespace PortableUi
 {
     public interface IUiFuelDiagnostics { ulong LastFuel { get; } }
+    public interface IUiLayoutDiagnostics
+    {
+        double LastLayoutMilliseconds { get; }
+        double LastCoordinatorMilliseconds { get; }
+        double LastForwardMilliseconds { get; }
+        int LastCalculations { get; }
+        int LastMeasurements { get; }
+    }
     public interface IUiSchedulingDiagnostics
     {
         bool SupportsScheduling { get; }

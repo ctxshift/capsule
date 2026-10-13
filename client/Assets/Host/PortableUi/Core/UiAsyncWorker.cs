@@ -33,14 +33,21 @@ namespace PortableUi
         public int WorkerThreadId { get; }
         public long EnqueuedTimestamp { get; }
         public ulong Fuel { get; }
+        public double LayoutMilliseconds { get; }
+        public double CoordinatorMilliseconds { get; }
+        public double ForwardMilliseconds { get; }
+        public int LayoutCalculations { get; }
+        public int LayoutMeasurements { get; }
         internal UiAsyncCompletion(long sequence, long generation, bool candidate,
-            UiSnapshot snapshot, UiAsyncAction[] actions, string error, double work, double age, long enqueued, ulong fuel)
+            UiSnapshot snapshot, UiAsyncAction[] actions, string error, double work, double age, long enqueued, ulong fuel, IUiLayoutDiagnostics layout = null)
         {
             Sequence = sequence; Generation = generation; Candidate = candidate;
             Snapshot = snapshot; Actions = Array.AsReadOnly(actions); Error = error;
             WorkerMilliseconds = work; QueueMilliseconds = age;
             WorkerThreadId = Thread.CurrentThread.ManagedThreadId;
             EnqueuedTimestamp = enqueued; Fuel = fuel;
+            LayoutMilliseconds=layout?.LastLayoutMilliseconds??0; CoordinatorMilliseconds=layout?.LastCoordinatorMilliseconds??0;
+            ForwardMilliseconds=layout?.LastForwardMilliseconds??0; LayoutCalculations=layout?.LastCalculations??0;LayoutMeasurements=layout?.LastMeasurements??0;
         }
     }
 
@@ -50,6 +57,7 @@ namespace PortableUi
     {
         public const int QueueCapacity = 128;
         public const int TimerMilliseconds = 50;
+        static long generationSequence;
         readonly object gate = new object();
         readonly LinkedList<Input> inputs = new LinkedList<Input>();
         readonly Thread thread;
@@ -150,7 +158,11 @@ namespace PortableUi
             lock (gate)
             {
                 if (stopping) throw new ObjectDisposedException(nameof(UiAsyncWorker));
-                var generation = checked(++requestedGeneration);
+                // A stopped worker may be replaced while an old native callback
+                // still holds its generation. Never reuse that identity.
+                var generation = Interlocked.Increment(ref generationSequence);
+                if (generation <= 0) throw new OverflowException("UI generation exhausted.");
+                requestedGeneration = generation;
                 pendingLoad = new Load { Generation = generation, Factory = factory, Enqueued = Stopwatch.GetTimestamp() };
                 Monitor.PulseAll(gate);
                 return generation;
@@ -159,6 +171,7 @@ namespace PortableUi
         public bool EnqueueObservation(long generation, ushort topic, ushort schema, byte[] payload) =>
             Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = Copy(payload) });
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload) =>
+            UiInputPayload.Valid(kind, payload) &&
             Enqueue(new Input { Kind = Kind.Event, Generation = generation, Handle = handle, Event = kind, Payload = Copy(payload) });
         public bool EnqueueViewport(long generation, int width, int height) =>
             Enqueue(new Input { Kind = Kind.Viewport, Generation = generation, Width = width, Height = height });
@@ -175,7 +188,12 @@ namespace PortableUi
                 input.Enqueued = Stopwatch.GetTimestamp();
                 // Only replace a matching tail state. An event is an ordering barrier.
                 var tail = inputs.Last;
-                if (tail != null && input.Kind != Kind.Event && tail.Value.Kind == input.Kind &&
+                if (tail != null && input.Kind == Kind.Event && input.Event == UiEventMask.Pointer &&
+                    tail.Value.Kind == Kind.Event && tail.Value.Event == UiEventMask.Pointer &&
+                    tail.Value.Generation == input.Generation && tail.Value.Handle == input.Handle &&
+                    UiInputPayload.SupersedesMove(tail.Value.Payload, input.Payload))
+                    tail.Value = input;
+                else if (tail != null && input.Kind != Kind.Event && tail.Value.Kind == input.Kind &&
                     tail.Value.Generation == input.Generation && tail.Value.Topic == input.Topic && tail.Value.Schema == input.Schema)
                     tail.Value = input;
                 else
@@ -291,7 +309,7 @@ namespace PortableUi
             }
             catch (Exception failure) { error = failure.Message; }
             RecordWork(start, candidate);
-            if (Publish(load.Generation, true, exchange, error, start, load.Enqueued, (candidate as IUiFuelDiagnostics)?.LastFuel ?? 0))
+            if (Publish(load.Generation, true, exchange, error, start, load.Enqueued, (candidate as IUiFuelDiagnostics)?.LastFuel ?? 0, candidate as IUiLayoutDiagnostics))
             {
                 Retire(ref active, activeExchange);
                 active = candidate; candidate = null; activeExchange = exchange; exchange.Candidate = false;
@@ -330,17 +348,17 @@ namespace PortableUi
             RecordWork(start, active);
             // Idle work has no publication/ack traffic. Counters remain available.
             if (error == null && activeExchange.Snapshot == null && activeExchange.Actions.Count == 0) return;
-            if (!Publish(generation, false, activeExchange, error, start, input?.Enqueued ?? start, (active as IUiFuelDiagnostics)?.LastFuel ?? 0))
+            if (!Publish(generation, false, activeExchange, error, start, input?.Enqueued ?? start, (active as IUiFuelDiagnostics)?.LastFuel ?? 0, active as IUiLayoutDiagnostics))
                 Retire(ref active, activeExchange);
         }
-        bool Publish(long generation, bool candidate, Exchange exchange, string error, long start, long enqueued, ulong fuel)
+        bool Publish(long generation, bool candidate, Exchange exchange, string error, long start, long enqueued, ulong fuel, IUiLayoutDiagnostics layout)
         {
             var end = Stopwatch.GetTimestamp();
             lock (gate)
             {
                 if (stopping || (candidate && generation != requestedGeneration)) return false;
                 completion = new UiAsyncCompletion(++sequence, generation, candidate, exchange.Snapshot,
-                    exchange.Actions.ToArray(), error, Milliseconds(end - start), Milliseconds(start - enqueued), enqueued, fuel);
+                    exchange.Actions.ToArray(), error, Milliseconds(end - start), Milliseconds(start - enqueued), enqueued, fuel, layout);
                 acknowledged = false; accepted = false;
                 while (!stopping && !acknowledged && !(candidate && generation != requestedGeneration)) Monitor.Wait(gate);
                 bool result = !stopping && acknowledged && accepted;

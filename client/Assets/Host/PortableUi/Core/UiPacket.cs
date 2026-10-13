@@ -7,7 +7,8 @@ namespace PortableUi
     public enum UiOpcode : byte
     {
         Create = 1, SetText = 2, SetImage = 3, SetProgress = 4,
-        SetVisible = 5, Remove = 6, SetEvents = 7, SetRect = 8, Raise = 9, SetStyle = 10
+        SetVisible = 5, Remove = 6, SetEvents = 7, SetRect = 8, Raise = 9, SetStyle = 10,
+        CreateLayout = 11, SetLayout = 12, SetBrightness = 13
     }
 
     internal sealed class UiCommand
@@ -20,6 +21,7 @@ namespace PortableUi
         internal ushort Value;
         internal bool Visible;
         internal UiEventMask Events;
+        internal UiLayout Layout;
     }
 
     // PUI1, little-endian, exact lengths; no guest-owned span is retained.
@@ -39,7 +41,8 @@ namespace PortableUi
             {
                 var reader = new Reader(bytes, 0, bytes.Length);
                 if (reader.U32() != 0x31495550) return new UiResult(UiError.InvalidPacket, "Magic must be PUI1.");
-                if (reader.U16() != Version) return new UiResult(UiError.UnsupportedVersion);
+                ushort version = reader.U16();
+                if (version != Version && version != 2) return new UiResult(UiError.UnsupportedVersion);
                 if (reader.U16() != 0) return new UiResult(UiError.InvalidPacket, "Reserved header must be zero.");
                 int count = reader.U16();
                 if (count > MaxCommands) return new UiResult(UiError.QuotaExceeded, "Too many commands.");
@@ -49,6 +52,8 @@ namespace PortableUi
                 for (int i = 0; i < count; i++)
                 {
                     var opcode = (UiOpcode)reader.U8();
+                    if (version == 1 && (opcode == UiOpcode.CreateLayout || opcode == UiOpcode.SetLayout || opcode == UiOpcode.SetBrightness))
+                        return new UiResult(UiError.UnsupportedVersion, "Layout requires packet v2.");
                     if (reader.U8() != 0) return new UiResult(UiError.InvalidPacket, "Command flags must be zero.");
                     int length = reader.U16();
                     var body = reader.Body(length);
@@ -56,12 +61,16 @@ namespace PortableUi
                     switch (opcode)
                     {
                         case UiOpcode.Create:
+                        case UiOpcode.CreateLayout:
                             command.Handle = body.U64(); command.Parent = body.U64();
                             command.Kind = (UiNodeKind)body.U8();
                             command.Rect = body.Rect();
                             command.Style = body.Key(); command.Asset = body.Key();
                             command.Text = body.Text(); command.Events = (UiEventMask)body.U16();
+                            if (opcode == UiOpcode.CreateLayout) command.Layout = body.Layout();
                             break;
+                        case UiOpcode.SetLayout:
+                            command.Handle = body.U64(); command.Layout = body.Layout(); break;
                         case UiOpcode.SetText:
                             command.Handle = body.U64(); command.Text = body.Text(); break;
                         case UiOpcode.SetStyle:
@@ -69,6 +78,7 @@ namespace PortableUi
                         case UiOpcode.SetImage:
                             command.Handle = body.U64(); command.Asset = body.Key(); break;
                         case UiOpcode.SetProgress:
+                        case UiOpcode.SetBrightness:
                             command.Handle = body.U64(); command.Value = body.U16(); break;
                         case UiOpcode.SetVisible:
                             command.Handle = body.U64();
@@ -123,6 +133,8 @@ namespace PortableUi
             internal ulong U64() { ulong lo = U32(); return lo | (ulong)U32() << 32; }
             internal int I32() => unchecked((int)U32());
             internal UiRect Rect() => new UiRect(I32(), I32(), I32(), I32());
+            internal UiLayout Layout() => new UiLayout(U8(), U8(), U8(), U8(),
+                I32(), I32(), I32(), I32(), I32(), I32(), I32(), I32(), I32(), I32(), I32());
             internal Reader Body(int length)
             {
                 Need(length); var body = new Reader(bytes, offset, offset + length); offset += length;
