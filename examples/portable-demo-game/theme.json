@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "demo.aster",
+  "font": {
+    "family": "Courier New",
+    "style": "Regular",
+    "pointSize": 16,
+    "sampleSize": 16,
+    "metrics": "font-metrics.json"
+  },
+  "components": {
+    "button": "console-button",
+    "buttonLabel": "paragraph",
+    "fieldLabel": "paragraph",
+    "slider": "console-range",
+    "select": "console-select",
+    "paragraph": "paragraph",
+    "windowInset": 16,
+    "windowContentTop": 40,
+    "windowBottom": 16,
+    "titleTop": 6,
+    "titleHeight": 24,
+    "titleRightInset": 30,
+    "buttonHeight": 42,
+    "buttonPadding": 12,
+    "fieldGap": 8
+  },
+  "window": {
+    "background": [16, 37, 45, 255],
+    "backing": "neutral",
+    "backingInset": 2,
+    "backingOpacity": 0,
+    "frame": "neutral",
+    "titleSize": 18,
+    "titleSpacing": 0,
+    "titleAlignment": "left",
+    "titleColor": [211, 239, 232, 255],
+    "ruleColor": [73, 132, 137, 255],
+    "ruleTop": 34,
+    "ruleHeight": 1,
+    "closeFrame": "neutral",
+    "closeCross": "neutral",
+    "closeInset": 7,
+    "closeSize": 22,
+    "crossInset": 5,
+    "crossSize": 12,
+    "shadowOffset": 2,
+    "shadowBlur": 8,
+    "shadowColor": [0, 0, 0, 80]
+  },
+  "button": {
+    "background": [30, 72, 80, 255],
+    "hover": [60, 121, 125, 255],
+    "highlight": "neutral",
+    "highlightOpacity": 0,
+    "highlightInset": 1,
+    "frame": "neutral",
+    "foreground": [211, 239, 232, 255]
+  },
+  "range": {
+    "track": [22, 49, 58, 255],
+    "border": [73, 132, 137, 255],
+    "fill": [109, 207, 181, 255],
+    "trackHeight": 6,
+    "trackRadius": 2,
+    "borderWidth": 1,
+    "thumbWidth": 12,
+    "thumbHeight": 18,
+    "thumbRadius": 2
+  },
+  "select": {
+    "background": [22, 49, 58, 255],
+    "border": [73, 132, 137, 255],
+    "foreground": [211, 239, 232, 255],
+    "fontSize": 16,
+    "itemHeight": 28,
+    "paddingLeft": 8,
+    "paddingRight": 18,
+    "borderWidth": 1,
+    "arrowWidth": 8,
+    "arrowHeight": 5
+  },
+  "focus": {
+    "color": [109, 207, 181, 255],
+    "width": 2,
+    "inset": 2
+  },
+  "text": [
+    {
+      "key": "paragraph",
+      "size": 16,
+      "lineHeight": 24,
+      "wrap": false,
+      "color": [211, 239, 232, 255]
+    }
+  ],
+  "assets": [
+    {
+      "key": "neutral",
+      "path": "assets/neutral.png",
+      "width": 3,
+      "height": 3,
+      "rect": [0, 0, 3, 3],
+      "border": 1,
+      "edge": 1,
+      "alphaAware": false
+    }
+  ]
+}
