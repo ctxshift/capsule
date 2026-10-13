@@ -132,7 +132,8 @@ namespace PortableUi
                     next[handle] = current.With(layout: command.Layout); break;
                 case UiOpcode.SetText:
                     if (current.Kind != UiNodeKind.Text && current.Kind != UiNodeKind.Window &&
-                        current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select)
+                        current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select &&
+                        current.Kind != UiNodeKind.Slot)
                         return new UiResult(UiError.InvalidCommand, "Node has no text.");
                     next[handle] = current.With(text: command.Text); break;
                 case UiOpcode.SetStyle:
