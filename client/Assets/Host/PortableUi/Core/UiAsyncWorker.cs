@@ -58,9 +58,10 @@ namespace PortableUi
         public const int QueueCapacity = 128;
         public const int TimerMilliseconds = 50;
         static long generationSequence;
-        readonly object gate = new object();
+        readonly object gate;
         readonly LinkedList<Input> inputs = new LinkedList<Input>();
-        readonly Thread thread;
+        readonly UiAsyncDispatcher dispatcher;
+        readonly bool ownsDispatcher;
         bool stopping, stopped, acknowledged, accepted, busy;
         long requestedGeneration, activeGeneration, sequence, timerWakes;
         string terminalError;
@@ -74,6 +75,8 @@ namespace PortableUi
         Load pendingLoad;
         IUiGuest active;
         Exchange activeExchange;
+        IUiGuest candidateGuest;
+        Exchange candidateExchange;
 
         enum Kind { Observation, Event, Viewport }
         sealed class Input
@@ -121,10 +124,14 @@ namespace PortableUi
             }
         }
 
-        public UiAsyncWorker()
+        public UiAsyncWorker() : this(new UiAsyncDispatcher(1), true) { }
+        public UiAsyncWorker(UiAsyncDispatcher owner) : this(owner, false) { }
+        UiAsyncWorker(UiAsyncDispatcher owner, bool owns)
         {
-            thread = new Thread(Run) { IsBackground = true, Name = "Portable UI owner" };
-            thread.Start();
+            dispatcher = owner ?? throw new ArgumentNullException(nameof(owner));
+            ownsDispatcher = owns;
+            gate = owner.Gate;
+            owner.Register(this);
         }
         public bool IsStopped { get { lock (gate) return stopped; } }
         public long TimerWakes => Interlocked.Read(ref timerWakes);
@@ -240,56 +247,93 @@ namespace PortableUi
             // Never join or free a live native store on the caller/main thread.
         }
         static double Milliseconds(long ticks) => ticks * 1000.0 / Stopwatch.Frequency;
-        void Run()
+        internal bool Ready
         {
-            // Keep the loop in a separate method. Unity 6000.6 IL2CPP emitted its
-            // back-edge outside this method's outer RAII finally scope when the
-            // loop was inline, disposing the active guest after the first job.
-            try { RunLoop(); }
-            catch (Exception failure)
+            get
             {
-                lock (gate) terminalError = failure.ToString();
+                lock (gate)
+                    return !stopped && (stopping || (completion != null
+                        ? acknowledged || completion.Candidate && completion.Generation != requestedGeneration
+                        : pendingLoad != null || inputs.Count != 0 || NextDeadline <= Stopwatch.GetTimestamp()));
             }
-            finally
+        }
+        internal long? NextDeadline
+        {
+            get
             {
-                try { Retire(ref active, activeExchange); }
-                finally
+                lock (gate)
                 {
-                    lock (gate) { activeGeneration = 0; completion = null; stopped = true; Monitor.PulseAll(gate); }
+                    if (stopped || completion != null) return null;
+                    var due = (active as IUiSchedulingDiagnostics)?.NextWakeTimestamp;
+                    return due.HasValue ? Math.Max(due.Value, scheduledNotBefore) : (long?)null;
                 }
             }
         }
 
-        void RunLoop()
+        // Called only by the shared owner thread. One invocation/ack per turn;
+        // waiting for one native publication never blocks another addon.
+        internal bool RunOne()
         {
-            while (true)
+            Load load = null; Input input = null; bool finish = false, retire = false;
+            lock (gate)
             {
-                    Load load = null; Input input = null;
-                    lock (gate)
-                    {
-                        if (stopping) break;
-                        if (pendingLoad != null) { load = pendingLoad; pendingLoad = null; }
-                        else if (inputs.Count != 0) { input = inputs.First.Value; inputs.RemoveFirst(); }
-                        else
-                        {
-                            var due = (active as IUiSchedulingDiagnostics)?.NextWakeTimestamp;
-                            if (!due.HasValue) { Monitor.Wait(gate); continue; }
-                            long remaining = Math.Max(due.Value, scheduledNotBefore) - Stopwatch.GetTimestamp();
-                            int wait = remaining <= 0 ? 0 : (int)Math.Min(int.MaxValue, Math.Ceiling(Milliseconds(remaining)));
-                            if (wait > 0 && Monitor.Wait(gate, wait)) continue;
-                            if (stopping) break;
-                            Interlocked.Increment(ref timerWakes);
-                            scheduledNotBefore = Stopwatch.GetTimestamp() + Stopwatch.Frequency * TimerMilliseconds / 1000;
-                        }
-                        busy = true;
-                    }
-                    try
-                    {
-                        if (load != null) Initialize(load);
-                        else if (active != null) Update(input);
-                    }
-                    finally { lock (gate) busy = false; }
+                if (stopped) return false;
+                retire = stopping;
+                if (!retire && completion != null)
+                {
+                    finish = acknowledged || completion.Candidate && completion.Generation != requestedGeneration;
+                    if (!finish) return false;
+                }
+                else if (!retire && pendingLoad != null) { load = pendingLoad; pendingLoad = null; }
+                else if (!retire && inputs.Count != 0) { input = inputs.First.Value; inputs.RemoveFirst(); }
+                else if (!retire)
+                {
+                    var due = NextDeadline;
+                    if (!due.HasValue || due.Value > Stopwatch.GetTimestamp()) return false;
+                    Interlocked.Increment(ref timerWakes);
+                    scheduledNotBefore = Stopwatch.GetTimestamp() + Stopwatch.Frequency * TimerMilliseconds / 1000;
+                }
+                busy = true;
             }
+            try
+            {
+                if (retire)
+                {
+                    Retire(ref candidateGuest, candidateExchange);
+                    Retire(ref active, activeExchange);
+                    lock (gate) { activeGeneration = 0; completion = null; stopped = true; Monitor.PulseAll(gate); }
+                    if (ownsDispatcher) dispatcher.Dispose();
+                }
+                else if (finish) FinishPublication();
+                else if (load != null) Initialize(load);
+                else if (active != null) Update(input);
+            }
+            catch (Exception failure) { lock (gate) { terminalError = failure.ToString(); stopping = true; } }
+            finally { lock (gate) busy = false; }
+            return true;
+        }
+
+        void FinishPublication()
+        {
+            bool candidate, commit;
+            lock (gate)
+            {
+                candidate = completion.Candidate;
+                commit = acknowledged && accepted;
+                completion = null;
+            }
+            if (candidate)
+            {
+                if (commit)
+                {
+                    Retire(ref active, activeExchange);
+                    active = candidateGuest; candidateGuest = null;
+                    activeExchange = candidateExchange; activeExchange.Candidate = false;
+                }
+                Retire(ref candidateGuest, candidateExchange);
+                candidateExchange = null;
+            }
+            else if (!commit) Retire(ref active, activeExchange);
         }
         void Initialize(Load load)
         {
@@ -309,12 +353,9 @@ namespace PortableUi
             }
             catch (Exception failure) { error = failure.Message; }
             RecordWork(start, candidate);
-            if (Publish(load.Generation, true, exchange, error, start, load.Enqueued, (candidate as IUiFuelDiagnostics)?.LastFuel ?? 0, candidate as IUiLayoutDiagnostics))
-            {
-                Retire(ref active, activeExchange);
-                active = candidate; candidate = null; activeExchange = exchange; exchange.Candidate = false;
-            }
-            Retire(ref candidate, exchange);
+            candidateGuest = candidate; candidateExchange = exchange;
+            if (!Publish(load.Generation, true, exchange, error, start, load.Enqueued, (candidate as IUiFuelDiagnostics)?.LastFuel ?? 0, candidate as IUiLayoutDiagnostics))
+                Retire(ref candidateGuest, exchange);
         }
         void Update(Input input)
         {
@@ -360,10 +401,7 @@ namespace PortableUi
                 completion = new UiAsyncCompletion(++sequence, generation, candidate, exchange.Snapshot,
                     exchange.Actions.ToArray(), error, Milliseconds(end - start), Milliseconds(start - enqueued), enqueued, fuel, layout);
                 acknowledged = false; accepted = false;
-                while (!stopping && !acknowledged && !(candidate && generation != requestedGeneration)) Monitor.Wait(gate);
-                bool result = !stopping && acknowledged && accepted;
-                completion = null;
-                return result;
+                return true;
             }
         }
         void Retire(ref IUiGuest guest, Exchange exchange)
