@@ -15,7 +15,7 @@ namespace PortableUi.Wasmtime
         void Destroy(IntPtr guest);
     }
     // Experimental native C ABI backend; no reflection-generated delegates or managed Wasmtime dependency.
-    public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiSchedulingDiagnostics
+    public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiSchedulingDiagnostics
     {
         public const string QuickJsSha256 = "0975D550E2B8A9BA9CBBBEB6B5914157C793631218C222F8BDDF12EB70905835";
         const string Library = "portable_ui_wasmtime";
@@ -58,6 +58,8 @@ namespace PortableUi.Wasmtime
             get;
             private set;
         }
+        public ulong TotalCallFuel { get; private set; }
+        public bool HasCallFuel => true;
         public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null)
         {
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
@@ -198,6 +200,7 @@ namespace PortableUi.Wasmtime
                 ? pui_call(native, name, a, b, nargs, results, fuel, out value)
                 : invocationRunner.Call(native, name, a, b, nargs, results, fuel, out value);
             LastFuel = invocationRunner == null ? pui_fuel(native) : invocationRunner.LastFuel;
+            TotalCallFuel = checked(TotalCallFuel + LastFuel);
             if (code != 0 || callbackError != null)
             {
                 terminal = true;

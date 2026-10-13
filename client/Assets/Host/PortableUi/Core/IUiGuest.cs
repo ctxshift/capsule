@@ -2,6 +2,9 @@ using System;
 namespace PortableUi
 {
     public interface IUiFuelDiagnostics { ulong LastFuel { get; } }
+    // Monotonic fuel for every export call, including helpers and failed calls.
+    // Module instantiation/native rendering are outside this counter.
+    public interface IUiCallFuelDiagnostics { bool HasCallFuel { get; } ulong TotalCallFuel { get; } }
     public interface IUiLayoutDiagnostics
     {
         double LastLayoutMilliseconds { get; }

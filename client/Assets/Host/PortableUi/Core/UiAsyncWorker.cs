@@ -5,6 +5,15 @@ using System.Threading;
 
 namespace PortableUi
 {
+    public readonly struct UiCallFuelMetrics
+    {
+        public readonly ulong Activation, Updates, Disposal;
+        public readonly double DisposalMilliseconds;
+        public readonly bool Available;
+        public ulong Total => checked(Activation + Updates + Disposal);
+        internal UiCallFuelMetrics(ulong activation, ulong updates, ulong disposal, double disposalMs, bool available)
+        { Activation = activation; Updates = updates; Disposal = disposal; DisposalMilliseconds = disposalMs; Available = available; }
+    }
     // The factory must capture only immutable managed data. It runs on the owner thread,
     // as do every guest call and disposal. Unity adapters must never enter this boundary.
     public delegate IUiGuest UiAsyncGuestFactory(IUiCommitTarget target,
@@ -68,6 +77,9 @@ namespace PortableUi
         long jobs;
         double totalWorkMilliseconds;
         ulong totalFuel;
+        ulong activationCallFuel, updateCallFuel, disposalCallFuel;
+        double disposalMilliseconds;
+        bool callFuelAvailable = true;
         long scheduledNotBefore;
         long updateCalls;
         public long UpdateCalls => Interlocked.Read(ref updateCalls);
@@ -150,12 +162,19 @@ namespace PortableUi
         public bool IsIdle { get { lock (gate) return !busy && inputs.Count == 0 && pendingLoad == null && (completion == null || acknowledged); } }
         public void ReadWork(out long count, out double milliseconds, out ulong fuel)
         { lock (gate) { count = jobs; milliseconds = totalWorkMilliseconds; fuel = totalFuel; } }
-        void RecordWork(long start, IUiGuest guest)
+        public UiCallFuelMetrics ReadCallFuel()
+        { lock (gate) return new UiCallFuelMetrics(activationCallFuel, updateCallFuel, disposalCallFuel, disposalMilliseconds, callFuelAvailable && jobs != 0); }
+        static ulong CallFuel(IUiGuest guest) => (guest as IUiCallFuelDiagnostics)?.TotalCallFuel ?? 0;
+        void RecordWork(long start, IUiGuest guest, bool activation, ulong before = 0)
         {
             lock (gate)
             {
                 ++jobs; totalWorkMilliseconds += Milliseconds(Stopwatch.GetTimestamp() - start);
                 totalFuel += (guest as IUiFuelDiagnostics)?.LastFuel ?? 0;
+                callFuelAvailable &= (guest as IUiCallFuelDiagnostics)?.HasCallFuel ?? false;
+                ulong used = checked(CallFuel(guest) - before);
+                if (activation) activationCallFuel = checked(activationCallFuel + used);
+                else updateCallFuel = checked(updateCallFuel + used);
             }
         }
 
@@ -352,7 +371,7 @@ namespace PortableUi
                 if (error == null && exchange.Snapshot == null) error = "Candidate did not produce a first snapshot.";
             }
             catch (Exception failure) { error = failure.Message; }
-            RecordWork(start, candidate);
+            RecordWork(start, candidate, true);
             candidateGuest = candidate; candidateExchange = exchange;
             if (!Publish(load.Generation, true, exchange, error, start, load.Enqueued, (candidate as IUiFuelDiagnostics)?.LastFuel ?? 0, candidate as IUiLayoutDiagnostics))
                 Retire(ref candidateGuest, exchange);
@@ -363,6 +382,7 @@ namespace PortableUi
             lock (gate) generation = activeGeneration;
             if (input != null && input.Generation != generation) return;
             var start = Stopwatch.GetTimestamp();
+            ulong before = CallFuel(active);
             activeExchange.Reset();
             string error = null;
             try
@@ -386,7 +406,7 @@ namespace PortableUi
                 }
             }
             catch (Exception failure) { error = failure.Message; }
-            RecordWork(start, active);
+            RecordWork(start, active, false, before);
             // Idle work has no publication/ack traffic. Counters remain available.
             if (error == null && activeExchange.Snapshot == null && activeExchange.Actions.Count == 0) return;
             if (!Publish(generation, false, activeExchange, error, start, input?.Enqueued ?? start, (active as IUiFuelDiagnostics)?.LastFuel ?? 0, active as IUiLayoutDiagnostics))
@@ -407,10 +427,21 @@ namespace PortableUi
         void Retire(ref IUiGuest guest, Exchange exchange)
         {
             if (guest == null) return;
+            ulong before = CallFuel(guest);
+            long start = Stopwatch.GetTimestamp();
             if (exchange != null) exchange.Disposing = true;
             try { guest.Dispose(); }
             catch (Exception failure) { lock (gate) terminalError = "Guest cleanup failed: " + failure.Message; }
-            finally { guest = null; }
+            finally
+            {
+                lock (gate)
+                {
+                    callFuelAvailable &= (guest as IUiCallFuelDiagnostics)?.HasCallFuel ?? false;
+                    disposalCallFuel = checked(disposalCallFuel + CallFuel(guest) - before);
+                    disposalMilliseconds += Milliseconds(Stopwatch.GetTimestamp() - start);
+                }
+                guest = null;
+            }
         }
     }
 }
