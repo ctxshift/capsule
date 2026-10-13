@@ -6,7 +6,7 @@
     "style": "Regular",
     "pointSize": 16,
     "sampleSize": 16,
-    "metrics": "font-metrics.json"
+    "metrics": "assets/data/font-metrics.json"
   },
   "components": {
     "button": "console-button",
@@ -97,7 +97,7 @@
   "assets": [
     {
       "key": "neutral",
-      "path": "assets/neutral.png",
+      "path": "assets/images/neutral.png",
       "width": 3,
       "height": 3,
       "rect": [0, 0, 3, 3],

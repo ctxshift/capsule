@@ -59,18 +59,42 @@ export async function startWorkshop(options: WorkshopOptions) {
         const themeFile = resolve(options.themeFile);
         let theme = parseTheme(JSON.parse(await readFile(themeFile, 'utf8')));
         const providerRoot = dirname(themeFile);
-        const readAsset = async (path: string) => {
-          const full = resolve(providerRoot, themePath(path));
-          if ((await lstat(full)).isSymbolicLink())
-            throw Error('Theme symlinks are not supported');
+        const provider = JSON.parse(
+          await readFile(resolve(providerRoot, 'addon.json'), 'utf8'),
+        ) as {
+          assets: { key: string; kind: string; path: string }[];
+        };
+        const readAsset = async (path: string, kind: string, key?: string) => {
+          const safe = themePath(path);
+          if (
+            !Array.isArray(provider.assets) ||
+            !provider.assets.some(
+              (asset) =>
+                asset.path === safe &&
+                asset.kind === kind &&
+                (!key || asset.key === key),
+            )
+          )
+            throw Error('Theme references an undeclared package asset');
+          let full = providerRoot;
+          for (const part of safe.split('/')) {
+            full = resolve(full, part);
+            if ((await lstat(full)).isSymbolicLink())
+              throw Error('Theme symlinks are not supported');
+          }
           return readFile(full);
         };
+        await readAsset(
+          relative(providerRoot, themeFile).replaceAll('\\', '/'),
+          'data',
+          'ui-theme-revision',
+        );
         const metrics = JSON.parse(
-          (await readAsset(theme.font.metrics)).toString(),
+          (await readAsset(theme.font.metrics, 'data')).toString(),
         );
         const art = new Map<string, Uint8Array>();
         for (const asset of theme.assets)
-          art.set(asset.key, await readAsset(asset.path));
+          art.set(asset.key, await readAsset(asset.path, 'image', asset.key));
         result = await worker.compile();
         if (result.success) {
           const manifest = JSON.parse(

@@ -4,6 +4,20 @@
   "id": "demo.starship",
   "entry": "src/main.tsx",
   "assets": [
-    { "kind": "data", "key": "ui-theme-revision", "path": "theme.json" }
+    {
+      "kind": "data",
+      "key": "ui-theme-revision",
+      "path": "theme.json"
+    },
+    {
+      "key": "font-metrics",
+      "kind": "data",
+      "path": "assets/data/font-metrics.json"
+    },
+    {
+      "key": "neutral",
+      "kind": "image",
+      "path": "assets/images/neutral.png"
+    }
   ]
 }

@@ -14,6 +14,6 @@ bun run typecheck
 
 Supply a compatible host runtime; the example does not build one. The workshop
 serves this example's browser shell and theme. All theme values are authored for
-this sample. `assets/neutral.png` is a generated three-pixel square; the sample
+this sample. `assets/images/neutral.png` is a generated three-pixel square; the sample
 uses Courier New and synthetic monospace advances of 9.6 pixels at 16 pixels.
 This is a browser development mock, with no connection to a game server.
