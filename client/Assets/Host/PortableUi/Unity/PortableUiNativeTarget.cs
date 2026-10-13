@@ -426,6 +426,7 @@ namespace PortableUi.Unity
             disposed = true;
             if (keyboardOwner == this) keyboardOwner = null;
             if (layer) { layer.gameObject.SetActive(false); DestroyOwned(layer.gameObject); }
+            (factory as INativeUiScopeLifetime)?.Dispose();
         }
         static void DestroyOwned(GameObject value)
         { if(Application.isPlaying)UnityEngine.Object.Destroy(value);else UnityEngine.Object.DestroyImmediate(value); }

@@ -15,8 +15,9 @@ namespace PortableUi.Unity
         Color hover;
         Color normalLabel=Color.white;
         bool over, down, selected;
-        public void Configure(Image highlight, Image detail, GameObject focusOutline, Color hoverColor, Color? labelColor=null)
-        { tint = highlight; texture = detail; focus = focusOutline; hover = hoverColor; normalLabel=labelColor??Color.white;Paint(); }
+        float detailOpacity=.12f;
+        public void Configure(Image highlight, Image detail, GameObject focusOutline, Color hoverColor, Color? labelColor=null,float textureOpacity=.12f)
+        { tint = highlight; texture = detail; focus = focusOutline; hover = hoverColor; normalLabel=labelColor??Color.white;detailOpacity=textureOpacity;Paint(); }
         public void OnPointerEnter(PointerEventData data) { over=true; Paint(); }
         public void OnPointerExit(PointerEventData data) { over=false; Paint(); }
         public void OnPointerDown(PointerEventData data) { KeyboardFocus=false;if(data.button==PointerEventData.InputButton.Left)down=true; Paint(); }
@@ -26,7 +27,7 @@ namespace PortableUi.Unity
         void Paint()
         {
             if(tint)tint.color = over ? hover : Color.clear;
-            if(texture)texture.color = new Color(1,1,1,over?.12f:0);
+            if(texture)texture.color = new Color(1,1,1,over?detailOpacity:0);
             if(focus)focus.SetActive(selected&&KeyboardFocus);
             foreach(var label in GetComponentsInChildren<TMP_Text>())label.color = down ? Color.white : normalLabel;
         }

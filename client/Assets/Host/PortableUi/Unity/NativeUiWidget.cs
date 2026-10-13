@@ -21,6 +21,8 @@ namespace PortableUi.Unity
     {
         void ApplyStyle(NativeUiWidget widget, UiNode node);
     }
+    // Native targets own per-addon materials/resolvers, never the shared factory.
+    public interface INativeUiScopeLifetime : System.IDisposable { }
 
     // Host supplies prefab instances and exact allowlisted artwork.
     public interface INativeUiWidgetFactory
