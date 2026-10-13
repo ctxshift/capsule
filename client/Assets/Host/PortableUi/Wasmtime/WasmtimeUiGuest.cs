@@ -6,6 +6,14 @@ using System.Text;
 
 namespace PortableUi.Wasmtime
 {
+    // Trusted host injection for the retained-call prototype. Default callers
+    // keep the existing synchronous ABI; standalone proofs provide a runner.
+    public interface IWasmtimeInvocationRunner
+    {
+        ulong LastFuel { get; }
+        int Call(IntPtr guest, string name, int a, int b, int args, int results, ulong allowance, out int value);
+        void Destroy(IntPtr guest);
+    }
     // Experimental native C ABI backend; no reflection-generated delegates or managed Wasmtime dependency.
     public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiSchedulingDiagnostics
     {
@@ -28,6 +36,7 @@ namespace PortableUi.Wasmtime
         readonly IUiObservationAdapter observations;
         readonly IUiActionAdapter actions;
         readonly UiCapabilityGrant grant;
+        readonly IWasmtimeInvocationRunner invocationRunner;
         IntPtr native;
         GCHandle self;
         bool terminal, disposed;
@@ -49,7 +58,7 @@ namespace PortableUi.Wasmtime
             get;
             private set;
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null)
         {
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
             using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != QuickJsSha256) throw new ArgumentException("Pinned carrier changed");
@@ -58,6 +67,7 @@ namespace PortableUi.Wasmtime
             this.target = target;
             this.observations = observations;
             this.actions = actions;
+            this.invocationRunner = invocationRunner;
             SupportsScheduling = scheduling;
             grant = activation.Grant;
             Session = new UiSession(activation.ConsumeOwner(), theme);
@@ -184,8 +194,10 @@ namespace PortableUi.Wasmtime
                 error = "Guest is terminal or disposed";
                 return false;
             }
-            int code = pui_call(native, name, a, b, nargs, results, fuel, out value);
-            LastFuel = pui_fuel(native);
+            int code = invocationRunner == null
+                ? pui_call(native, name, a, b, nargs, results, fuel, out value)
+                : invocationRunner.Call(native, name, a, b, nargs, results, fuel, out value);
+            LastFuel = invocationRunner == null ? pui_fuel(native) : invocationRunner.LastFuel;
             if (code != 0 || callbackError != null)
             {
                 terminal = true;
@@ -258,7 +270,9 @@ namespace PortableUi.Wasmtime
                 return true;
             }
             if (result == 0) return true;
+            ulong updateFuel = LastFuel;
             error = ReadError();
+            LastFuel = updateFuel;
             terminal = true;
             return false;
         }
@@ -274,7 +288,8 @@ namespace PortableUi.Wasmtime
             finally
             {
                 disposed = true;
-                pui_destroy(native);
+                if (invocationRunner == null) pui_destroy(native);
+                else invocationRunner.Destroy(native);
                 native = IntPtr.Zero;
                 if (self.IsAllocated) self.Free();
             }

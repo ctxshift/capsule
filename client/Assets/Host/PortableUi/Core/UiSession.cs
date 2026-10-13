@@ -148,6 +148,11 @@ namespace PortableUi
                     if (!asset.Success) return asset;
                     next[handle] = current.With(asset: command.Asset); break;
                 case UiOpcode.SetProgress:
+                    if (current.Kind == UiNodeKind.Button)
+                    {
+                        if(command.Value > 1)return new UiResult(UiError.InvalidCommand,"Button state must be 0..1.");
+                        next[handle]=current.With(progress:command.Value);break;
+                    }
                     if ((current.Kind != UiNodeKind.Progress && current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select) || command.Value > 10000)
                         return new UiResult(UiError.InvalidCommand, "Progress must be 0..10000 on a progress node.");
                     next[handle] = current.With(progress: command.Value); break;

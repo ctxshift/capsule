@@ -3,7 +3,7 @@ using System;
 namespace PortableUi
 {
     public enum UiPointerPhase : byte { Down = 1, Move = 2, Up = 3, Cancel = 4 }
-    public enum UiInputKey : byte { Escape = 1, Tab = 2, Enter = 3, Space = 4, Left = 5, Right = 6, Up = 7, Down = 8 }
+    public enum UiInputKey : byte { Escape = 1, Tab = 2, Enter = 3, Space = 4, Left = 5, Right = 6, Up = 7, Down = 8, E = 9, I = 10, C = 11 }
 
     // Explicit version-one host input records. Coordinates use the same 1/64
     // design-unit representation as layout. No platform key names cross the ABI.
@@ -36,6 +36,7 @@ namespace PortableUi
             if (normalized > 10000) throw new ArgumentOutOfRangeException(nameof(normalized));
             return new[] { Version, (byte)normalized, (byte)(normalized >> 8) };
         }
+        public static byte[] Boundary(bool entered) => new[] { Version, (byte)(entered ? 1 : 0) };
 
         public static bool Valid(UiEventMask kind, byte[] bytes)
         {
@@ -46,10 +47,12 @@ namespace PortableUi
                     Read(bytes, 8) >= -8192 * 64 && Read(bytes, 8) <= 8192 * 64 &&
                     Read(bytes, 12) >= -8192 * 64 && Read(bytes, 12) <= 8192 * 64;
             if (kind == UiEventMask.Key)
-                return bytes.Length == 5 && bytes[0] == Version && bytes[1] >= 1 && bytes[1] <= 8 &&
+                return bytes.Length == 5 && bytes[0] == Version && bytes[1] >= 1 && bytes[1] <= 11 &&
                     bytes[2] <= 1 && bytes[3] <= 15 && bytes[4] <= 1;
             if (kind == UiEventMask.ValueChange)
                 return bytes.Length == 3 && bytes[0] == Version && (bytes[1] | bytes[2] << 8) <= 10000;
+            if (kind == UiEventMask.Hover || kind == UiEventMask.Focus)
+                return bytes.Length == 0 || bytes.Length == 2 && bytes[0] == Version && bytes[1] <= 1;
             // Legacy addon event payloads retain their established opaque contract.
             return true;
         }
