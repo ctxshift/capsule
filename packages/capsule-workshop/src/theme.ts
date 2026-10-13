@@ -3,6 +3,8 @@ import type { ComponentTheme } from '@capsule/react/components';
 export type Rgba = [number, number, number, number];
 export interface ThemeAsset {
   key: string;
+  /** Declared physical image; defaults to key for a single-region asset. */
+  image?: string;
   path: string;
   width: number;
   height: number;
@@ -150,11 +152,23 @@ export function parseTheme(value: unknown): UiTheme {
   )
     throw Error('Theme collection bounds');
   const keys = new Set<string>();
+  const images = new Map<string, string>();
   for (const asset of theme.assets) {
     if (!/^[a-z0-9-]{1,64}$/.test(asset.key) || keys.has(asset.key))
       throw Error('Theme asset identity');
     keys.add(asset.key);
     themePath(asset.path);
+    const image = asset.image ?? asset.key;
+    if (!/^[a-z0-9-]{1,64}$/.test(image)) throw Error('Theme image identity');
+    const source = JSON.stringify([
+      asset.path,
+      asset.width,
+      asset.height,
+      asset.alphaAware,
+    ]);
+    if (images.has(image) && images.get(image) !== source)
+      throw Error('Conflicting theme image source');
+    images.set(image, source);
     if (
       ![
         asset.width,
@@ -164,6 +178,8 @@ export function parseTheme(value: unknown): UiTheme {
         ...asset.rect,
       ].every((n) => Number.isInteger(n) && n >= 0 && n <= 8192) ||
       asset.rect.length !== 4 ||
+      asset.rect[2] < 1 ||
+      asset.rect[3] < 1 ||
       asset.rect[0] + asset.rect[2] > asset.width ||
       asset.rect[1] + asset.rect[3] > asset.height
     )

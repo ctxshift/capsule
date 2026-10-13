@@ -64,6 +64,7 @@ export async function startWorkshop(options: WorkshopOptions) {
         ) as {
           assets: { key: string; kind: string; path: string }[];
         };
+        const sourceBytes = new Map<string, Buffer>();
         const readAsset = async (path: string, kind: string, key?: string) => {
           const safe = themePath(path);
           if (
@@ -76,13 +77,17 @@ export async function startWorkshop(options: WorkshopOptions) {
             )
           )
             throw Error('Theme references an undeclared package asset');
+          const cached = sourceBytes.get(safe);
+          if (cached) return cached;
           let full = providerRoot;
           for (const part of safe.split('/')) {
             full = resolve(full, part);
             if ((await lstat(full)).isSymbolicLink())
               throw Error('Theme symlinks are not supported');
           }
-          return readFile(full);
+          const bytes = await readFile(full);
+          sourceBytes.set(safe, bytes);
+          return bytes;
         };
         await readAsset(
           relative(providerRoot, themeFile).replaceAll('\\', '/'),
@@ -94,7 +99,10 @@ export async function startWorkshop(options: WorkshopOptions) {
         );
         const art = new Map<string, Uint8Array>();
         for (const asset of theme.assets)
-          art.set(asset.key, await readAsset(asset.path, 'image', asset.key));
+          art.set(
+            asset.image ?? asset.key,
+            await readAsset(asset.path, 'image', asset.image ?? asset.key),
+          );
         result = await worker.compile();
         if (result.success) {
           const manifest = JSON.parse(
