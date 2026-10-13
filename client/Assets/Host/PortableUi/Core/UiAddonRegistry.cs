@@ -57,6 +57,9 @@ namespace PortableUi
         public bool AllowsAction(ushort capability) => actions.Contains(capability);
         public bool AllowsInput(ushort capability) => inputs.Contains(capability);
         public bool HasInput => inputs.Count != 0;
+        public bool IsSubsetOf(UiCapabilityGrant ceiling) => ceiling != null &&
+            observations.IsSubsetOf(ceiling.observations) && actions.IsSubsetOf(ceiling.actions) &&
+            inputs.IsSubsetOf(ceiling.inputs);
     }
 
     public sealed class UiAddonRegistration
@@ -103,7 +106,22 @@ namespace PortableUi
             }
         }
         readonly Dictionary<string, UiAddonRegistration> registrations =
-            new Dictionary<string, UiAddonRegistration>(StringComparer.Ordinal);
+            new Dictionary<string, UiAddonRegistration>(StringComparer.OrdinalIgnoreCase);
+        readonly HashSet<string> reserved;
+        readonly UiCapabilityGrant communityCeiling;
+
+        // Legacy diagnostic hosts may opt out of admission policy. Game hosts
+        // supply their reserved identities and an explicit community ceiling.
+        public UiAddonRegistry() { reserved = new HashSet<string>(StringComparer.OrdinalIgnoreCase); }
+        public UiAddonRegistry(IEnumerable<string> reservedCoreIds, UiCapabilityGrant allowedCommunity)
+        {
+            communityCeiling = allowedCommunity ?? throw new ArgumentNullException(nameof(allowedCommunity));
+            reserved = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (reservedCoreIds == null) throw new ArgumentNullException(nameof(reservedCoreIds));
+            foreach (string id in reservedCoreIds)
+                if (string.IsNullOrEmpty(id) || id.Length > 96 || !ValidId(id) || !reserved.Add(id))
+                    throw new ArgumentException("Invalid or duplicate reserved identity.");
+        }
 
         public UiAddonRegistration Register(string id, UiAddonTrust trust, UiCapabilityGrant grant)
         {
@@ -112,6 +130,9 @@ namespace PortableUi
                 throw new ArgumentException("Addon registration ID is invalid.", nameof(id));
             if (!Enum.IsDefined(typeof(UiAddonTrust), trust))
                 throw new ArgumentOutOfRangeException(nameof(trust));
+            if (trust == UiAddonTrust.Community &&
+                (reserved.Contains(id) || communityCeiling != null && !grant.IsSubsetOf(communityCeiling)))
+                throw new ArgumentException("Community registration requests reserved identity or capabilities.");
             lock (registrations)
             {
                 if (registrations.ContainsKey(id))
