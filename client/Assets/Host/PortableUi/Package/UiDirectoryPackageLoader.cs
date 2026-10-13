@@ -14,8 +14,13 @@ namespace PortableUi.Package
         public const int MaxDecodedImageBytes = 32 * 1024 * 1024;
 
         public static bool TryLoad(string directory, out UiPackageRevision revision, out string error)
+            => TryLoad(directory, UiPackageLimits.Community, out revision, out error);
+
+        public static bool TryLoad(string directory, UiPackageLimits limits,
+            out UiPackageRevision revision, out string error)
         {
             revision = null; error = null;
+            if (limits == null) { error = "Host asset limits missing."; return false; }
             try
             {
                 if (string.IsNullOrWhiteSpace(directory))
@@ -69,6 +74,8 @@ namespace PortableUi.Package
                 if (!TryRead(root, manifest.EntryPath, MaxScriptBytes, out var script, out error))
                     return false;
                 total = checked(total + script.Length);
+                if (total > limits.MaxTotalBytes)
+                { error = "Encoded package quota exceeded."; return false; }
                 var data = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
                 var images = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
                 var descriptors = new Dictionary<string, UiPackageImageDescriptor>(
@@ -79,16 +86,16 @@ namespace PortableUi.Package
                     int limit = asset.Kind == UiPackageAssetKind.Data ? MaxDataBytes : MaxImageBytes;
                     if (!TryRead(root, asset.Path, limit, out var bytes, out error)) return false;
                     total = checked(total + bytes.Length);
-                    if (total > MaxTotalBytes)
+                    if (total > limits.MaxTotalBytes)
                     { error = "Encoded package quota exceeded."; return false; }
                     if (asset.Kind == UiPackageAssetKind.Data)
                         data.Add(asset.Key, bytes);
                     else
                     {
-                        if (!UiPackageImageDescriptor.TryInspect(bytes, asset.Path, out var descriptor))
+                        if (!UiPackageImageDescriptor.TryInspect(bytes, asset.Path, limits, out var descriptor))
                         { error = "Invalid image header or dimensions."; return false; }
                         decodedTotal = checked(decodedTotal + descriptor.DecodedBytes);
-                        if (decodedTotal > MaxDecodedImageBytes)
+                        if (decodedTotal > limits.MaxDecodedImageBytes)
                         { error = "Decoded image quota exceeded."; return false; }
                         images.Add(asset.Key, bytes);
                         descriptors.Add(asset.Key, descriptor);

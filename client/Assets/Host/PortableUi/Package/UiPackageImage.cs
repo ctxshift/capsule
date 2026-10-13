@@ -17,20 +17,24 @@ namespace PortableUi.Package
         }
 
         public static bool TryInspect(byte[] bytes, string path, out UiPackageImageDescriptor image)
+            => TryInspect(bytes, path, UiPackageLimits.Community, out image);
+
+        public static bool TryInspect(byte[] bytes, string path, UiPackageLimits limits,
+            out UiPackageImageDescriptor image)
         {
             image = null;
-            if (bytes == null) return false;
+            if (bytes == null || limits == null) return false;
             string extension = System.IO.Path.GetExtension(path).ToLowerInvariant();
-            if (extension == ".png") return TryPng(bytes, out image);
-            if (extension == ".jpg" || extension == ".jpeg") return TryJpeg(bytes, out image);
+            if (extension == ".png") return TryPng(bytes, limits, out image);
+            if (extension == ".jpg" || extension == ".jpeg") return TryJpeg(bytes, limits, out image);
             return false;
         }
 
         static bool Dimensions(UiPackageImageFormat format, int width, int height,
-            out UiPackageImageDescriptor image)
+            UiPackageLimits limits, out UiPackageImageDescriptor image)
         {
             image = null;
-            if (width < 1 || height < 1 || width > 2048 || height > 2048 ||
+            if (width < 1 || height < 1 || width > limits.MaxImageDimension || height > limits.MaxImageDimension ||
                 (long)width * height * 4 > 16 * 1024 * 1024) return false;
             image = new UiPackageImageDescriptor(format, width, height);
             return true;
@@ -41,7 +45,7 @@ namespace PortableUi.Package
 
         static int Be16(byte[] b, int at) => (b[at] << 8) | b[at + 1];
 
-        static bool TryPng(byte[] b, out UiPackageImageDescriptor image)
+        static bool TryPng(byte[] b, UiPackageLimits limits, out UiPackageImageDescriptor image)
         {
             image = null;
             byte[] signature = { 137, 80, 78, 71, 13, 10, 26, 10 };
@@ -50,10 +54,10 @@ namespace PortableUi.Package
                 if (b[i] != signature[i]) return false;
             if (Be32(b, 8) != 13 || b[12] != 'I' || b[13] != 'H' ||
                 b[14] != 'D' || b[15] != 'R') return false;
-            return Dimensions(UiPackageImageFormat.Png, Be32(b, 16), Be32(b, 20), out image);
+            return Dimensions(UiPackageImageFormat.Png, Be32(b, 16), Be32(b, 20), limits, out image);
         }
 
-        static bool TryJpeg(byte[] b, out UiPackageImageDescriptor image)
+        static bool TryJpeg(byte[] b, UiPackageLimits limits, out UiPackageImageDescriptor image)
         {
             image = null;
             if (b.Length < 12 || b[0] != 0xFF || b[1] != 0xD8) return false;
@@ -75,7 +79,7 @@ namespace PortableUi.Package
                 {
                     if (length < 7) return false;
                     return Dimensions(UiPackageImageFormat.Jpeg,
-                        Be16(b, at + 5), Be16(b, at + 3), out image);
+                        Be16(b, at + 5), Be16(b, at + 3), limits, out image);
                 }
                 at += length;
             }
