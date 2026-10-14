@@ -14,6 +14,7 @@ export interface ThemeAsset {
   alphaAware: boolean;
   brightness?: number;
   opacity?: number;
+  rotation?: 0 | 90 | 180 | 270;
   /** Fill the image rectangle without preserving aspect ratio; defaults to false. */
   stretch?: boolean;
 }
@@ -89,6 +90,8 @@ export interface UiTheme {
     size: number;
     lineHeight: number;
     weight?: 400 | 700;
+    smallCaps?: boolean;
+    letterSpacing?: number;
     ruleInset?: number;
     ruleColor?: Rgba;
     wrap: boolean;
@@ -264,8 +267,25 @@ export function parseTheme(
     )
       throw Error('Theme surface shadow bounds');
   }
+  for (const style of theme.text) {
+    if (style.smallCaps !== undefined && typeof style.smallCaps !== 'boolean')
+      throw Error('Theme smallcaps bounds');
+    if (
+      (style.letterSpacing !== undefined &&
+        typeof style.letterSpacing !== 'number') ||
+      !Number.isFinite(style.letterSpacing ?? 0) ||
+      (style.letterSpacing ?? 0) < 0 ||
+      (style.letterSpacing ?? 0) > 8
+    )
+      throw Error('Theme letter spacing bounds');
+  }
   const images = new Map<string, string>();
   for (const asset of theme.assets) {
+    if (
+      ![0, 90, 180, 270].includes(asset.rotation ?? 0) ||
+      asset.rotation === null
+    )
+      throw Error('Theme image rotation bounds');
     if (
       !Number.isFinite(asset.opacity ?? 1) ||
       (asset.opacity ?? 1) < 0 ||

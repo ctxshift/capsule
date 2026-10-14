@@ -42,6 +42,7 @@ export function createBrowserTheme(
       region,
       undefined,
       definition(node.asset).stretch ?? false,
+      definition(node.asset).rotation ?? 0,
     );
     svg.style.filter = `brightness(${definition(node.asset).brightness ?? 1})`;
     svg.style.opacity = String(definition(node.asset).opacity ?? 1);
@@ -63,7 +64,7 @@ export function createBrowserTheme(
   html,body {margin:0;width:1440px;height:900px;color:${color(b.foreground)};font:${theme.font.sampleSize}px PortableThemeFont;background:transparent;}
   * {box-sizing:border-box;} button,input,select {font:inherit;color:inherit;} button {border:0;cursor:pointer;}
   [data-kind="3"][data-style=""] {font-size:${theme.font.sampleSize}px;line-height:${theme.text.find((text) => text.key === c.buttonLabel)!.lineHeight}px;white-space:nowrap;pointer-events:none!important;}
-  ${theme.text.map((text) => `[data-kind="3"][data-style="${text.key}"] {font-weight:${text.weight ?? 400};font-size:${text.size}px;line-height:${text.lineHeight}px;white-space:${text.wrap ? 'normal' : 'nowrap'};pointer-events:none!important;color:${color(text.color)};}`).join('\n')}
+  ${theme.text.map((text) => `[data-kind="3"][data-style="${text.key}"] {font-variant:${text.smallCaps ? 'small-caps' : 'normal'};letter-spacing:${text.letterSpacing ?? 0}px;font-weight:${text.weight ?? 400};font-size:${text.size}px;line-height:${text.lineHeight}px;white-space:${text.wrap ? 'normal' : 'nowrap'};pointer-events:none!important;color:${color(text.color)};}`).join('\n')}
   .window {background:${color(w.background)};box-shadow:0 ${w.shadowOffset}px ${w.shadowBlur}px ${color(w.shadowColor)};isolation:isolate;}
   .window-backing {position:absolute;inset:${w.backingInset}px;opacity:${w.backingOpacity};background-position:center;background-size:cover;pointer-events:none;}
   .window-title {position:absolute;left:${c.windowInset}px;right:${c.windowInset}px;top:${c.titleTop}px;height:${c.titleHeight}px;font:small-caps ${w.titleSize}px/${c.titleHeight}px PortableThemeFont;letter-spacing:${w.titleSpacing}px;text-align:${w.titleAlignment};color:${color(w.titleColor)};pointer-events:none;}
@@ -146,11 +147,17 @@ export function createBrowserTheme(
       if (!text) throw Error('Unknown captured text style ' + style);
       return {
         lineHeight: text.lineHeight,
+        trailingSpacing: text.letterSpacing ?? 0,
         advance(character) {
-          const value = advances.get(character.codePointAt(0)!);
+          const glyph = text.smallCaps ? character.toUpperCase() : character;
+          const value = advances.get(glyph.codePointAt(0)!);
           if (value === undefined)
             throw Error('Uncaptured font glyph ' + character);
-          return (value * text.size) / theme.font.sampleSize;
+          return (
+            (value * text.size * (glyph !== character ? 0.8 : 1)) /
+              theme.font.sampleSize +
+            (text.letterSpacing ?? 0)
+          );
         },
       };
     },

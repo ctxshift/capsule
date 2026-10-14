@@ -3,6 +3,7 @@ import type { UiNode } from './packet';
 
 export interface TextMetrics {
   lineHeight: number;
+  trailingSpacing?: number;
   advance(text: string): number;
 }
 
@@ -14,7 +15,7 @@ export function measureText(
   width: number,
   mode: number,
 ) {
-  const limit = mode === 0 ? Infinity : width;
+  const limit = mode === 0 ? Infinity : width + (font.trailingSpacing ?? 0);
   let line = 0,
     maximum = 0,
     word = 0,
@@ -60,6 +61,7 @@ export function measureText(
   }
   flush();
   maximum = Math.max(maximum, line);
+  maximum = Math.max(0, maximum - (font.trailingSpacing ?? 0));
   return {
     width: mode === 1 ? width : mode === 2 ? Math.min(width, maximum) : maximum,
     height: lines * font.lineHeight,
