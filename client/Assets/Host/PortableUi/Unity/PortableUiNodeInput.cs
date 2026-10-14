@@ -6,7 +6,7 @@ namespace PortableUi.Unity
 {
     public sealed class PortableUiNodeInput : MonoBehaviour, IPointerClickHandler,
         IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler,
-        IBeginDragHandler, IDragHandler, IEndDragHandler, ISelectHandler, ISubmitHandler, ICancelHandler
+        IBeginDragHandler, IDragHandler, IEndDragHandler, ISelectHandler, ISubmitHandler, ICancelHandler, IScrollHandler
     {
         PortableUiNativeTarget target;
         ulong handle;
@@ -27,6 +27,13 @@ namespace PortableUi.Unity
         {
             if (data.button == PointerEventData.InputButton.Left &&
                 (mask & UiEventMask.Activate) != 0) target?.Queue(handle, UiEventMask.Activate);
+        }
+        public void OnScroll(PointerEventData data)
+        {
+            if (!float.IsFinite(data.scrollDelta.x) || !float.IsFinite(data.scrollDelta.y)) return;
+            target?.QueueWheelPath(handle, UiInputPayload.Wheel(
+                Mathf.RoundToInt(Mathf.Clamp(data.scrollDelta.x * 64, -8192, 8192) * 64),
+                Mathf.RoundToInt(Mathf.Clamp(-data.scrollDelta.y * 64, -8192, 8192) * 64), Modifiers()));
         }
         public void OnPointerEnter(PointerEventData data)
         { if ((mask & UiEventMask.Hover) != 0) target?.Queue(handle, UiEventMask.Hover); }

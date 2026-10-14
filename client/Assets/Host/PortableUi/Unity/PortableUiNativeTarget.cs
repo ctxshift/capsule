@@ -272,6 +272,18 @@ namespace PortableUi.Unity
             return Session != null && Session.QueueEvent(handle, kind, payload).Success;
         }
 
+        public void QueueWheelPath(ulong handle, byte[] payload)
+        {
+            for (int depth = 0; depth < 24 && TryGetNode(handle, out var node); depth++)
+            {
+                if (!node.Visible) return;
+                if ((node.Events & UiEventMask.Wheel) != 0)
+                { Queue(handle, UiEventMask.Wheel, payload); return; }
+                if (node.Parent == 0) return;
+                handle = node.Parent;
+            }
+        }
+
         public void QueueFocusPath(ulong handle)
         {
             PortableUiControlFeedback.KeyboardFocus=false;

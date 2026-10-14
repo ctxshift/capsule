@@ -9,7 +9,7 @@ namespace PortableUi
     // design-unit representation as layout. No platform key names cross the ABI.
     public static class UiInputPayload
     {
-        public const ushort AllowedEvents = 511;
+        public const ushort AllowedEvents = 1023;
         public const byte Version = 1;
         public const int PointerLength = 16;
 
@@ -38,9 +38,22 @@ namespace PortableUi
         }
         public static byte[] Boundary(bool entered) => new[] { Version, (byte)(entered ? 1 : 0) };
 
+        public static byte[] Wheel(int deltaX, int deltaY, byte modifiers = 0)
+        {
+            var bytes = new byte[12];
+            bytes[0] = Version; bytes[1] = modifiers;
+            Write(bytes, 4, deltaX); Write(bytes, 8, deltaY);
+            if (!Valid(UiEventMask.Wheel, bytes)) throw new ArgumentOutOfRangeException(nameof(deltaY));
+            return bytes;
+        }
+
         public static bool Valid(UiEventMask kind, byte[] bytes)
         {
             if (bytes == null || bytes.Length > UiSession.MaxEventPayloadBytes) return false;
+            if (kind == UiEventMask.Wheel)
+                return bytes.Length == 12 && bytes[0] == Version && bytes[1] <= 15 && bytes[2] == 0 && bytes[3] == 0 &&
+                    Read(bytes, 4) >= -8192 * 64 && Read(bytes, 4) <= 8192 * 64 &&
+                    Read(bytes, 8) >= -8192 * 64 && Read(bytes, 8) <= 8192 * 64;
             if (kind == UiEventMask.Pointer)
                 return bytes.Length == PointerLength && bytes[0] == Version &&
                     bytes[1] >= 1 && bytes[1] <= 4 && bytes[2] <= 2 && bytes[3] <= 15 &&

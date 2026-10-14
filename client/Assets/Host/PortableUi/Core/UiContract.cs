@@ -33,7 +33,7 @@ namespace PortableUi
     public enum UiEventMask : ushort
     {
         None = 0, Activate = 1, Close = 2, Hover = 4, DragStart = 8,
-        Drop = 16, Focus = 32, Pointer = 64, Key = 128, ValueChange = 256
+        Drop = 16, Focus = 32, Pointer = 64, Key = 128, ValueChange = 256, Wheel = 512
     }
 
     public readonly struct UiRect
