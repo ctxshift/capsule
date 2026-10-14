@@ -80,6 +80,9 @@ namespace PortableUi.Unity
             if (disposed) { error = "Native target disposed."; return false; }
             var staged = new Dictionary<ulong, NativeUiWidget>();
             RectTransform stage = null;
+            var selectedBefore = EventSystem.current ? EventSystem.current.currentSelectedGameObject : null;
+            var focusPath = selectedBefore && selectedBefore.transform.IsChildOf(layer)
+                ? selectedBefore.GetComponentsInParent<Selectable>() : Array.Empty<Selectable>();
             try
             {
                 // Prepare new widgets off-tree before touching retained keyed objects.
@@ -150,7 +153,7 @@ namespace PortableUi.Unity
                 currentWidgets = nextWidgets;
                 currentSnapshot = proposed;
                 ++CommitCount;
-                MaintainFocus();
+                MaintainFocus(focusPath);
                 return true;
             }
             catch (Exception exception)
@@ -359,13 +362,14 @@ namespace PortableUi.Unity
             }
         }
 
-        void MaintainFocus()
+        void MaintainFocus(Selectable[] retainedFocusPath = null)
         {
             if (!active || currentSnapshot == null || !EventSystem.current) return;
             ulong top = 0;
             foreach (var node in currentSnapshot.Nodes)
                 if (node.Kind == UiNodeKind.Window && currentWidgets[node.Handle].Rect.gameObject.activeInHierarchy) top = node.Handle;
             var selected = EventSystem.current.currentSelectedGameObject;
+            if (top == focusedWindow && selected && !selected.transform.IsChildOf(layer)) return;
             if (top == focusedWindow && (top == 0 || selected && selected.activeInHierarchy &&
                 selected.transform.IsChildOf(currentWidgets[top].Rect) && selected.TryGetComponent<Selectable>(out var selectable) && selectable.IsActive() && selectable.IsInteractable())) return;
             if (focusedWindow == 0 && top != 0) returnFocus = selected;
@@ -377,6 +381,10 @@ namespace PortableUi.Unity
             }
             if (!currentWidgets.TryGetValue(top, out var window)) return;
             if (selected && selected.activeInHierarchy && selected.transform.IsChildOf(window.Rect) && selected.TryGetComponent<Selectable>(out var retained) && retained.IsActive() && retained.IsInteractable()) return;
+            if (retainedFocusPath != null)
+                foreach (var ancestor in retainedFocusPath)
+                    if (ancestor && ancestor.IsActive() && ancestor.IsInteractable() && ancestor.transform.IsChildOf(window.Rect))
+                    { ancestor.Select(); return; }
             foreach (var control in window.Rect.GetComponentsInChildren<Selectable>())
                 if (control.IsActive() && control.IsInteractable()) { control.Select(); break; }
         }
