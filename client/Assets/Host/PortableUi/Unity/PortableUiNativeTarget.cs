@@ -91,6 +91,7 @@ namespace PortableUi.Unity
         {
             error = null;
             if (disposed) { error = "Native target disposed."; return false; }
+            if (TryWindowTranslation(proposed)) return true;
             var staged = new Dictionary<ulong, NativeUiWidget>();
             RectTransform stage = null;
             var selectedBefore = EventSystem.current ? EventSystem.current.currentSelectedGameObject : null;
@@ -211,6 +212,35 @@ namespace PortableUi.Unity
             if (!currentWidgets.TryGetValue(handle, out var widget) || !widget.Rect) return false;
             rect = widget.Rect;
             return true;
+        }
+
+        bool TryWindowTranslation(UiSnapshot proposed)
+        {
+            if(currentSnapshot==null || proposed==null || proposed.Generation!=currentSnapshot.Generation ||
+                proposed.Nodes.Count!=currentSnapshot.Nodes.Count)return false;
+            bool moved=false;
+            for(int i=0;i<proposed.Nodes.Count;i++)
+            {
+                var next=proposed.Nodes[i];var old=currentSnapshot.Nodes[i];
+                if(next.Handle!=old.Handle || next.Parent!=old.Parent || next.Kind!=old.Kind || next.Order!=old.Order ||
+                    next.StyleKey!=old.StyleKey || next.AssetKey!=old.AssetKey || next.Text!=old.Text ||
+                    next.Progress!=old.Progress || next.Visible!=old.Visible || next.Events!=old.Events || next.Brightness!=old.Brightness ||
+                    next.Rect.Width!=old.Rect.Width || next.Rect.Height!=old.Rect.Height)return false;
+                if(next.Rect.X!=old.Rect.X || next.Rect.Y!=old.Rect.Y)
+                {
+                    if(next.Kind!=UiNodeKind.Window || !currentWidgets.TryGetValue(next.Handle,out var widget) || !widget.Rect)return false;
+                    moved=true;
+                }
+            }
+            if(!moved)return false;
+            // All presentation, child geometry and sibling order are unchanged.
+            // Unity moves the retained subtree without rebinding textures/styles/text.
+            for(int i=0;i<proposed.Nodes.Count;i++)
+            {
+                var next=proposed.Nodes[i];var old=currentSnapshot.Nodes[i];
+                if(next.Rect.X!=old.Rect.X || next.Rect.Y!=old.Rect.Y)SetRect(currentWidgets[next.Handle].Rect,next.Rect);
+            }
+            currentSnapshot=proposed;++CommitCount;return true;
         }
 
         void ApplyPresentation(UiSnapshot snapshot, Dictionary<ulong, NativeUiWidget> widgets)
