@@ -27,6 +27,7 @@ const names = [
   'Text',
   'Image',
   'Portrait',
+  'Viewport',
   'Slot',
   'Window',
   'Progress',
