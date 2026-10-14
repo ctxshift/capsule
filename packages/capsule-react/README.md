@@ -7,6 +7,13 @@ it is not yet published to a registry.
 - `@capsule/react`: declarative primitives, render and observation hooks.
 - `@capsule/react/components`: theme-driven composed controls.
 - `@capsule/react/window-state`: bounded window placement/state helpers.
+- `@capsule/react/scroll-list`: controlled fixed-row scrolling and keyboard offset helpers.
+
+`ScrollList` takes row IDs, a row renderer, viewport/row dimensions, an offset and
+callbacks. It mounts only visible rows, preserves keyed rows while they remain
+visible, and accepts scrollbar artwork from its caller. Keep each list's offset
+and focused-list identity in screen state; route root key events through
+`scrollKeyOffset` for the focused list. Wheel input does not change focus.
 
 `onWheel` receives `{ deltaX, deltaY, modifiers }` in design units, positive
 right/down. Native wheel steps map to 64 design units; the browser normalizes

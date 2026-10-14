@@ -66,12 +66,19 @@ export class DomTarget {
         (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
       controls[next]?.focus();
       event.preventDefault();
-    } else if (event.key === 'Escape') {
+    } else if (['Escape', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+      const active = this.stage.ownerDocument.activeElement;
+      if (
+        event.key !== 'Escape' &&
+        active &&
+        ['INPUT', 'SELECT', 'TEXTAREA'].includes(active.tagName)
+      )
+        return;
       event.preventDefault();
       this.send(
         input(root.id, 128, [
           1,
-          1,
+          event.key === 'Escape' ? 1 : event.key === 'ArrowUp' ? 7 : 8,
           1,
           this.modifiers(event),
           event.repeat ? 1 : 0,

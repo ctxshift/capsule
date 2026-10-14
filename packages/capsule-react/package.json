@@ -6,7 +6,8 @@
   "exports": {
     ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
     "./components": { "types": "./src/components.tsx", "default": "./src/components.tsx" },
-    "./window-state": { "types": "./src/window-state.ts", "default": "./src/window-state.ts" }
+    "./window-state": { "types": "./src/window-state.ts", "default": "./src/window-state.ts" },
+    "./scroll-list": { "types": "./src/scroll-list.tsx", "default": "./src/scroll-list.tsx" }
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
