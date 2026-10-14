@@ -7,9 +7,11 @@ namespace PortableUi
     // runs in the worker session; this independently bounds the immutable handoff.
     public static class UiSnapshotValidator
     {
-        public static bool Validate(UiSnapshot snapshot, uint owner, IUiTheme theme, out string error)
+        public static bool Validate(UiSnapshot snapshot, uint owner, IUiTheme theme, out string error, int layoutNodeLimit = UiSession.DefaultLayoutNodes)
         {
             error = null;
+            if (layoutNodeLimit != UiSession.DefaultLayoutNodes && layoutNodeLimit != UiSession.ExtendedLayoutNodes)
+            { error = "Invalid host layout profile."; return false; }
             if (snapshot == null || snapshot.Nodes.Count > UiSession.MaxNodes || owner == 0)
             { error = "Snapshot quota or owner invalid."; return false; }
             var seen = new HashSet<ulong>();
@@ -33,7 +35,7 @@ namespace PortableUi
                 layoutMode = layout;
                 int depth = node.Parent == 0 ? 1 : depths[node.Parent] + 1;
                 depths.Add(node.Handle, depth);
-                if (layout && (!node.Layout.Valid() || depth > 24 || snapshot.Nodes.Count > 128))
+                if (layout && (!node.Layout.Valid() || depth > 24 || snapshot.Nodes.Count > layoutNodeLimit))
                 { error = "Layout intent quota or value invalid."; return false; }
                 var r = node.Rect;
                 if (r.X < -8192 * 64 || r.X > 8192 * 64 || r.Y < -8192 * 64 || r.Y > 8192 * 64 ||

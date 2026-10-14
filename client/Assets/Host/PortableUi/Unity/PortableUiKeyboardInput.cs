@@ -25,6 +25,10 @@ namespace PortableUi.Unity
             Send(keyboard.rightArrowKey, UiInputKey.Right, modifiers);
             Send(keyboard.upArrowKey, UiInputKey.Up, modifiers);
             Send(keyboard.downArrowKey, UiInputKey.Down, modifiers);
+            Send(keyboard.homeKey, UiInputKey.Home, modifiers);
+            Send(keyboard.endKey, UiInputKey.End, modifiers);
+            Send(keyboard.pageUpKey, UiInputKey.PageUp, modifiers);
+            Send(keyboard.pageDownKey, UiInputKey.PageDown, modifiers);
         }
         void Send(KeyControl control, UiInputKey key, byte modifiers)
         { if (control.wasPressedThisFrame) target.RouteKey(key, modifiers); }

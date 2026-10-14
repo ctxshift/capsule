@@ -255,6 +255,18 @@ namespace PortableUi.Unity
                 select.SetValueWithoutNotify(node.Progress); select.RefreshShownValue();
             }
             if (factory is INativeUiStyleAdapter styled) styled.ApplyStyle(widget, node);
+            if (node.Kind == UiNodeKind.Box || node.Kind == UiNodeKind.ClipBox)
+            {
+                bool focusable = (node.Events & UiEventMask.Focus) != 0;
+                var selectable = widget.Rect.GetComponent<Selectable>();
+                if (focusable && !selectable)
+                {
+                    selectable = widget.Rect.gameObject.AddComponent<Selectable>();
+                    selectable.navigation = new Navigation { mode = Navigation.Mode.None };
+                    selectable.transition = Selectable.Transition.None;
+                }
+                if (selectable) selectable.enabled = focusable;
+            }
             if (widget.Image && (node.Kind == UiNodeKind.Box || node.Kind == UiNodeKind.ClipBox || node.Kind == UiNodeKind.Button))
                 widget.Image.raycastTarget = node.Events != UiEventMask.None;
             var input = widget.Rect.GetComponent<PortableUiNodeInput>();
@@ -355,7 +367,7 @@ namespace PortableUi.Unity
                 if (node.Kind == UiNodeKind.Window && currentWidgets[node.Handle].Rect.gameObject.activeInHierarchy) top = node.Handle;
             var selected = EventSystem.current.currentSelectedGameObject;
             if (top == focusedWindow && (top == 0 || selected && selected.activeInHierarchy &&
-                selected.transform.IsChildOf(currentWidgets[top].Rect) && selected.TryGetComponent<Selectable>(out var selectable) && selectable.IsInteractable())) return;
+                selected.transform.IsChildOf(currentWidgets[top].Rect) && selected.TryGetComponent<Selectable>(out var selectable) && selectable.IsActive() && selectable.IsInteractable())) return;
             if (focusedWindow == 0 && top != 0) returnFocus = selected;
             focusedWindow = top;
             if (top == 0)
@@ -364,7 +376,7 @@ namespace PortableUi.Unity
                 returnFocus = null; return;
             }
             if (!currentWidgets.TryGetValue(top, out var window)) return;
-            if (selected && selected.activeInHierarchy && selected.transform.IsChildOf(window.Rect)) return;
+            if (selected && selected.activeInHierarchy && selected.transform.IsChildOf(window.Rect) && selected.TryGetComponent<Selectable>(out var retained) && retained.IsActive() && retained.IsInteractable()) return;
             foreach (var control in window.Rect.GetComponentsInChildren<Selectable>())
                 if (control.IsActive() && control.IsInteractable()) { control.Select(); break; }
         }

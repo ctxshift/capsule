@@ -60,7 +60,7 @@ namespace PortableUi.Yoga
             CheckOwner();
             if (root == IntPtr.Zero) throw new ObjectDisposedException(nameof(NativeYoga));
             metrics = default; milliseconds = 0; rectangles = null; error = null;
-            if (styles == null || styles.Length < 1 || styles.Length > 128) { error = "Yoga node quota."; return false; }
+            if (styles == null || styles.Length < 1 || styles.Length > UiSession.ExtendedLayoutNodes) { error = "Yoga node quota."; return false; }
             var output = new YogaRect[styles.Length];
             long start = Stopwatch.GetTimestamp();
             var context = measurer == null ? null : new MeasureContext { Measurer = measurer };

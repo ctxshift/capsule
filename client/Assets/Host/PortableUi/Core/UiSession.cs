@@ -7,6 +7,8 @@ namespace PortableUi
     public sealed class UiSession
     {
         public const int MaxNodes = 1024;
+        public const int DefaultLayoutNodes = 128, ExtendedLayoutNodes = 256;
+        public int LayoutNodeLimit { get; }
         public const int MaxRoots = 16;
         public const int MaxEvents = 128;
         public const int MaxEventPayloadBytes = 256;
@@ -24,9 +26,11 @@ namespace PortableUi
         public int NodeCount => nodes.Count;
         public int PendingEventCount => events.Count;
 
-        public UiSession(uint ownerNonce, IUiTheme injectedTheme)
+        public UiSession(uint ownerNonce, IUiTheme injectedTheme, int layoutNodeLimit = DefaultLayoutNodes)
         {
             if (ownerNonce == 0) throw new ArgumentOutOfRangeException(nameof(ownerNonce));
+            if (layoutNodeLimit != DefaultLayoutNodes && layoutNodeLimit != ExtendedLayoutNodes) throw new ArgumentOutOfRangeException(nameof(layoutNodeLimit));
+            LayoutNodeLimit = layoutNodeLimit;
             owner = ownerNonce;
             theme = injectedTheme ?? throw new ArgumentNullException(nameof(injectedTheme));
         }
@@ -60,7 +64,7 @@ namespace PortableUi
             var snapshot = Snapshot(proposed);
             bool hasLayout = false;
             foreach (var node in snapshot.Nodes) if (node.Layout != null) { hasLayout = true; break; }
-            if (hasLayout && !UiSnapshotValidator.Validate(snapshot, owner, theme, out string layoutError))
+            if (hasLayout && !UiSnapshotValidator.Validate(snapshot, owner, theme, out string layoutError, LayoutNodeLimit))
                 return new UiResult(UiError.InvalidCommand, layoutError);
             try
             {
