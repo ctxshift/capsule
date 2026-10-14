@@ -38,6 +38,7 @@ export function createBrowserTheme(
     if (previous?.key === node.asset) return;
     const region = asset(node.asset);
     const svg = image(element.ownerDocument, region, undefined, false);
+    svg.style.filter = `brightness(${definition(node.asset).brightness ?? 1})`;
     if (previous) previous.svg.replaceWith(svg);
     else element.append(svg);
     renderedImages.set(element, { key: node.asset, svg });
@@ -76,7 +77,14 @@ export function createBrowserTheme(
     css,
     fonts: [`${theme.font.sampleSize}px PortableThemeFont`],
     images: [...new Set([...art.values()].map((image) => image.url))],
-    update: updateImage,
+    update(element, node) {
+      updateImage(element, node);
+      if (node.kind === 8)
+        element.style.backgroundColor = color(
+          theme.surfaces?.find((surface) => surface.key === node.style)
+            ?.color ?? [0, 0, 0, 0],
+        );
+    },
     metrics(_document, style) {
       const text = theme.text.find(
         (text) => text.key === (style || theme.components.buttonLabel),

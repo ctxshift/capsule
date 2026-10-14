@@ -46,6 +46,7 @@ export interface Props {
   onActivate?: (event: ActionEvent) => void;
   onClose?: () => void;
   onHover?: () => void;
+  onHoverChange?: (hovered: boolean) => void;
   onPointer?: (event: PointerEvent) => void;
   onKey?: (event: KeyEvent) => void;
   onFocus?: () => void;

@@ -157,10 +157,26 @@ export class DomTarget {
       boxSizing: 'border-box',
       padding: '0',
       margin: '0',
-      pointerEvents: node.kind === 8 && !(node.events & 64) ? 'none' : 'auto',
+      pointerEvents:
+        (node.kind === 8 && !(node.events & (4 | 64))) ||
+        (node.kind === 4 && node.events === 0)
+          ? 'none'
+          : 'auto',
     });
     this.theme.decorate(element, node, () => this.send(input(node.id, 2)));
     const options = { signal: this.subscriptions.signal };
+    for (const [event, hovered] of [
+      ['pointerenter', 1],
+      ['pointerleave', 0],
+    ] as const)
+      element.addEventListener(
+        event,
+        () => {
+          if ((this.nodes.get(node.id)?.events ?? 0) & 4)
+            this.send(input(node.id, 4, [1, hovered]));
+        },
+        options,
+      );
     if (node.kind === 10)
       element.addEventListener(
         'click',
@@ -230,7 +246,10 @@ export class DomTarget {
       this.elements.set(node.id, element);
       element.dataset.style = node.style;
       element.style.pointerEvents =
-        node.kind === 8 && !(node.events & 64) ? 'none' : 'auto';
+        (node.kind === 8 && !(node.events & (4 | 64))) ||
+        (node.kind === 4 && node.events === 0)
+          ? 'none'
+          : 'auto';
       const parent = node.parent ? this.elements.get(node.parent)! : this.stage;
       if (element.parentElement !== parent) parent.append(element);
       const [x, y, width, height] = rectangles.get(node.id)!;

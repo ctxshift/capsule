@@ -12,6 +12,7 @@ export interface ThemeAsset {
   border: number;
   edge: number;
   alphaAware: boolean;
+  brightness?: number;
 }
 export interface UiTheme {
   schemaVersion: 1;
@@ -88,6 +89,7 @@ export interface UiTheme {
     color: Rgba;
   }[];
   assets: ThemeAsset[];
+  surfaces?: { key: string; color: Rgba }[];
 }
 export interface FontMetrics {
   advances: { code: number; value: number }[];
@@ -152,11 +154,30 @@ export function parseTheme(value: unknown): UiTheme {
   )
     throw Error('Theme collection bounds');
   const keys = new Set<string>();
+  const surfaces = new Set<string>();
+  if ((theme.surfaces?.length ?? 0) > 30) throw Error('Theme surface quota');
+  for (const surface of theme.surfaces ?? []) {
+    if (
+      !/^[a-z0-9-]{1,64}$/.test(surface.key) ||
+      surfaces.has(surface.key) ||
+      !Array.isArray(surface.color) ||
+      surface.color.length !== 4 ||
+      !surface.color.every((n) => Number.isInteger(n) && n >= 0 && n <= 255)
+    )
+      throw Error('Theme surface bounds');
+    surfaces.add(surface.key);
+  }
   const images = new Map<string, string>();
   for (const asset of theme.assets) {
     if (!/^[a-z0-9-]{1,64}$/.test(asset.key) || keys.has(asset.key))
       throw Error('Theme asset identity');
     keys.add(asset.key);
+    if (
+      !Number.isFinite(asset.brightness ?? 1) ||
+      (asset.brightness ?? 1) < 0 ||
+      (asset.brightness ?? 1) > 2
+    )
+      throw Error('Theme image brightness bounds');
     themePath(asset.path);
     const image = asset.image ?? asset.key;
     if (!/^[a-z0-9-]{1,64}$/.test(image)) throw Error('Theme image identity');

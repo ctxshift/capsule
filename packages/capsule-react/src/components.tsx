@@ -103,6 +103,7 @@ export function createComponents(theme: ComponentTheme) {
   function Window({
     title,
     width,
+    height,
     position,
     dragExtent,
     viewport,
@@ -113,6 +114,7 @@ export function createComponents(theme: ComponentTheme) {
   }: {
     title: string;
     width: number;
+    height?: number;
     position: { x: number; y: number };
     dragExtent: { height: number };
     viewport: { width: number; height: number };
@@ -165,6 +167,7 @@ export function createComponents(theme: ComponentTheme) {
         x={position.x}
         y={position.y}
         width={width}
+        height={height}
         title={title}
         paddingLeft={theme.windowInset}
         paddingRight={theme.windowInset}
