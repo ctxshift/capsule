@@ -25,8 +25,8 @@ namespace PortableUi.Unity
             }
             catch
             {
-                if (sprite) UnityEngine.Object.Destroy(sprite);
-                if (texture) UnityEngine.Object.Destroy(texture);
+                UnityUiDecodedImage.Release(sprite);
+                UnityUiDecodedImage.Release(texture);
                 throw;
             }
         }
@@ -59,9 +59,14 @@ namespace PortableUi.Unity
 
         public void Dispose()
         {
-            if (sprite && ownsResources) UnityEngine.Object.Destroy(sprite);
-            if (texture && ownsResources) UnityEngine.Object.Destroy(texture);
+            if (ownsResources) { Release(sprite); Release(texture); }
             sprite = null; texture = null;
+        }
+        internal static void Release(UnityEngine.Object resource)
+        {
+            if (!resource) return;
+            if (Application.isPlaying) UnityEngine.Object.Destroy(resource);
+            else UnityEngine.Object.DestroyImmediate(resource);
         }
     }
 }
