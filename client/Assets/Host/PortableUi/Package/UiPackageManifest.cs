@@ -35,8 +35,11 @@ namespace PortableUi.Package
         { Id = id; EntryPath = entry; declarations = assets.AsReadOnly(); }
 
         public static bool TryParse(byte[] bytes, out UiPackageManifest manifest, out string error)
+            => TryParse(bytes,MaxAssets,out manifest,out error);
+        public static bool TryParse(byte[] bytes, int maxAssets, out UiPackageManifest manifest, out string error)
         {
             manifest = null; error = null;
+            if(maxAssets<1 || maxAssets>64) { error="Host manifest profile bounds.";return false; }
             if (bytes == null || bytes.Length == 0 || bytes.Length > MaxManifestBytes)
             { error = "Manifest must be 1..16384 bytes."; return false; }
             string source;
@@ -72,7 +75,7 @@ namespace PortableUi.Package
             var assetArray = root["assets"] as JArray;
             if (!ValidKey(id) || !ValidPath(entry) ||
                 !entry.EndsWith(".js", StringComparison.OrdinalIgnoreCase) ||
-                assetArray == null || assetArray.Count > MaxAssets)
+                    assetArray == null || assetArray.Count > maxAssets)
             { error = "Invalid identity, entry path or asset count."; return false; }
             var assets = new List<UiPackageDeclaration>(assetArray.Count);
             var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

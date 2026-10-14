@@ -25,11 +25,12 @@ namespace PortableUi.Package
             return keys.AsReadOnly();
         }
 
-        public UiPackageTheme(UiPackageRevision revision, string themeKey)
+        public UiPackageTheme(UiPackageRevision revision, string themeKey) : this(revision,themeKey,null) { }
+        public UiPackageTheme(UiPackageRevision revision, string themeKey, UiThemeLimits? limits)
         {
             if (!revision.TryCopyData(themeKey, out var bytes))
                 throw new ArgumentException("Package theme data is not declared.");
-            Definition = new UiControlTheme(new UTF8Encoding(false, true).GetString(bytes));
+            Definition = new UiControlTheme(new UTF8Encoding(false, true).GetString(bytes), limits);
             var sources = new Dictionary<string, UiControlTheme.AssetRecipe>(StringComparer.Ordinal);
             foreach (var recipe in Definition.CopyAssets())
             {

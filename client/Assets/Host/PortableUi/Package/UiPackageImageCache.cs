@@ -162,7 +162,7 @@ namespace PortableUi.Package
             { error = "Package generation disposed."; return false; }
             if (key != null && slotsByKey.TryGetValue(key, out int oldSlot))
             { handle = new UiPackageImageHandle(Generation, oldSlot); return true; }
-            if (nextSlot >= UiPackageManifest.MaxAssets)
+            if (nextSlot >= Revision.Manifest.Declarations.Count)
             { error = "Image handle quota exceeded."; return false; }
             if (!cache.TryAcquire(Revision, key, out var cacheKey, out var image, out error))
                 return false;

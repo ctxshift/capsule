@@ -5,12 +5,25 @@ using Newtonsoft.Json.Linq;
 
 namespace PortableUi.Package
 {
+    // Selected by trusted host composition, never by fields inside a theme.
+    public readonly struct UiThemeLimits
+    {
+        public readonly int AssetRecipes, TextStyles;
+        public static readonly UiThemeLimits Default = new UiThemeLimits(30,16);
+        public UiThemeLimits(int assetRecipes,int textStyles)
+        {
+            if(assetRecipes<1 || assetRecipes>64 || textStyles<1 || textStyles>32)
+                throw new ArgumentOutOfRangeException();
+            AssetRecipes=assetRecipes;TextStyles=textStyles;
+        }
+    }
     // Immutable host-owned provider data. Untrusted packages can only derive a
     // private palette/geometry scope; they cannot register a default provider.
     public sealed class UiControlTheme
     {
         readonly JObject value;
-        public UiControlTheme(string json)
+        public UiControlTheme(string json) : this(json,null) { }
+        public UiControlTheme(string json, UiThemeLimits? limits)
         {
             if (json == null || json.Length > 65536) throw new ArgumentException("Theme data quota.");
             using (var reader = new JsonTextReader(new System.IO.StringReader(json)) { MaxDepth = 8 })
@@ -20,9 +33,13 @@ namespace PortableUi.Package
             Validate(value, 0);
             foreach (string group in new[] { "font", "components", "window", "button", "range", "select", "focus" })
                 if (!(value[group] is JObject)) throw new ArgumentException("Missing theme group: " + group);
-            if (!(value["assets"] is JArray assets) || assets.Count > 30 || !(value["text"] is JArray text) || text.Count > 16)
+            var capacity=limits ?? UiThemeLimits.Default;
+            if (!(value["assets"] is JArray assets) || assets.Count > capacity.AssetRecipes || !(value["text"] is JArray text) || text.Count > capacity.TextStyles)
                 throw new ArgumentException("Theme collection quota.");
             foreach(var asset in CopyAssets()) { }
+            foreach(var style in text)
+                if(style["weight"]!=null && (style["weight"].Type!=JTokenType.Integer || ((int)style["weight"]!=400 && (int)style["weight"]!=700)))
+                    throw new ArgumentException("Theme text weight bounds.");
             if(value["surfaces"] != null)
             {
                 if(!(value["surfaces"] is JArray surfaces) || surfaces.Count > 30) throw new ArgumentException("Theme surface quota.");
@@ -102,6 +119,8 @@ namespace PortableUi.Package
         }
         public float ImageBrightness(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["brightness"]??1;return 1;}
+        public float ImageOpacity(string key)
+        {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["opacity"]??1;return 1;}
         public bool TrySurfaceShadow(string key,out float blur,out byte[] color)
         {
             if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)if((string)surface["key"]==key && surface["shadow"] is JObject shadow)
@@ -114,6 +133,7 @@ namespace PortableUi.Package
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool)asset["alphaAware"];return false;}
         public float TextNumber(string key,string property) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown text style."); }
         public bool TextWrap(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(bool)item["wrap"];throw new ArgumentException("Unknown text style."); }
+        public bool TextBold(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(int?)item["weight"]==700;return false; }
         public byte[] TextColor(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key){var c=(JArray)item["color"];return new[]{(byte)c[0],(byte)c[1],(byte)c[2],(byte)c[3]};}throw new ArgumentException("Unknown text style."); }
         public float AssetNumber(string key,string property) {foreach(var item in (JArray)value["assets"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown theme asset.");}
         public bool AssetAlphaAware(string key) {foreach(var item in (JArray)value["assets"])if((string)item["key"]==key)return(bool)item["alphaAware"];throw new ArgumentException("Unknown theme asset.");}
@@ -127,6 +147,8 @@ namespace PortableUi.Package
                 if(string.IsNullOrEmpty(path)||System.IO.Path.IsPathRooted(path)||path.Contains("..")||path.Contains("\\")||string.IsNullOrEmpty(key)||key.IndexOfAny(new[]{'/','\\','.'})>=0)throw new ArgumentException("Invalid theme asset path.");
                 var rect=(JArray)item["rect"];
                 float brightness=(float?)item["brightness"]??1;
+                float opacity=(float?)item["opacity"]??1;
+                if(float.IsNaN(opacity)||float.IsInfinity(opacity)||opacity<0||opacity>1)throw new ArgumentException("Theme image opacity bounds.");
                 if(item["stretch"]!=null && item["stretch"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme image stretch must be boolean.");
                 if(float.IsNaN(brightness)||float.IsInfinity(brightness)||brightness<0||brightness>2)throw new ArgumentException("Theme image brightness bounds.");
                 string imageKey = item["image"] == null ? key : (string)item["image"];

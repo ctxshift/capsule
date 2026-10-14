@@ -32,7 +32,7 @@ namespace PortableUi.Package
                 if (!TryRead(root, UiPackageManifest.FileName,
                     UiPackageManifest.MaxManifestBytes, out var manifestBytes, out error))
                     return false;
-                if (!UiPackageManifest.TryParse(manifestBytes, out var manifest, out error))
+                if (!UiPackageManifest.TryParse(manifestBytes, limits.MaxDeclarations, out var manifest, out error))
                     return false;
                 var declared = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 { UiPackageManifest.FileName, manifest.EntryPath };
@@ -46,25 +46,25 @@ namespace PortableUi.Package
                 while (pending.Count > 0)
                 {
                     string current = pending.Pop();
-                    if (++directoryCount > UiPackageManifest.MaxAssets + 2)
+                    if (++directoryCount > limits.MaxDeclarations + 2)
                     { error = "Package directory count quota exceeded."; return false; }
                     foreach (string child in Directory.EnumerateFileSystemEntries(current))
                     {
-                        if (++discovered > UiPackageManifest.MaxAssets * 2 + 4)
+                        if (++discovered > limits.MaxDeclarations * 2 + 4)
                         { error = "Package entry count quota exceeded."; return false; }
                         FileAttributes attributes = File.GetAttributes(child);
                         if ((attributes & FileAttributes.ReparsePoint) != 0)
                         { error = "Package contains a reparse point."; return false; }
                         if ((attributes & FileAttributes.Directory) != 0)
                         {
-                            if (pending.Count + directoryCount >= UiPackageManifest.MaxAssets + 2)
+                            if (pending.Count + directoryCount >= limits.MaxDeclarations + 2)
                             { error = "Package directory count quota exceeded."; return false; }
                             pending.Push(child); continue;
                         }
                         string relative = child.Substring(root.Length).TrimStart(Path.DirectorySeparatorChar,
                             Path.AltDirectorySeparatorChar).Replace(Path.DirectorySeparatorChar, '/');
                         if (!UiPackageManifest.ValidPath(relative) || !exact.Contains(relative) ||
-                            !found.Add(relative) || found.Count > UiPackageManifest.MaxAssets + 2)
+                            !found.Add(relative) || found.Count > limits.MaxDeclarations + 2)
                         { error = "Undeclared, invalid or case-colliding package file."; return false; }
                     }
                 }

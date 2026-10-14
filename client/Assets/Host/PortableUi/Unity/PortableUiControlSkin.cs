@@ -25,6 +25,7 @@ namespace PortableUi.Unity
                 if(alphaAware&&!sampling)sampling=widget.Image.gameObject.AddComponent<PortableUiAlphaAwareImage>();
                 if(sampling)sampling.SetPolicy(alphaAware);
                 float gain=theme.ImageBrightness(node.AssetKey);
+                widget.Image.color=new Color(1,1,1,theme.ImageOpacity(node.AssetKey));
                 var tint=widget.Image.GetComponent<PortableUiBrightness>();
                 if(gain!=1 && !tint)tint=widget.Image.gameObject.AddComponent<PortableUiBrightness>();
                 if(tint)tint.ThemeFactor=gain;
@@ -147,10 +148,11 @@ namespace PortableUi.Unity
                 TopRect(header, N("components","windowInset"),N("components","titleTop"),node.Rect.Width/64f-2*N("components","windowInset"),N("components","titleHeight"));
                 header.GetComponent<Image>().color = Color.clear;
                 Stretch(widget.Label.rectTransform, 0);
-                widget.Label.font=font; widget.Label.fontSize=N("window","titleSize");
+                float titleSize=HasText(node.StyleKey)?theme.TextNumber(node.StyleKey,"size"):N("window","titleSize");
+                widget.Label.font=font; widget.Label.fontSize=titleSize;
                 widget.Label.fontStyle = FontStyles.SmallCaps;
                 // TMP spacing is a percentage of the font size; CSS uses 2 px.
-                widget.Label.characterSpacing = 100*N("window","titleSpacing")/N("window","titleSize");
+                widget.Label.characterSpacing = 100*N("window","titleSpacing")/titleSize;
                 string alignment=theme.String("window","titleAlignment");
                 widget.Label.alignment=alignment=="center"?TextAlignmentOptions.Midline:alignment=="right"?TextAlignmentOptions.MidlineRight:TextAlignmentOptions.MidlineLeft;
                 widget.Label.margin = Vector4.zero;
@@ -181,7 +183,7 @@ namespace PortableUi.Unity
                 var closeFeedback=close.GetComponent<PortableUiControlFeedback>()??close.gameObject.AddComponent<PortableUiControlFeedback>();
                 closeFeedback.Configure(closeHover,null,FocusFrame(close.rectTransform),C("button","hover"));
             }
- else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;label.font=font;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=FontStyles.Normal;label.characterSpacing=0;label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=font.faceInfo.lineHeight*size/font.faceInfo.pointSize*font.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
+ else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;label.font=font;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=theme.TextBold(key)?FontStyles.Bold:FontStyles.Normal;label.characterSpacing=0;label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=font.faceInfo.lineHeight*size/font.faceInfo.pointSize*font.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
  bool HasText(string key){foreach(string candidate in theme.TextKeys)if(candidate==key)return true;return false;}
  public void Dispose(){if(buttonSoftLight){if(Application.isPlaying)UnityEngine.Object.Destroy(buttonSoftLight);else UnityEngine.Object.DestroyImmediate(buttonSoftLight);buttonSoftLight=null;}}
         static Image ChildImage(RectTransform parent, string name)
