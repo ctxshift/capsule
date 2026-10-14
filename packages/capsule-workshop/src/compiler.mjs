@@ -299,6 +299,8 @@ export function compiler({
         tsconfigRaw: { compilerOptions: { alwaysStrict: false } },
         entryPoints: [source],
         bundle: true,
+        // Compact generated transport only; retain authored names and source maps.
+        minifyWhitespace: true,
         write: false,
         format: 'iife',
         platform: 'browser',
