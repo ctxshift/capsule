@@ -37,6 +37,18 @@ namespace PortableUi.Package
             if (!(value["assets"] is JArray assets) || assets.Count > capacity.AssetRecipes || !(value["text"] is JArray text) || text.Count > capacity.TextStyles)
                 throw new ArgumentException("Theme collection quota.");
             foreach(var asset in CopyAssets()) { }
+            if (value["buttonStyles"] != null)
+            {
+                if (!(value["buttonStyles"] is JArray buttons) || buttons.Count > 16) throw new ArgumentException("Theme button style quota.");
+                var keys = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var button in buttons)
+                {
+                    string key = (string)button["key"];
+                    if (string.IsNullOrEmpty(key) || !System.Text.RegularExpressions.Regex.IsMatch(key,"^[a-z0-9-]{1,64}$") || !keys.Add(key) || key == String("components","button")) throw new ArgumentException("Theme button style bounds.");
+                    ValidateColor(button["selectedTint"]);
+                    if ((button["selectedTextureOpacity"]?.Type != JTokenType.Integer && button["selectedTextureOpacity"]?.Type != JTokenType.Float) || (float)button["selectedTextureOpacity"] < 0 || (float)button["selectedTextureOpacity"] > 1) throw new ArgumentException("Theme button texture opacity bounds.");
+                }
+            }
             foreach(var style in text)
             {
                 if(style["ruleInset"]!=null && (style["ruleInset"].Type!=JTokenType.Integer && style["ruleInset"].Type!=JTokenType.Float || (float)style["ruleInset"]<0 || (float)style["ruleInset"]>256))throw new ArgumentException("Theme window rule inset bounds.");
@@ -58,6 +70,17 @@ namespace PortableUi.Package
                     if(string.IsNullOrEmpty(key) || !System.Text.RegularExpressions.Regex.IsMatch(key,"^[a-z0-9-]{1,64}$") || !keys.Add(key) ||
                         !(surface["color"] is JArray rgba) || rgba.Count!=4) throw new ArgumentException("Theme surface bounds.");
                     foreach(var channel in rgba) if(channel.Type!=JTokenType.Integer || (int)channel<0 || (int)channel>255) throw new ArgumentException("Theme surface bounds.");
+                    if (surface["rules"] != null)
+                    {
+                        if (!(surface["rules"] is JObject rules) || rules.Count > 4) throw new ArgumentException("Theme surface rule quota.");
+                        foreach (var property in rules.Properties())
+                        {
+                            if (Array.IndexOf(new[] { "top", "right", "bottom", "left" }, property.Name) < 0 || !(property.Value is JArray rule) || rule.Count != 5 ||
+                                (rule[0].Type != JTokenType.Integer && rule[0].Type != JTokenType.Float) || (float)rule[0] <= 0 || (float)rule[0] > 8)
+                                throw new ArgumentException("Theme surface rule bounds.");
+                            for (int i=1;i<5;i++) if(rule[i].Type!=JTokenType.Integer || (int)rule[i]<0 || (int)rule[i]>255) throw new ArgumentException("Theme surface rule color bounds.");
+                        }
+                    }
                     if(surface["shadow"]!=null)
                     {
                         var shadow=surface["shadow"] as JObject;
@@ -70,6 +93,32 @@ namespace PortableUi.Package
             }
         }
         UiControlTheme(JObject source) { value = source; }
+        static void ValidateColor(JToken token)
+        {
+            if (!(token is JArray color) || color.Count != 4) throw new ArgumentException("Theme color bounds.");
+            foreach (var channel in color) if (channel.Type != JTokenType.Integer || (int)channel < 0 || (int)channel > 255) throw new ArgumentException("Theme color bounds.");
+        }
+        public bool TryButtonSelectedTint(string key, out byte[] color)
+        {
+            if (value["buttonStyles"] is JArray styles) foreach (var style in styles) if ((string)style["key"] == key)
+            { var rgba = (JArray)style["selectedTint"]; color = new[] { (byte)rgba[0], (byte)rgba[1], (byte)rgba[2], (byte)rgba[3] }; return true; }
+            color = null; return false;
+        }
+        public float ButtonSelectedTextureOpacity(string key)
+        { if(value["buttonStyles"] is JArray styles)foreach(var style in styles)if((string)style["key"]==key)return(float)style["selectedTextureOpacity"];return 0; }
+        public readonly struct SurfaceRule
+        {
+            public readonly string Edge;
+            public readonly float Width;
+            public readonly byte[] Color;
+            public SurfaceRule(string edge, float width, byte[] color) { Edge = edge; Width = width; Color = color; }
+        }
+        public IEnumerable<SurfaceRule> SurfaceRules(string key)
+        {
+            if (value["surfaces"] is JArray surfaces) foreach (var surface in surfaces) if ((string)surface["key"] == key && surface["rules"] is JObject rules)
+                foreach (var property in rules.Properties())
+                { var rule = (JArray)property.Value; yield return new SurfaceRule(property.Name, (float)rule[0], new[] { (byte)rule[1], (byte)rule[2], (byte)rule[3], (byte)rule[4] }); }
+        }
         static void Validate(JToken token, int depth)
         {
             if (depth > 8) throw new ArgumentException("Theme depth quota.");
@@ -118,7 +167,7 @@ namespace PortableUi.Package
             var result = new byte[4]; for (int i=0;i<4;++i) { int c=(int)rgba[i]; if(c<0||c>255)throw new ArgumentException("Theme color bounds.");result[i]=(byte)c; } return result;
         }
         public IEnumerable<string> TextKeys { get { foreach (var item in (JArray)value["text"]) yield return (string)item["key"]; } }
-        public IEnumerable<string> StyleKeys {get{foreach(string key in new[]{"button","buttonLabel","fieldLabel","slider","select","paragraph"})yield return String("components",key);foreach(string key in TextKeys)yield return key;if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)yield return (string)surface["key"];}}
+        public IEnumerable<string> StyleKeys {get{foreach(string key in new[]{"button","buttonLabel","fieldLabel","slider","select","paragraph"})yield return String("components",key);foreach(string key in TextKeys)yield return key;if(value["buttonStyles"] is JArray buttons)foreach(var button in buttons)yield return (string)button["key"];if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)yield return (string)surface["key"];}}
         public bool TrySurfaceColor(string key,out byte[] color)
         {
             if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)if((string)surface["key"]==key)

@@ -10,6 +10,7 @@ namespace PortableUi.Unity
  public sealed class PortableUiControlSkin : IDisposable
  {
  readonly UiControlTheme theme; readonly TMP_FontAsset font; readonly UiWindowParts parts; readonly Assets art; Material buttonSoftLight;
+ readonly System.Collections.Generic.Dictionary<string,Material> selectedButtonMaterials = new System.Collections.Generic.Dictionary<string,Material>();
  sealed class Assets {readonly Func<string,Sprite> resolve;public Assets(Func<string,Sprite> r){resolve=r;}public bool TryGet(string key,out Sprite sprite){sprite=resolve(key);if(!sprite)throw new InvalidOperationException("Missing theme sprite: "+key);return true;}}
  public PortableUiControlSkin(UiControlTheme definition,TMP_FontAsset exactFont,Func<string,Sprite> sprites,UiWindowParts windowParts){theme=definition;font=exactFont;art=new Assets(sprites);parts=windowParts;}
  float N(string group,string key)=>theme.Number(group,key);
@@ -41,6 +42,7 @@ namespace PortableUi.Unity
                 }
             }
             if(node.Kind==UiNodeKind.Box && widget.Image) widget.Image.color=Color.clear;
+            if (node.Kind == UiNodeKind.Box) ApplySurfaceRules(root, node.StyleKey);
             if(node.Kind==UiNodeKind.Box && parts?.SurfaceShadow!=null)
             {
                 bool hasShadow=theme.TrySurfaceShadow(node.StyleKey,out var blur,out var shadowColor);
@@ -57,7 +59,8 @@ namespace PortableUi.Unity
                 widget.Image.color=new Color32(surface[0],surface[1],surface[2],surface[3]);
                 return true;
             }
-            if (node.Kind == UiNodeKind.Button && (node.StyleKey == theme.String("components","button") || string.IsNullOrEmpty(node.StyleKey)))
+            bool selectedButton = theme.TryButtonSelectedTint(node.StyleKey, out var selectedColor);
+            if (node.Kind == UiNodeKind.Button && (selectedButton || node.StyleKey == theme.String("components","button") || string.IsNullOrEmpty(node.StyleKey)))
             {
                 var control = root.GetComponent<Button>(); control.transition = Selectable.Transition.None;
                 widget.Image.color = C("button","background");
@@ -72,13 +75,22 @@ namespace PortableUi.Unity
                     buttonSoftLight.SetVector("_BaseRgb",V(C("button","background")));
                     buttonSoftLight.SetVector("_OverlayRgba",V(C("button","hover")));
                 }
-                texture.material=buttonSoftLight;
+                var textureMaterial = buttonSoftLight;
+                float selectedOpacity = selectedButton ? theme.ButtonSelectedTextureOpacity(node.StyleKey) : 0;
+                if (selectedButton && !selectedButtonMaterials.TryGetValue(node.StyleKey, out textureMaterial))
+                {
+                    textureMaterial = new Material(buttonSoftLight) { name = "Scoped selected button", hideFlags = HideFlags.DontSave };
+                    textureMaterial.SetVector("_OverlayRgba", V(new Color32(selectedColor[0],selectedColor[1],selectedColor[2],selectedColor[3])));
+                    textureMaterial.SetFloat("_Strength", selectedOpacity);
+                    selectedButtonMaterials.Add(node.StyleKey, textureMaterial);
+                }
+                texture.material=textureMaterial;
                 var border = ChildImage(root,"Theme button frame"); Stretch(border.rectTransform,0);
                 art.TryGet(theme.String("button","frame"),out var frame); border.sprite = frame;
                 border.type = Image.Type.Sliced; border.fillCenter=false; border.pixelsPerUnitMultiplier=Slice("button","frame");
                 var focus = FocusFrame(root);
                 var feedback=root.GetComponent<PortableUiControlFeedback>()??root.gameObject.AddComponent<PortableUiControlFeedback>();
-                feedback.Configure(tint,texture,focus,Color.clear,C("button","foreground"),N("button","highlightOpacity"));
+                feedback.Configure(tint,texture,focus,Color.clear,C("button","foreground"),N("button","highlightOpacity"),selectedButton?1:0);
             }
             else if (node.Kind == UiNodeKind.Range && (node.StyleKey == theme.String("components","slider") || string.IsNullOrEmpty(node.StyleKey)))
             {
@@ -191,7 +203,38 @@ namespace PortableUi.Unity
             }
  else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;label.font=font;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=theme.TextBold(key)?FontStyles.Bold:FontStyles.Normal;label.characterSpacing=0;label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=font.faceInfo.lineHeight*size/font.faceInfo.pointSize*font.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
  bool HasText(string key){foreach(string candidate in theme.TextKeys)if(candidate==key)return true;return false;}
- public void Dispose(){if(buttonSoftLight){if(Application.isPlaying)UnityEngine.Object.Destroy(buttonSoftLight);else UnityEngine.Object.DestroyImmediate(buttonSoftLight);buttonSoftLight=null;}}
+ public void Dispose(){foreach(var material in selectedButtonMaterials.Values){if(Application.isPlaying)UnityEngine.Object.Destroy(material);else UnityEngine.Object.DestroyImmediate(material);}selectedButtonMaterials.Clear();if(buttonSoftLight){if(Application.isPlaying)UnityEngine.Object.Destroy(buttonSoftLight);else UnityEngine.Object.DestroyImmediate(buttonSoftLight);buttonSoftLight=null;}}
+        void ApplySurfaceRules(RectTransform root, string style)
+        {
+            // Host decorations do not participate in guest layout or input.
+            foreach (string edge in new[] { "top", "right", "bottom", "left" })
+            {
+                var old = root.Find("Theme surface " + edge);
+                if (old) old.gameObject.SetActive(false);
+            }
+            foreach (var rule in theme.SurfaceRules(style))
+            {
+                var line = ChildImage(root, "Theme surface " + rule.Edge);
+                line.gameObject.SetActive(true);
+                line.color = new Color32(rule.Color[0], rule.Color[1], rule.Color[2], rule.Color[3]);
+                var rect = line.rectTransform;
+                rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one;
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
+                if (rule.Edge == "top" || rule.Edge == "bottom")
+                {
+                    float y = rule.Edge == "top" ? 1 : 0;
+                    rect.anchorMin = new Vector2(0, y); rect.anchorMax = new Vector2(1, y);
+                    rect.pivot = new Vector2(.5f, y); rect.sizeDelta = new Vector2(0, rule.Width);
+                }
+                else
+                {
+                    float x = rule.Edge == "right" ? 1 : 0;
+                    rect.anchorMin = new Vector2(x, 0); rect.anchorMax = new Vector2(x, 1);
+                    rect.pivot = new Vector2(x, .5f); rect.sizeDelta = new Vector2(rule.Width, 0);
+                }
+                rect.anchoredPosition = Vector2.zero;
+            }
+        }
         static Image ChildImage(RectTransform parent, string name)
         {
             var found = parent.Find(name);
