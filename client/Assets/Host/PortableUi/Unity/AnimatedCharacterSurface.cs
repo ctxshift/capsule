@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Profiling;
 using UnityEngine.Animations;
 using UnityEngine.EventSystems;
 using UnityEngine.Playables;
@@ -16,6 +17,7 @@ namespace PortableUi.Unity
         string key;
         Action<Camera> configureCamera;
         readonly List<Lease> leases = new List<Lease>();
+        static readonly ProfilerMarker AnimationMarker = new ProfilerMarker("Capsule.Character.Animation");
         ulong revision;
         bool baseline;
         public int LiveLeases => leases.Count;
@@ -199,7 +201,7 @@ namespace PortableUi.Unity
                 if(disposed || !visible || !graph.IsValid())return;
                 if(animation.GetTime()>=playing.length)
                 { if(playing!=owner.idle)Play(owner.idle);else animation.SetTime(animation.GetTime()%Math.Max(.001,playing.length)); }
-                graph.Evaluate(Time.unscaledDeltaTime);
+                using (AnimationMarker.Auto()) graph.Evaluate(Time.unscaledDeltaTime);
             }
             public Texture Resize(int width,int height)
             {

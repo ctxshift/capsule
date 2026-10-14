@@ -26,6 +26,8 @@ namespace PortableUi.Unity
         // Async integration installs a main-thread queue sink, never a worker session.
         public Func<ulong, UiEventMask, byte[], bool> InputSink { get; set; }
         public long CommitCount { get; private set; }
+        // A surrounding game shell can own Escape while retaining native widget keys.
+        public bool ExternalEscapeRouting {get;set;}
         internal bool SurfaceInputActive => active && !disposed;
 
         public bool TryDesignPoint(Vector2 screen, Camera camera, out Vector2 point)
