@@ -105,6 +105,8 @@ export function createComponents(theme: ComponentTheme) {
     titleStyle,
     width,
     height,
+    direction,
+    gap,
     position,
     dragExtent,
     viewport,
@@ -117,6 +119,8 @@ export function createComponents(theme: ComponentTheme) {
     titleStyle?: string;
     width: number;
     height?: number;
+    direction?: 'row' | 'column';
+    gap?: number;
     position: { x: number; y: number };
     dragExtent: { height: number };
     viewport: { width: number; height: number };
@@ -170,6 +174,8 @@ export function createComponents(theme: ComponentTheme) {
         y={position.y}
         width={width}
         height={height}
+        direction={direction}
+        gap={gap}
         title={title}
         style={titleStyle}
         paddingLeft={theme.windowInset}
