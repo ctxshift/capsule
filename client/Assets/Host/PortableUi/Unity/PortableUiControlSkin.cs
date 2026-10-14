@@ -6,7 +6,7 @@ using UnityEngine.UI;
 namespace PortableUi.Unity
 {
  public sealed class UiWindowParts
- { public Func<NativeUiWidget,Image> Frame,Rule; public Func<NativeUiWidget,RectTransform> Header; public Action<RectTransform,float,float,Color> Shadow; }
+ { public Func<NativeUiWidget,Image> Frame,Rule; public Func<NativeUiWidget,RectTransform> Header; public Action<RectTransform,float,float,Color> Shadow; public Action<RectTransform,float,Color,Color,Color> SurfaceShadow; }
  public sealed class PortableUiControlSkin : IDisposable
  {
  readonly UiControlTheme theme; readonly TMP_FontAsset font; readonly UiWindowParts parts; readonly Assets art; Material buttonSoftLight;
@@ -28,8 +28,24 @@ namespace PortableUi.Unity
                 var tint=widget.Image.GetComponent<PortableUiBrightness>();
                 if(gain!=1 && !tint)tint=widget.Image.gameObject.AddComponent<PortableUiBrightness>();
                 if(tint)tint.ThemeFactor=gain;
+                if(theme.ImageStretch(node.AssetKey))
+                {
+                    widget.Image.type=Image.Type.Simple;
+                    widget.Image.preserveAspect=false;
+                    return true;
+                }
             }
             if(node.Kind==UiNodeKind.Box && widget.Image) widget.Image.color=Color.clear;
+            if(node.Kind==UiNodeKind.Box && parts?.SurfaceShadow!=null)
+            {
+                bool hasShadow=theme.TrySurfaceShadow(node.StyleKey,out var blur,out var shadowColor);
+                Color shadowTint=hasShadow?(Color)new Color32(shadowColor[0],shadowColor[1],shadowColor[2],shadowColor[3]):Color.clear;
+                // Rectangular approximation of the composited surface silhouette.
+                Color surfaceTint=Color.clear;
+                if(theme.TrySurfaceColor(node.StyleKey,out var background))surfaceTint=new Color32(background[0],background[1],background[2],background[3]);
+                shadowTint.a*=surfaceTint.a;
+                parts.SurfaceShadow(root,blur,shadowTint,surfaceTint,C("window","background"));
+            }
             if(node.Kind==UiNodeKind.Box && theme.TrySurfaceColor(node.StyleKey,out var surface))
             {
                 widget.Image.sprite=null;

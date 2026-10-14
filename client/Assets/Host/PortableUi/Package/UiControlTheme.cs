@@ -33,6 +33,14 @@ namespace PortableUi.Package
                     if(string.IsNullOrEmpty(key) || !System.Text.RegularExpressions.Regex.IsMatch(key,"^[a-z0-9-]{1,64}$") || !keys.Add(key) ||
                         !(surface["color"] is JArray rgba) || rgba.Count!=4) throw new ArgumentException("Theme surface bounds.");
                     foreach(var channel in rgba) if(channel.Type!=JTokenType.Integer || (int)channel<0 || (int)channel>255) throw new ArgumentException("Theme surface bounds.");
+                    if(surface["shadow"]!=null)
+                    {
+                        var shadow=surface["shadow"] as JObject;
+                        if(shadow==null || (shadow["blur"]?.Type!=JTokenType.Float && shadow["blur"]?.Type!=JTokenType.Integer) ||
+                            (float)shadow["blur"]<0 || (float)shadow["blur"]>32 || !(shadow["color"] is JArray tint) || tint.Count!=4)
+                            throw new ArgumentException("Theme surface shadow bounds.");
+                        foreach(var channel in tint)if(channel.Type!=JTokenType.Integer || (int)channel<0 || (int)channel>255)throw new ArgumentException("Theme surface shadow bounds.");
+                    }
                 }
             }
         }
@@ -94,6 +102,14 @@ namespace PortableUi.Package
         }
         public float ImageBrightness(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["brightness"]??1;return 1;}
+        public bool TrySurfaceShadow(string key,out float blur,out byte[] color)
+        {
+            if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)if((string)surface["key"]==key && surface["shadow"] is JObject shadow)
+            {blur=(float)shadow["blur"];var rgba=(JArray)shadow["color"];color=new[]{(byte)rgba[0],(byte)rgba[1],(byte)rgba[2],(byte)rgba[3]};return true;}
+            blur=0;color=null;return false;
+        }
+        public bool ImageStretch(string key)
+        {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool?)asset["stretch"]??false;return false;}
         public bool ImageAlphaAware(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool)asset["alphaAware"];return false;}
         public float TextNumber(string key,string property) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown text style."); }
@@ -111,6 +127,7 @@ namespace PortableUi.Package
                 if(string.IsNullOrEmpty(path)||System.IO.Path.IsPathRooted(path)||path.Contains("..")||path.Contains("\\")||string.IsNullOrEmpty(key)||key.IndexOfAny(new[]{'/','\\','.'})>=0)throw new ArgumentException("Invalid theme asset path.");
                 var rect=(JArray)item["rect"];
                 float brightness=(float?)item["brightness"]??1;
+                if(item["stretch"]!=null && item["stretch"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme image stretch must be boolean.");
                 if(float.IsNaN(brightness)||float.IsInfinity(brightness)||brightness<0||brightness>2)throw new ArgumentException("Theme image brightness bounds.");
                 string imageKey = item["image"] == null ? key : (string)item["image"];
                 if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z0-9-]{1,64}$") ||
