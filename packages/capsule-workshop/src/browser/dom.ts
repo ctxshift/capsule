@@ -329,6 +329,16 @@ export class DomTarget {
     return element;
   }
   apply(nodes: ReadonlyMap<bigint, UiNode>) {
+    const focusPath: bigint[] = [];
+    for (
+      let element = this.stage.ownerDocument
+        .activeElement as HTMLElement | null;
+      element && element !== this.stage;
+      element = element.parentElement
+    ) {
+      const entry = [...this.elements].find(([, owned]) => owned === element);
+      if (entry) focusPath.push(entry[0]);
+    }
     const rectangles = layout(nodes, (style) =>
       this.theme.metrics(this.stage.ownerDocument, style),
     );
@@ -420,10 +430,35 @@ export class DomTarget {
     }
     const windows = [...nodes.values()].filter((node) => node.kind === 1);
     const fresh = windows.filter((node) => !oldWindows.has(node.id)).at(-1);
+    if (
+      !fresh &&
+      this.stage.ownerDocument.activeElement === this.stage.ownerDocument.body
+    ) {
+      const front = windows.at(-1);
+      const surviving = focusPath.find((id) => {
+        const candidate = nodes.get(id);
+        if (
+          !candidate ||
+          !(candidate.events & 32 || [10, 11, 12].includes(candidate.kind))
+        )
+          return false;
+        let withinFront = !front;
+        for (
+          let node: UiNode | undefined = candidate;
+          node;
+          node = nodes.get(node.parent)
+        ) {
+          if (!node.visible) return false;
+          if (node.id === front?.id) withinFront = true;
+        }
+        return withinFront;
+      });
+      if (surviving !== undefined) this.elements.get(surviving)?.focus();
+    }
     if (fresh)
       this.elements
         .get(fresh.id)!
-        .querySelector<HTMLElement>('button,input,select')
+        .querySelector<HTMLElement>('button,input,select,[tabindex="0"]')
         ?.focus();
     if (oldWindows.size && !windows.length) this.restoreFocus();
     else if (
@@ -432,7 +467,7 @@ export class DomTarget {
     )
       this.elements
         .get(windows.at(-1)!.id)!
-        .querySelector<HTMLElement>('button,input,select')
+        .querySelector<HTMLElement>('button,input,select,[tabindex="0"]')
         ?.focus();
   }
   dispose() {
