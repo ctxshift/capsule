@@ -78,6 +78,8 @@ namespace PortableUi
         double totalWorkMilliseconds;
         ulong totalFuel;
         ulong activationCallFuel, updateCallFuel, disposalCallFuel;
+        UiHostCallMetrics hostCalls;
+        bool hostCallsAvailable = true;
         double disposalMilliseconds;
         bool callFuelAvailable = true;
         long scheduledNotBefore;
@@ -164,11 +166,20 @@ namespace PortableUi
         { lock (gate) { count = jobs; milliseconds = totalWorkMilliseconds; fuel = totalFuel; } }
         public UiCallFuelMetrics ReadCallFuel()
         { lock (gate) return new UiCallFuelMetrics(activationCallFuel, updateCallFuel, disposalCallFuel, disposalMilliseconds, callFuelAvailable && jobs != 0); }
+        public UiHostCallMetrics ReadHostCalls(out bool available)
+        { lock (gate) { available = hostCallsAvailable && jobs != 0; return hostCalls; } }
+        static UiHostCallMetrics HostCalls(IUiGuest guest) => (guest as IUiHostCallDiagnostics)?.TotalHostCalls ?? default;
+        void RecordHostCalls(IUiGuest guest, UiHostCallMetrics before)
+        {
+            hostCallsAvailable &= (guest as IUiHostCallDiagnostics)?.HasHostCallMetrics ?? false;
+            hostCalls += HostCalls(guest) - before;
+        }
         static ulong CallFuel(IUiGuest guest) => (guest as IUiCallFuelDiagnostics)?.TotalCallFuel ?? 0;
-        void RecordWork(long start, IUiGuest guest, bool activation, ulong before = 0)
+        void RecordWork(long start, IUiGuest guest, bool activation, ulong before = 0, UiHostCallMetrics beforeHost = default)
         {
             lock (gate)
             {
+                RecordHostCalls(guest, beforeHost);
                 ++jobs; totalWorkMilliseconds += Milliseconds(Stopwatch.GetTimestamp() - start);
                 totalFuel += (guest as IUiFuelDiagnostics)?.LastFuel ?? 0;
                 callFuelAvailable &= (guest as IUiCallFuelDiagnostics)?.HasCallFuel ?? false;
@@ -383,6 +394,7 @@ namespace PortableUi
             if (input != null && input.Generation != generation) return;
             var start = Stopwatch.GetTimestamp();
             ulong before = CallFuel(active);
+            var beforeHost = HostCalls(active);
             activeExchange.Reset();
             string error = null;
             try
@@ -406,7 +418,7 @@ namespace PortableUi
                 }
             }
             catch (Exception failure) { error = failure.Message; }
-            RecordWork(start, active, false, before);
+            RecordWork(start, active, false, before, beforeHost);
             // Idle work has no publication/ack traffic. Counters remain available.
             if (error == null && activeExchange.Snapshot == null && activeExchange.Actions.Count == 0) return;
             if (!Publish(generation, false, activeExchange, error, start, input?.Enqueued ?? start, (active as IUiFuelDiagnostics)?.LastFuel ?? 0, active as IUiLayoutDiagnostics))
@@ -428,6 +440,7 @@ namespace PortableUi
         {
             if (guest == null) return;
             ulong before = CallFuel(guest);
+            var beforeHost = HostCalls(guest);
             long start = Stopwatch.GetTimestamp();
             if (exchange != null) exchange.Disposing = true;
             try { guest.Dispose(); }
@@ -437,6 +450,7 @@ namespace PortableUi
                 lock (gate)
                 {
                     callFuelAvailable &= (guest as IUiCallFuelDiagnostics)?.HasCallFuel ?? false;
+                    RecordHostCalls(guest, beforeHost);
                     disposalCallFuel = checked(disposalCallFuel + CallFuel(guest) - before);
                     disposalMilliseconds += Milliseconds(Stopwatch.GetTimestamp() - start);
                 }

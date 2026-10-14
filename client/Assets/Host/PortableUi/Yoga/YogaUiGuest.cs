@@ -4,7 +4,7 @@ namespace PortableUi.Yoga
 {
     // Opt-in worker-owned decorator. The transport remains responsible for final
     // main-thread acceptance and retires the guest if native presentation fails.
-    public sealed class YogaUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiSchedulingDiagnostics, IUiLayoutDiagnostics, IUiCommitTarget
+    public sealed class YogaUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiHostCallDiagnostics, IUiSchedulingDiagnostics, IUiLayoutDiagnostics, IUiCommitTarget
     {
         readonly IUiGuest inner;
         readonly IUiCommitTarget output;
@@ -29,6 +29,9 @@ namespace PortableUi.Yoga
         public ulong LastFuel => (inner as IUiFuelDiagnostics)?.LastFuel ?? 0;
         public ulong TotalCallFuel => (inner as IUiCallFuelDiagnostics)?.TotalCallFuel ?? 0;
         public bool HasCallFuel => (inner as IUiCallFuelDiagnostics)?.HasCallFuel ?? false;
+        public bool HasHostCallMetrics => (inner as IUiHostCallDiagnostics)?.HasHostCallMetrics ?? false;
+        public UiHostCallMetrics LastHostCalls => (inner as IUiHostCallDiagnostics)?.LastHostCalls ?? default;
+        public UiHostCallMetrics TotalHostCalls => (inner as IUiHostCallDiagnostics)?.TotalHostCalls ?? default;
         public bool SupportsScheduling => (inner as IUiSchedulingDiagnostics)?.SupportsScheduling ?? false;
         public long? NextWakeTimestamp => (inner as IUiSchedulingDiagnostics)?.NextWakeTimestamp;
         public bool Initialize(out string error) => inner.Initialize(out error);

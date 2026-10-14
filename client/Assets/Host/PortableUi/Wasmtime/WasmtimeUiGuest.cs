@@ -15,7 +15,7 @@ namespace PortableUi.Wasmtime
         void Destroy(IntPtr guest);
     }
     // Experimental native C ABI backend; no reflection-generated delegates or managed Wasmtime dependency.
-    public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiSchedulingDiagnostics
+    public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiHostCallDiagnostics, IUiSchedulingDiagnostics
     {
         public const ulong AddonExecutionFuel = 200000000;
         public const string QuickJsSha256 = "0975D550E2B8A9BA9CBBBEB6B5914157C793631218C222F8BDDF12EB70905835";
@@ -61,6 +61,17 @@ namespace PortableUi.Wasmtime
         }
         public ulong TotalCallFuel { get; private set; }
         public bool HasCallFuel => true;
+        public bool HasHostCallMetrics => true;
+        public UiHostCallMetrics LastHostCalls { get; private set; }
+        public UiHostCallMetrics TotalHostCalls { get; private set; }
+        readonly UiHostCallMetrics[] operationMetrics = new UiHostCallMetrics[7];
+        long copiedRead, copiedWritten;
+        public UiHostCallMetrics ReadHostCalls(UiHostOperation operation)
+        {
+            int index = (int)operation;
+            if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
+            return operationMetrics[index];
+        }
         public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null)
         {
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
@@ -104,49 +115,76 @@ namespace PortableUi.Wasmtime
             catch (Exception error)
             {
                 guest.callbackError = error.Message;
-                return -1;
+                return op <= 6 ? (int)UiHostResult.Internal : 29;
             }
         }
+        sealed class GuestMemoryException : Exception { public GuestMemoryException() : base("Guest memory bounds") { } }
         static IntPtr Address(IntPtr memory, ulong size, long pointer, int length, int max)
         {
             ulong offset = unchecked((uint)pointer);
-            if (length < 0 || length > max || offset + (ulong)length > size) throw new InvalidOperationException("Guest memory bounds");
+            if (length < 0 || length > max || offset > int.MaxValue || offset + (ulong)length > size) throw new GuestMemoryException();
             return IntPtr.Add(memory, checked((int)offset));
         }
         int Import(int op, long a, long b, long c, long d, IntPtr memory, ulong size)
         {
-            if (op == 0)
+            long started = Stopwatch.GetTimestamp();
+            copiedRead = copiedWritten = 0;
+            int result = op <= 6 ? (int)UiHostResult.Internal : 29; // WASI IO for internal failure.
+            try
+            {
+                result = terminal || disposed ? (op <= 6 ? (int)UiHostResult.Unavailable : 8) : ImportCore(op, a, b, c, d, memory, size);
+                return result;
+            }
+            catch (GuestMemoryException) { return result = op <= 6 ? (int)UiHostResult.InvalidArgument : 21; } // WASI FAULT.
+            catch (Exception error) { callbackError = error.Message; return result; }
+            finally
+            {
+                var metrics = new UiHostCallMetrics(1, (op <= 6 ? result < 0 : result != 0) ? 1 : 0,
+                    copiedRead, copiedWritten, Stopwatch.GetTimestamp() - started);
+                TotalHostCalls += metrics;
+                if (op >= 0 && op < operationMetrics.Length) operationMetrics[op] += metrics;
+            }
+        }
+        static int Result(UiResult result) => result.Success ? (int)UiHostResult.Success
+            : result.Error == UiError.QuotaExceeded ? (int)UiHostResult.QuotaExceeded : (int)UiHostResult.Rejected;
+        int ImportCore(int op, long a, long b, long c, long d, IntPtr memory, ulong size)
+        {
+            if (op == (int)UiHostOperation.Reserve)
             {
                 var output = Address(memory, size, a, 8, 8);
                 var result = Session.ReserveHandle(out var handle);
-                if (!result.Success) return -1;
-                Marshal.WriteInt64(output, unchecked((long)handle));
+                if (!result.Success) return Result(result);
+                Marshal.WriteInt64(output, unchecked((long)handle)); copiedWritten += 8;
                 return 0;
             }
-            if (op == 1)
+            if (op == (int)UiHostOperation.Submit)
             {
-                if (b < 0 || b > 65536) return -1;
+                if (b < 0 || b > UiHostBridgeContract.MaxSubmitBytes) return (int)UiHostResult.InvalidArgument;
                 var input = Address(memory, size, a, (int)b, 65536);
                 var bytes = new byte[(int)b];
-                Marshal.Copy(input, bytes, 0, bytes.Length);
+                Marshal.Copy(input, bytes, 0, bytes.Length); copiedRead += bytes.Length;
                 var submitted = Session.Submit(bytes, target);
                 if (!submitted.Success) callbackError = "Native UI submission rejected: " + submitted.Detail;
-                return submitted.Success ? 0 : -1;
+                return Result(submitted);
             }
-            if (op == 2)
+            if (op == (int)UiHostOperation.NextEvent)
             {
-                Address(memory, size, a, (int)b, 272);
+                if (b != UiHostBridgeContract.EventCapacity) return (int)UiHostResult.InvalidArgument;
+                Address(memory, size, a, (int)b, UiHostBridgeContract.EventCapacity);
                 var bytes = new byte[272];
                 var result = Session.WriteNextEvent(bytes, out int n);
-                if (!result.Success) return -1;
-                Marshal.Copy(bytes, 0, Address(memory, size, a, n, 272), n);
+                if (!result.Success) return Result(result);
+                Marshal.Copy(bytes, 0, Address(memory, size, a, n, 272), n); copiedWritten += n;
                 return n;
             }
-            if (op == 3)
+            if (op == (int)UiHostOperation.NextObservation)
             {
-                Address(memory, size, a, (int)b, 264);
+                if (b != UiHostBridgeContract.ObservationCapacity) return (int)UiHostResult.InvalidArgument;
+                Address(memory, size, a, (int)b, UiHostBridgeContract.ObservationCapacity);
+                if (observations == null) return (int)UiHostResult.Unavailable;
                 if (!observations.TryDequeue(out var topic, out var schema, out var payload)) return 0;
-                if (!grant.AllowsObservation(topic, schema) || payload == null || payload.Length > 256) return -1;
+                if (!grant.AllowsObservation(topic, schema)) return (int)UiHostResult.Rejected;
+                if (payload == null || payload.Length > UiHostBridgeContract.MaxPayloadBytes) return (int)UiHostResult.InvalidArgument;
                 var bytes = new byte[payload.Length + 8];
                 bytes[0] = (byte)topic;
                 bytes[1] = (byte)(topic >> 8);
@@ -155,18 +193,20 @@ namespace PortableUi.Wasmtime
                 bytes[4] = (byte)payload.Length;
                 bytes[5] = (byte)(payload.Length >> 8);
                 Buffer.BlockCopy(payload, 0, bytes, 8, payload.Length);
-                Marshal.Copy(bytes, 0, Address(memory, size, a, bytes.Length, 264), bytes.Length);
+                Marshal.Copy(bytes, 0, Address(memory, size, a, bytes.Length, 264), bytes.Length); copiedWritten += bytes.Length;
                 return bytes.Length;
             }
-            if (op == 4)
+            if (op == (int)UiHostOperation.RequestAction)
             {
-                if (b < 1 || b > 65535 || !grant.AllowsAction((ushort)b) || d < 0 || d > 256) return -1;
+                if (b < 1 || b > 65535 || d < 0 || d > UiHostBridgeContract.MaxPayloadBytes) return (int)UiHostResult.InvalidArgument;
+                if (!grant.AllowsAction((ushort)b)) return (int)UiHostResult.Rejected;
+                if (actions == null) return (int)UiHostResult.Unavailable;
                 var bytes = new byte[(int)d];
-                Marshal.Copy(Address(memory, size, c, bytes.Length, 256), bytes, 0, bytes.Length);
-                return Session.RequestAction(unchecked((ulong)a), (ushort)b, bytes, actions).Success ? 0 : -1;
+                Marshal.Copy(Address(memory, size, c, bytes.Length, 256), bytes, 0, bytes.Length); copiedRead += bytes.Length;
+                return Result(Session.RequestAction(unchecked((ulong)a), (ushort)b, bytes, actions));
             }
-            if (op == 5 || op == 6) return -1;
-            // This experimental component-fixture route has no package I/O grants.
+            // Package operations are deliberately unavailable in the current host profile.
+            if (op == (int)UiHostOperation.ReadData || op == (int)UiHostOperation.AcquireImage) return (int)UiHostResult.Unsupported;
             if (op == 7)
             {
                 Address(memory, size, a, 0, 0);
@@ -175,15 +215,15 @@ namespace PortableUi.Wasmtime
             }
             if (op == 8)
             {
-                Marshal.WriteInt32(Address(memory, size, a, 4, 4), 0);
-                Marshal.WriteInt32(Address(memory, size, b, 4, 4), 0);
+                Marshal.WriteInt32(Address(memory, size, a, 4, 4), 0); copiedWritten += 4;
+                Marshal.WriteInt32(Address(memory, size, b, 4, 4), 0); copiedWritten += 4;
                 return 0;
             }
             if (op == 9)
             {
                 if (a != 0 && a != 1) return 28;
                 ulong nanos = a == 0 ? unchecked((ulong)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()) * 1000000UL : unchecked((ulong)(Stopwatch.GetTimestamp() * (1000000000.0 / Stopwatch.Frequency)));
-                Marshal.WriteInt64(Address(memory, size, c, 8, 8), unchecked((long)nanos));
+                Marshal.WriteInt64(Address(memory, size, c, 8, 8), unchecked((long)nanos)); copiedWritten += 8;
                 return 0;
             }
             return 8;
@@ -197,9 +237,15 @@ namespace PortableUi.Wasmtime
                 error = "Guest is terminal or disposed";
                 return false;
             }
-            int code = invocationRunner == null
-                ? pui_call(native, name, a, b, nargs, results, fuel, out value)
-                : invocationRunner.Call(native, name, a, b, nargs, results, fuel, out value);
+            int code;
+            var beforeHostCalls = TotalHostCalls;
+            try
+            {
+                code = invocationRunner == null
+                    ? pui_call(native, name, a, b, nargs, results, fuel, out value)
+                    : invocationRunner.Call(native, name, a, b, nargs, results, fuel, out value);
+            }
+            finally { LastHostCalls = TotalHostCalls - beforeHostCalls; }
             LastFuel = invocationRunner == null ? pui_fuel(native) : invocationRunner.LastFuel;
             TotalCallFuel = checked(TotalCallFuel + LastFuel);
             if (code != 0 || callbackError != null)
