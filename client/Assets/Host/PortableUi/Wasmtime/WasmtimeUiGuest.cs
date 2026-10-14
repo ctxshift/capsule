@@ -26,7 +26,8 @@ namespace PortableUi.Wasmtime
         static bool bootstrapped;
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern int pui_bootstrap(byte[] bytes, int length);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_bootstrap_error();
-        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_create(HostCallback callback, IntPtr data);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_create_with_host_call_limit(HostCallback callback, IntPtr data, int limit);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern ulong pui_host_call_rejections(IntPtr guest);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern int pui_call(IntPtr guest, [MarshalAs(UnmanagedType.LPStr)] string name, int a, int b, int nargs, int results, ulong fuel, out int result);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_memory(IntPtr guest, out ulong size);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern ulong pui_fuel(IntPtr guest);
@@ -62,6 +63,7 @@ namespace PortableUi.Wasmtime
         public ulong TotalCallFuel { get; private set; }
         public bool HasCallFuel => true;
         public bool HasHostCallMetrics => true;
+        public int HostCallsPerInvocation { get; }
         public UiHostCallMetrics LastHostCalls { get; private set; }
         public UiHostCallMetrics TotalHostCalls { get; private set; }
         readonly UiHostCallMetrics[] operationMetrics = new UiHostCallMetrics[7];
@@ -72,8 +74,11 @@ namespace PortableUi.Wasmtime
             if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
             return operationMetrics[index];
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation)
         {
+            if (hostCallsPerInvocation != UiHostBridgeContract.MaxCallsPerInvocation && hostCallsPerInvocation != UiHostBridgeContract.ExtendedCallsPerInvocation)
+                throw new ArgumentOutOfRangeException(nameof(hostCallsPerInvocation));
+            HostCallsPerInvocation = hostCallsPerInvocation;
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
             using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != QuickJsSha256) throw new ArgumentException("Pinned carrier changed");
             this.sdk = (byte[])sdk.Clone();
@@ -94,7 +99,7 @@ namespace PortableUi.Wasmtime
                 }
             }
             self = GCHandle.Alloc(this);
-            native = pui_create(Callback, GCHandle.ToIntPtr(self));
+            native = pui_create_with_host_call_limit(Callback, GCHandle.ToIntPtr(self), hostCallsPerInvocation);
             if (native == IntPtr.Zero)
             {
                 self.Free();
@@ -245,7 +250,12 @@ namespace PortableUi.Wasmtime
                     ? pui_call(native, name, a, b, nargs, results, fuel, out value)
                     : invocationRunner.Call(native, name, a, b, nargs, results, fuel, out value);
             }
-            finally { LastHostCalls = TotalHostCalls - beforeHostCalls; }
+            finally
+            {
+                long rejected = checked((long)pui_host_call_rejections(native));
+                TotalHostCalls += new UiHostCallMetrics(0, 0, 0, 0, 0, rejected - TotalHostCalls.QuotaRejections);
+                LastHostCalls = TotalHostCalls - beforeHostCalls;
+            }
             LastFuel = invocationRunner == null ? pui_fuel(native) : invocationRunner.LastFuel;
             TotalCallFuel = checked(TotalCallFuel + LastFuel);
             if (code != 0 || callbackError != null)

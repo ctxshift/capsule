@@ -20,6 +20,7 @@ namespace PortableUi
     public static class UiHostBridgeContract
     {
         public const int MaxCallsPerInvocation = 64;
+        public const int ExtendedCallsPerInvocation = 256;
         public const int MaxSubmitBytes = 65536;
         public const int EventCapacity = 272;
         public const int ObservationCapacity = 264;
@@ -27,19 +28,20 @@ namespace PortableUi
     }
 
     // Actual managed callback work, including failures, but excluding the C bridge's
-    // pre-dispatch quota trap. Bytes count only completed copies across guest memory.
+    // pre-dispatch quota trap, recorded separately in QuotaRejections. Bytes count
+    // only completed copies across guest memory. Per-operation metrics exclude traps.
     public readonly struct UiHostCallMetrics
     {
-        public readonly long Calls, Failures, BytesRead, BytesWritten, ElapsedTicks;
+        public readonly long Calls, Failures, BytesRead, BytesWritten, ElapsedTicks, QuotaRejections;
         public double Milliseconds => ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-        public UiHostCallMetrics(long calls, long failures, long read, long written, long ticks)
-        { Calls = calls; Failures = failures; BytesRead = read; BytesWritten = written; ElapsedTicks = ticks; }
+        public UiHostCallMetrics(long calls, long failures, long read, long written, long ticks, long quotaRejections = 0)
+        { Calls = calls; Failures = failures; BytesRead = read; BytesWritten = written; ElapsedTicks = ticks; QuotaRejections = quotaRejections; }
         public static UiHostCallMetrics operator +(UiHostCallMetrics a, UiHostCallMetrics b) =>
             new UiHostCallMetrics(a.Calls + b.Calls, a.Failures + b.Failures,
-                a.BytesRead + b.BytesRead, a.BytesWritten + b.BytesWritten, a.ElapsedTicks + b.ElapsedTicks);
+                a.BytesRead + b.BytesRead, a.BytesWritten + b.BytesWritten, a.ElapsedTicks + b.ElapsedTicks, a.QuotaRejections + b.QuotaRejections);
         public static UiHostCallMetrics operator -(UiHostCallMetrics a, UiHostCallMetrics b) =>
             new UiHostCallMetrics(a.Calls - b.Calls, a.Failures - b.Failures,
-                a.BytesRead - b.BytesRead, a.BytesWritten - b.BytesWritten, a.ElapsedTicks - b.ElapsedTicks);
+                a.BytesRead - b.BytesRead, a.BytesWritten - b.BytesWritten, a.ElapsedTicks - b.ElapsedTicks, a.QuotaRejections - b.QuotaRejections);
     }
 
     public interface IUiHostCallDiagnostics
