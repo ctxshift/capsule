@@ -259,7 +259,7 @@ export class DomTarget {
         width: `${width}px`,
         height: `${height}px`,
         display: node.visible ? 'block' : 'none',
-        filter: `brightness(${node.brightness / 10000})`,
+        filter: `brightness(${node.brightness / 10000})${element.dataset.themeFilter ?? ''}`,
       });
       if (node.kind === 3) element.textContent = node.text;
       if (node.kind === 11) {

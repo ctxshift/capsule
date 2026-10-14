@@ -13,6 +13,8 @@ export interface ThemeAsset {
   edge: number;
   alphaAware: boolean;
   brightness?: number;
+  /** Fill the image rectangle without preserving aspect ratio; defaults to false. */
+  stretch?: boolean;
 }
 export interface UiTheme {
   schemaVersion: 1;
@@ -89,7 +91,11 @@ export interface UiTheme {
     color: Rgba;
   }[];
   assets: ThemeAsset[];
-  surfaces?: { key: string; color: Rgba }[];
+  surfaces?: {
+    key: string;
+    color: Rgba;
+    shadow?: { blur: number; color: Rgba };
+  }[];
 }
 export interface FontMetrics {
   advances: { code: number; value: number }[];
@@ -166,6 +172,19 @@ export function parseTheme(value: unknown): UiTheme {
     )
       throw Error('Theme surface bounds');
     surfaces.add(surface.key);
+    if (
+      surface.shadow !== undefined &&
+      (!surface.shadow ||
+        !Number.isFinite(surface.shadow.blur) ||
+        surface.shadow.blur < 0 ||
+        surface.shadow.blur > 32 ||
+        !Array.isArray(surface.shadow.color) ||
+        surface.shadow.color.length !== 4 ||
+        !surface.shadow.color.every(
+          (n) => Number.isInteger(n) && n >= 0 && n <= 255,
+        ))
+    )
+      throw Error('Theme surface shadow bounds');
   }
   const images = new Map<string, string>();
   for (const asset of theme.assets) {
@@ -178,6 +197,8 @@ export function parseTheme(value: unknown): UiTheme {
       (asset.brightness ?? 1) > 2
     )
       throw Error('Theme image brightness bounds');
+    if (asset.stretch !== undefined && typeof asset.stretch !== 'boolean')
+      throw Error('Theme image stretch must be boolean');
     themePath(asset.path);
     const image = asset.image ?? asset.key;
     if (!/^[a-z0-9-]{1,64}$/.test(image)) throw Error('Theme image identity');

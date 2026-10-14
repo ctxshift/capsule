@@ -37,7 +37,12 @@ export function createBrowserTheme(
     const previous = renderedImages.get(element);
     if (previous?.key === node.asset) return;
     const region = asset(node.asset);
-    const svg = image(element.ownerDocument, region, undefined, false);
+    const svg = image(
+      element.ownerDocument,
+      region,
+      undefined,
+      definition(node.asset).stretch ?? false,
+    );
     svg.style.filter = `brightness(${definition(node.asset).brightness ?? 1})`;
     if (previous) previous.svg.replaceWith(svg);
     else element.append(svg);
@@ -79,11 +84,15 @@ export function createBrowserTheme(
     images: [...new Set([...art.values()].map((image) => image.url))],
     update(element, node) {
       updateImage(element, node);
-      if (node.kind === 8)
-        element.style.backgroundColor = color(
-          theme.surfaces?.find((surface) => surface.key === node.style)
-            ?.color ?? [0, 0, 0, 0],
+      if (node.kind === 8) {
+        const surface = theme.surfaces?.find(
+          (surface) => surface.key === node.style,
         );
+        element.style.backgroundColor = color(surface?.color ?? [0, 0, 0, 0]);
+        element.dataset.themeFilter = surface?.shadow
+          ? ` drop-shadow(0 0 ${surface.shadow.blur / 2}px ${color(surface.shadow.color)})`
+          : '';
+      }
     },
     metrics(_document, style) {
       const text = theme.text.find(
