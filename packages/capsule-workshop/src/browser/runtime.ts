@@ -78,7 +78,7 @@ export class BrowserGeneration {
       requestAction: (handle, capability, payload) => {
         if (this.retired) return;
         const node = this.nodes.get(handle);
-        if (!node || !(node.events & 1))
+        if (!node || !(node.events & (1 | 64)))
           throw Error('Mock action source is not a live activation');
         if (
           payload.length > 256 ||
@@ -87,8 +87,11 @@ export class BrowserGeneration {
           capability > 65535
         )
           throw Error('Mock action bounds');
-        if (this.active) this.game.request(capability, payload);
-        else {
+        if (this.active) {
+          this.game.request(capability, payload);
+          // A host may publish a pending/result observation while handling intent.
+          this.enqueue(new Uint8Array());
+        } else {
           if (this.stagedRequests.length >= 128)
             throw Error('Mock candidate action quota');
           this.stagedRequests.push({ capability, payload: payload.slice() });

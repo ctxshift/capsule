@@ -2,11 +2,12 @@ import type { ReactNode } from 'react';
 export interface ActionEvent {
   request(capability: number, payload?: Uint8Array): void;
 }
-export interface PointerEvent {
+export interface PointerEvent extends ActionEvent {
   phase: 'down' | 'move' | 'up' | 'cancel';
   pointerId: number;
   x: number;
   y: number;
+  /** DOM button numbering: primary 0, auxiliary 1, secondary 2. */
   button: number;
   modifiers: number;
 }

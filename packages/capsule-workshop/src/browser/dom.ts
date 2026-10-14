@@ -91,7 +91,7 @@ export class DomTarget {
     const y =
       ((event.clientY - bounds.top) * this.stage.offsetHeight) / bounds.height;
     if (phase === 1) {
-      if (event.button !== 0) return;
+      if (event.button !== 0 && event.button !== 2) return;
       this.capture = {
         id: node.id,
         pointer: event.pointerId,
@@ -105,7 +105,7 @@ export class DomTarget {
     const bytes = input(node.id, 64, [
       1,
       phase,
-      0,
+      this.capture?.button ?? event.button,
       this.modifiers(event),
       ...new Array<number>(12).fill(0),
     ]);
@@ -165,6 +165,13 @@ export class DomTarget {
     });
     this.theme.decorate(element, node, () => this.send(input(node.id, 2)));
     const options = { signal: this.subscriptions.signal };
+    element.addEventListener(
+      'contextmenu',
+      (event) => {
+        if ((this.nodes.get(node.id)?.events ?? 0) & 64) event.preventDefault();
+      },
+      options,
+    );
     for (const [event, hovered] of [
       ['pointerenter', 1],
       ['pointerleave', 0],
