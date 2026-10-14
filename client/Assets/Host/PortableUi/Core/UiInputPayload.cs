@@ -3,7 +3,7 @@ using System;
 namespace PortableUi
 {
     public enum UiPointerPhase : byte { Down = 1, Move = 2, Up = 3, Cancel = 4 }
-    public enum UiInputKey : byte { Escape = 1, Tab = 2, Enter = 3, Space = 4, Left = 5, Right = 6, Up = 7, Down = 8, E = 9, I = 10, C = 11, Home = 12, End = 13, PageUp = 14, PageDown = 15 }
+    public enum UiInputKey : byte { Escape = 1, Tab = 2, Enter = 3, Space = 4, Left = 5, Right = 6, Up = 7, Down = 8, E = 9, I = 10, C = 11, Home = 12, End = 13, PageUp = 14, PageDown = 15, J = 16, K = 17 }
 
     // Explicit version-one host input records. Coordinates use the same 1/64
     // design-unit representation as layout. No platform key names cross the ABI.
@@ -60,7 +60,7 @@ namespace PortableUi
                     Read(bytes, 8) >= -8192 * 64 && Read(bytes, 8) <= 8192 * 64 &&
                     Read(bytes, 12) >= -8192 * 64 && Read(bytes, 12) <= 8192 * 64;
             if (kind == UiEventMask.Key)
-                return bytes.Length == 5 && bytes[0] == Version && bytes[1] >= 1 && bytes[1] <= 15 &&
+                return bytes.Length == 5 && bytes[0] == Version && bytes[1] >= 1 && bytes[1] <= 17 &&
                     bytes[2] <= 1 && bytes[3] <= 15 && bytes[4] <= 1;
             if (kind == UiEventMask.ValueChange)
                 return bytes.Length == 3 && bytes[0] == Version && (bytes[1] | bytes[2] << 8) <= 10000;
