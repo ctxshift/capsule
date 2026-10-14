@@ -12,7 +12,22 @@ export interface PointerEvent extends ActionEvent {
   modifiers: number;
 }
 export interface KeyEvent {
-  key: 'Escape' | 'Tab' | 'Enter' | 'Space' | 'Left' | 'Right' | 'Up' | 'Down';
+  key:
+    | 'Escape'
+    | 'Tab'
+    | 'Enter'
+    | 'Space'
+    | 'Left'
+    | 'Right'
+    | 'Up'
+    | 'Down'
+    | 'E'
+    | 'I'
+    | 'C'
+    | 'Home'
+    | 'End'
+    | 'PageUp'
+    | 'PageDown';
   down: boolean;
   modifiers: number;
   repeat: boolean;

@@ -40,6 +40,7 @@ export class BrowserGeneration {
     private game: BrowserGame,
     restoreFocus: () => void,
     private failure: (error: Error) => void,
+    private layoutNodeLimit = 128,
   ) {
     this.frame = document.createElement('iframe');
     this.frame.title = 'Native-compatible addon';
@@ -66,7 +67,7 @@ export class BrowserGeneration {
       reserve: () => ++this.reserved,
       submit: (bytes) => {
         if (!this.retired) {
-          const next = applyPacket(this.nodes, bytes);
+          const next = applyPacket(this.nodes, bytes, this.layoutNodeLimit);
           this.target.apply(next);
           this.nodes = next;
         }
@@ -106,12 +107,14 @@ export class BrowserGeneration {
     game: BrowserGame,
     restoreFocus: () => void,
     failure: (error: Error) => void,
+    layoutNodeLimit = 128,
   ) {
     const generation = new BrowserGeneration(
       theme,
       game,
       restoreFocus,
       failure,
+      layoutNodeLimit,
     );
     try {
       for (const font of theme.fonts)

@@ -21,17 +21,22 @@ export function scrollKeyOffset(
   contentHeight: number,
   height: number,
 ) {
-  if (
-    !event.down ||
-    event.modifiers ||
-    (event.key !== 'Up' && event.key !== 'Down')
-  )
-    return offset;
-  return scrollOffset(
-    offset + (event.key === 'Up' ? -64 : 64),
-    contentHeight,
-    height,
-  );
+  if (!event.down || event.modifiers) return offset;
+  const next =
+    event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? contentHeight
+        : event.key === 'PageUp'
+          ? offset - height
+          : event.key === 'PageDown'
+            ? offset + height
+            : event.key === 'Up'
+              ? offset - 64
+              : event.key === 'Down'
+                ? offset + 64
+                : offset;
+  return scrollOffset(next, contentHeight, height);
 }
 
 export interface ScrollListProps {

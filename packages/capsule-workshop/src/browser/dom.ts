@@ -57,7 +57,7 @@ export class DomTarget {
       const controls = Array.from(
         this.elements
           .get(front.id)!
-          .querySelectorAll<HTMLElement>('button,input,select'),
+          .querySelectorAll<HTMLElement>('button,input,select,[tabindex="0"]'),
       );
       const index = controls.indexOf(
         this.stage.ownerDocument.activeElement as HTMLElement,
@@ -66,7 +66,17 @@ export class DomTarget {
         (index + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
       controls[next]?.focus();
       event.preventDefault();
-    } else if (['Escape', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
+    } else if (
+      [
+        'Escape',
+        'ArrowUp',
+        'ArrowDown',
+        'Home',
+        'End',
+        'PageUp',
+        'PageDown',
+      ].includes(event.key)
+    ) {
       const active = this.stage.ownerDocument.activeElement;
       if (
         event.key !== 'Escape' &&
@@ -78,7 +88,17 @@ export class DomTarget {
       this.send(
         input(root.id, 128, [
           1,
-          event.key === 'Escape' ? 1 : event.key === 'ArrowUp' ? 7 : 8,
+          (
+            {
+              Escape: 1,
+              ArrowUp: 7,
+              ArrowDown: 8,
+              Home: 12,
+              End: 13,
+              PageUp: 14,
+              PageDown: 15,
+            } as Record<string, number>
+          )[event.key],
           1,
           this.modifiers(event),
           event.repeat ? 1 : 0,
@@ -165,13 +185,21 @@ export class DomTarget {
       padding: '0',
       margin: '0',
       pointerEvents:
-        (node.kind === 8 && !(node.events & (4 | 64 | 512))) ||
+        (node.kind === 8 && node.events === 0) ||
         (node.kind === 4 && node.events === 0)
           ? 'none'
           : 'auto',
     });
     this.theme.decorate(element, node, () => this.send(input(node.id, 2)));
     const options = { signal: this.subscriptions.signal };
+    element.addEventListener(
+      'focus',
+      () => {
+        if ((this.nodes.get(node.id)?.events ?? 0) & 32)
+          this.send(input(node.id, 32));
+      },
+      options,
+    );
     element.addEventListener(
       'wheel',
       (rawEvent) => {
@@ -234,10 +262,34 @@ export class DomTarget {
         },
         options,
       );
-    if (node.kind === 10)
+    if (node.kind === 10 || node.kind === 8 || node.kind === 9)
       element.addEventListener(
         'click',
-        () => this.send(input(node.id, 1)),
+        (event) => {
+          if (!((this.nodes.get(node.id)?.events ?? 0) & 1)) return;
+          event.stopPropagation();
+          this.send(input(node.id, 1));
+        },
+        options,
+      );
+    if (node.kind === 8 || node.kind === 9)
+      element.addEventListener(
+        'keydown',
+        (event) => {
+          if (
+            event.target !== element ||
+            !((this.nodes.get(node.id)?.events ?? 0) & 1)
+          )
+            return;
+          if (
+            (event as KeyboardEvent).key !== 'Enter' &&
+            (event as KeyboardEvent).key !== ' '
+          )
+            return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (!(event as KeyboardEvent).repeat) this.send(input(node.id, 1));
+        },
         options,
       );
     element.addEventListener(
@@ -302,8 +354,10 @@ export class DomTarget {
       this.theme.update?.(element, node);
       this.elements.set(node.id, element);
       element.dataset.style = node.style;
+      if (node.kind === 8 || node.kind === 9)
+        element.tabIndex = node.events & 32 ? 0 : -1;
       element.style.pointerEvents =
-        (node.kind === 8 && !(node.events & (4 | 64 | 512))) ||
+        (node.kind === 8 && node.events === 0) ||
         (node.kind === 4 && node.events === 0)
           ? 'none'
           : 'auto';

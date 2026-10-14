@@ -95,6 +95,7 @@ class Reader {
 export function applyPacket(
   previous: ReadonlyMap<bigint, UiNode>,
   bytes: Uint8Array,
+  maxNodes = 128,
 ): Map<bigint, UiNode> {
   if (bytes.length < 16 || bytes.length > 65536)
     throw Error('Packet byte quota');
@@ -187,7 +188,12 @@ export function applyPacket(
     }
     if (body.remaining) throw Error('Trailing command bytes');
   }
-  if (reader.remaining || next.size > 128) throw Error('Packet/node quota');
+  if (
+    ![128, 256].includes(maxNodes) ||
+    reader.remaining ||
+    next.size > maxNodes
+  )
+    throw Error('Packet/node quota');
   for (const node of next.values()) {
     if (node.value > 10000 || (node.events & ~1023) !== 0)
       throw Error('UI value/event bounds');
