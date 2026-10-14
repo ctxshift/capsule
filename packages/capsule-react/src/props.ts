@@ -11,7 +11,7 @@ export interface PointerEvent extends ActionEvent {
   button: number;
   modifiers: number;
 }
-export interface KeyEvent {
+export interface KeyEvent extends ActionEvent {
   key:
     | 'Escape'
     | 'Tab'
@@ -68,7 +68,7 @@ export interface Props {
   step?: number;
   brightness?: number;
   onActivate?: (event: ActionEvent) => void;
-  onClose?: () => void;
+  onClose?: (event: ActionEvent) => void;
   onHover?: () => void;
   onHoverChange?: (hovered: boolean) => void;
   onPointer?: (event: PointerEvent) => void;

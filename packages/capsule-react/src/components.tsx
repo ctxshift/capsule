@@ -7,6 +7,7 @@ import {
   Text,
   Window as NativeWindow,
   type PointerEvent,
+  type ActionEvent,
 } from './index';
 
 export interface ComponentTheme {
@@ -126,7 +127,7 @@ export function createComponents(theme: ComponentTheme) {
     viewport: { width: number; height: number };
     onMove: (x: number, y: number) => void;
     onFocus: () => void;
-    onClose: () => void;
+    onClose: (event: ActionEvent) => void;
     children: ReactNode;
   }) {
     const drag = useRef<{

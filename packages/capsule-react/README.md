@@ -21,6 +21,15 @@ pixel, line and page deltas. Events target the nearest subscribed ancestor and
 do not move keyboard focus. Hosts bound each axis to ±8192 units. Compose scroll
 state and clipped content in the addon; wheel input itself grants no game action.
 
+Activation, pointer, close and key callbacks receive an action context with
+`request(capability, payload?)`. Requests retain the originating widget handle;
+the host still validates capabilities, generation, visibility and game-specific
+preconditions. This permits guarded Back/close/Escape actions without routing
+through a hidden activation control. Existing callbacks that ignore their event
+argument continue to work. Retired widget callbacks cannot submit new requests
+from queued input. This does not grant capabilities or route gameplay keys while
+a native text field owns focus.
+
 Exports include TypeScript source as the authoritative development types. Run
 `bun run declarations` here to emit declaration files from the implementation;
 generated `dist/` output is ignored. The current addon compiler bundles the source
