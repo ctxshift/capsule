@@ -3,7 +3,7 @@ import { readFile, stat, lstat } from 'node:fs/promises';
 import { resolve, dirname, relative, isAbsolute } from 'node:path';
 import { createHash } from 'node:crypto';
 import { compiler } from './compiler.mjs';
-import { parseTheme, scopedTheme, themePath } from './theme';
+import { parseTheme, scopedTheme, themePath, type ThemeLimits } from './theme';
 import { capsuleSourceRoot } from './sdk-paths.mjs';
 
 export interface WorkshopOptions {
@@ -16,6 +16,8 @@ export interface WorkshopOptions {
   runtimeStatus?: string;
   port?: number;
   watchRoots?: string[];
+  themeLimits?: Readonly<ThemeLimits>;
+  maxDeclarations?: number;
 }
 export async function startWorkshop(options: WorkshopOptions) {
   const source = resolve(options.source);
@@ -27,6 +29,7 @@ export async function startWorkshop(options: WorkshopOptions) {
     ...(options.watchRoots ?? []),
   ];
   const worker = compiler({
+    maxDeclarations: options.maxDeclarations,
     source,
     output,
     runtimeStatus,
@@ -57,7 +60,10 @@ export async function startWorkshop(options: WorkshopOptions) {
       do {
         requested = false;
         const themeFile = resolve(options.themeFile);
-        let theme = parseTheme(JSON.parse(await readFile(themeFile, 'utf8')));
+        let theme = parseTheme(
+          JSON.parse(await readFile(themeFile, 'utf8')),
+          options.themeLimits,
+        );
         const providerRoot = dirname(themeFile);
         const provider = JSON.parse(
           await readFile(resolve(providerRoot, 'addon.json'), 'utf8'),
@@ -121,6 +127,7 @@ export async function startWorkshop(options: WorkshopOptions) {
                   'utf8',
                 ),
               ),
+              options.themeLimits,
             );
           const bundle = await readFile(resolve(output, 'bundle.js'), 'utf8');
           const sdk = await readFile(resolve(options.sdkFile), 'utf8');

@@ -102,6 +102,7 @@ export function createComponents(theme: ComponentTheme) {
   }
   function Window({
     title,
+    titleStyle,
     width,
     height,
     position,
@@ -113,6 +114,7 @@ export function createComponents(theme: ComponentTheme) {
     children,
   }: {
     title: string;
+    titleStyle?: string;
     width: number;
     height?: number;
     position: { x: number; y: number };
@@ -169,6 +171,7 @@ export function createComponents(theme: ComponentTheme) {
         width={width}
         height={height}
         title={title}
+        style={titleStyle}
         paddingLeft={theme.windowInset}
         paddingRight={theme.windowInset}
         paddingTop={theme.windowContentTop}

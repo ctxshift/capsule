@@ -38,7 +38,7 @@ const names = [
 /**
  * @param {{source: string, output: string, assets?: string | null,
  * runtimeStatus?: string | null, beforePublish?: (() => Promise<unknown>) | null,
- * watchRoots?: string[], projectRoot?: string, manifest?: string}} options
+ * watchRoots?: string[], projectRoot?: string, manifest?: string, maxDeclarations?: number}} options
  */
 export function compiler({
   source,
@@ -49,7 +49,14 @@ export function compiler({
   watchRoots = [],
   projectRoot,
   manifest,
+  maxDeclarations = 30,
 }) {
+  if (
+    !Number.isInteger(maxDeclarations) ||
+    maxDeclarations < 1 ||
+    maxDeclarations > 64
+  )
+    throw Error('Host manifest profile bounds');
   source = resolve(source);
   output = resolve(output);
   const root = projectRoot ? resolve(projectRoot) : dirname(source),
@@ -315,7 +322,7 @@ export function compiler({
         : assets
           ? JSON.parse(await fs.readFile(assets, 'utf8'))
           : [];
-      if (!Array.isArray(declarations) || declarations.length > 30)
+      if (!Array.isArray(declarations) || declarations.length > maxDeclarations)
         throw Error('Invalid asset declaration count');
       await fs.mkdir(stage);
       await fs.writeFile(join(stage, 'bundle.js'), bundle.contents);

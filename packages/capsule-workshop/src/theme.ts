@@ -13,6 +13,7 @@ export interface ThemeAsset {
   edge: number;
   alphaAware: boolean;
   brightness?: number;
+  opacity?: number;
   /** Fill the image rectangle without preserving aspect ratio; defaults to false. */
   stretch?: boolean;
 }
@@ -87,6 +88,7 @@ export interface UiTheme {
     key: string;
     size: number;
     lineHeight: number;
+    weight?: 400 | 700;
     wrap: boolean;
     color: Rgba;
   }[];
@@ -111,7 +113,27 @@ export function themePath(value: string) {
   return value;
 }
 // Trusted provider schemas remain bounded; addon overrides cannot replace provider identity.
-export function parseTheme(value: unknown): UiTheme {
+export interface ThemeLimits {
+  assetRecipes: number;
+  textStyles: number;
+}
+export const defaultThemeLimits: Readonly<ThemeLimits> = Object.freeze({
+  assetRecipes: 30,
+  textStyles: 16,
+});
+export function parseTheme(
+  value: unknown,
+  limits: Readonly<ThemeLimits> = defaultThemeLimits,
+): UiTheme {
+  if (
+    !Number.isInteger(limits.assetRecipes) ||
+    limits.assetRecipes < 1 ||
+    limits.assetRecipes > 64 ||
+    !Number.isInteger(limits.textStyles) ||
+    limits.textStyles < 1 ||
+    limits.textStyles > 32
+  )
+    throw Error('Host theme profile bounds');
   if (!value || typeof value !== 'object') throw Error('Missing theme');
   const theme = value as UiTheme;
   if (theme.schemaVersion !== 1 || !/^[a-z0-9.-]{1,64}$/.test(theme.id))
@@ -154,9 +176,9 @@ export function parseTheme(value: unknown): UiTheme {
   if (
     !Array.isArray(theme.assets) ||
     !theme.assets.length ||
-    theme.assets.length > 30 ||
+    theme.assets.length > limits.assetRecipes ||
     !Array.isArray(theme.text) ||
-    theme.text.length > 16
+    theme.text.length > limits.textStyles
   )
     throw Error('Theme collection bounds');
   const keys = new Set<string>();
@@ -188,6 +210,12 @@ export function parseTheme(value: unknown): UiTheme {
   }
   const images = new Map<string, string>();
   for (const asset of theme.assets) {
+    if (
+      !Number.isFinite(asset.opacity ?? 1) ||
+      (asset.opacity ?? 1) < 0 ||
+      (asset.opacity ?? 1) > 1
+    )
+      throw Error('Theme image opacity bounds');
     if (!/^[a-z0-9-]{1,64}$/.test(asset.key) || keys.has(asset.key))
       throw Error('Theme asset identity');
     keys.add(asset.key);
@@ -246,6 +274,9 @@ export function parseTheme(value: unknown): UiTheme {
       text.lineHeight < text.size ||
       text.lineHeight > 256 ||
       typeof text.wrap !== 'boolean' ||
+      (text.weight !== undefined &&
+        text.weight !== 400 &&
+        text.weight !== 700) ||
       text.color.length !== 4 ||
       text.color.some((n) => !Number.isInteger(n) || n < 0 || n > 255)
     )
@@ -253,8 +284,12 @@ export function parseTheme(value: unknown): UiTheme {
   return JSON.parse(JSON.stringify(theme)) as UiTheme;
 }
 
-export function scopedTheme(provider: UiTheme, overrides: unknown): UiTheme {
-  const result = parseTheme(provider);
+export function scopedTheme(
+  provider: UiTheme,
+  overrides: unknown,
+  limits: Readonly<ThemeLimits> = defaultThemeLimits,
+): UiTheme {
+  const result = parseTheme(provider, limits);
   if (!overrides || typeof overrides !== 'object' || Array.isArray(overrides))
     throw Error('Invalid scoped theme');
   const record = result as unknown as Record<string, Record<string, unknown>>;
@@ -288,5 +323,5 @@ export function scopedTheme(provider: UiTheme, overrides: unknown): UiTheme {
       record[group][key] = value;
     }
   }
-  return parseTheme(result);
+  return parseTheme(result, limits);
 }

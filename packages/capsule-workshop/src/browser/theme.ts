@@ -44,6 +44,7 @@ export function createBrowserTheme(
       definition(node.asset).stretch ?? false,
     );
     svg.style.filter = `brightness(${definition(node.asset).brightness ?? 1})`;
+    svg.style.opacity = String(definition(node.asset).opacity ?? 1);
     if (previous) previous.svg.replaceWith(svg);
     else element.append(svg);
     renderedImages.set(element, { key: node.asset, svg });
@@ -62,7 +63,7 @@ export function createBrowserTheme(
   html,body {margin:0;width:1440px;height:900px;color:${color(b.foreground)};font:${theme.font.sampleSize}px PortableThemeFont;background:transparent;}
   * {box-sizing:border-box;} button,input,select {font:inherit;color:inherit;} button {border:0;cursor:pointer;}
   [data-kind="3"][data-style=""] {font-size:${theme.font.sampleSize}px;line-height:${theme.text.find((text) => text.key === c.buttonLabel)!.lineHeight}px;white-space:nowrap;pointer-events:none!important;}
-  ${theme.text.map((text) => `[data-style="${text.key}"] {font-size:${text.size}px;line-height:${text.lineHeight}px;white-space:${text.wrap ? 'normal' : 'nowrap'};pointer-events:none!important;color:${color(text.color)};}`).join('\n')}
+  ${theme.text.map((text) => `[data-kind="3"][data-style="${text.key}"] {font-weight:${text.weight ?? 400};font-size:${text.size}px;line-height:${text.lineHeight}px;white-space:${text.wrap ? 'normal' : 'nowrap'};pointer-events:none!important;color:${color(text.color)};}`).join('\n')}
   .window {background:${color(w.background)};box-shadow:0 ${w.shadowOffset}px ${w.shadowBlur}px ${color(w.shadowColor)};isolation:isolate;}
   .window-backing {position:absolute;inset:${w.backingInset}px;opacity:${w.backingOpacity};background-position:center;background-size:cover;pointer-events:none;}
   .window-title {position:absolute;left:${c.windowInset}px;right:${c.windowInset}px;top:${c.titleTop}px;height:${c.titleHeight}px;font:small-caps ${w.titleSize}px/${c.titleHeight}px PortableThemeFont;letter-spacing:${w.titleSpacing}px;text-align:${w.titleAlignment};color:${color(w.titleColor)};pointer-events:none;}
@@ -84,6 +85,11 @@ export function createBrowserTheme(
     images: [...new Set([...art.values()].map((image) => image.url))],
     update(element, node) {
       updateImage(element, node);
+      if (node.kind === 1) {
+        const title = element.querySelector<HTMLElement>('.window-title');
+        if (title)
+          title.style.fontSize = `${theme.text.find((text) => text.key === node.style)?.size ?? w.titleSize}px`;
+      }
       if (node.kind === 8) {
         const surface = theme.surfaces?.find(
           (surface) => surface.key === node.style,
