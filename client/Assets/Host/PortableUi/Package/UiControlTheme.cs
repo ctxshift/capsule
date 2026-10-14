@@ -12,7 +12,7 @@ namespace PortableUi.Package
         public static readonly UiThemeLimits Default = new UiThemeLimits(30,16);
         public UiThemeLimits(int assetRecipes,int textStyles)
         {
-            if(assetRecipes<1 || assetRecipes>64 || textStyles<1 || textStyles>36)
+            if(assetRecipes<1 || assetRecipes>64 || textStyles<1 || textStyles>64)
                 throw new ArgumentOutOfRangeException();
             AssetRecipes=assetRecipes;TextStyles=textStyles;
         }
