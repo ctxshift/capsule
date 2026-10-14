@@ -17,6 +17,7 @@ namespace PortableUi.Wasmtime
     // Experimental native C ABI backend; no reflection-generated delegates or managed Wasmtime dependency.
     public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiSchedulingDiagnostics
     {
+        public const ulong AddonExecutionFuel = 200000000;
         public const string QuickJsSha256 = "0975D550E2B8A9BA9CBBBEB6B5914157C793631218C222F8BDDF12EB70905835";
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
@@ -260,12 +261,12 @@ namespace PortableUi.Wasmtime
             InitializationTrace?.Invoke("Host SDK eval begin");
             if (!Evaluate(sdk, "portable_ui_bootstrap", 200000000, out error)) return false;
             InitializationTrace?.Invoke("Addon eval begin");
-            return Evaluate(source, "portable_ui_eval", 20000000, out error);
+            return Evaluate(source, "portable_ui_eval", AddonExecutionFuel, out error);
         }
         public bool Update(out string error)
         {
             ++UpdateCalls;
-            if (!Call(SupportsScheduling ? "portable_ui_update_v2" : "portable_ui_update", 0, 0, 0, 1, 20000000, out int result, out error)) return false;
+            if (!Call(SupportsScheduling ? "portable_ui_update_v2" : "portable_ui_update", 0, 0, 0, 1, AddonExecutionFuel, out int result, out error)) return false;
             if (SupportsScheduling && result >= 0)
             {
                 NextWakeTimestamp = result == 0 ? (long?)null : Stopwatch.GetTimestamp() +
