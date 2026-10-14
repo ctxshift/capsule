@@ -14,6 +14,7 @@ namespace PortableUi.Unity
         Transform source;
         AnimationClip idle;
         string key;
+        Action<Camera> configureCamera;
         readonly List<Lease> leases = new List<Lease>();
         ulong revision;
         bool baseline;
@@ -31,12 +32,12 @@ namespace PortableUi.Unity
             Prepare(surfaceKey,idleClip);
             SetOwner(visualSource);
         }
-        public void Prepare(string surfaceKey, AnimationClip idleClip)
+        public void Prepare(string surfaceKey, AnimationClip idleClip, Action<Camera> cameraConfiguration = null)
         {
             if(string.IsNullOrEmpty(surfaceKey) || !idleClip)
                 throw new ArgumentException("A surface key and idle clip are required.");
             if(leases.Count!=0)throw new InvalidOperationException("Retire live leases before rebinding the character owner.");
-            Clear(); key=surfaceKey; idle=idleClip;
+            Clear(); key=surfaceKey; idle=idleClip; configureCamera=cameraConfiguration;
         }
         // Preserve the UI's texture leases while replacing or removing an owner.
         public void SetOwner(Transform visualSource)
@@ -110,7 +111,7 @@ namespace PortableUi.Unity
                 lightObject.transform.localPosition=new Vector3(-3,4,3);
                 var light=lightObject.AddComponent<Light>(); light.type=LightType.Point;
                 light.intensity=100; light.range=12; light.cullingMask=1<<31; light.shadows=LightShadows.None;
-                try { Refresh(); stage.SetActive(false); }
+                try { owner.configureCamera?.Invoke(camera); Refresh(); stage.SetActive(false); }
                 catch { Dispose(); throw; }
             }
             public void Refresh()
