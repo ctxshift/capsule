@@ -145,7 +145,7 @@ export function parseTheme(
     limits.assetRecipes > 64 ||
     !Number.isInteger(limits.textStyles) ||
     limits.textStyles < 1 ||
-    limits.textStyles > 36
+    limits.textStyles > 64
   )
     throw Error('Host theme profile bounds');
   if (!value || typeof value !== 'object') throw Error('Missing theme');
