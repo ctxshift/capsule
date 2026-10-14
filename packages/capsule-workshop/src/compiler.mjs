@@ -299,8 +299,11 @@ export function compiler({
         tsconfigRaw: { compilerOptions: { alwaysStrict: false } },
         entryPoints: [source],
         bundle: true,
-        // Compact generated transport only; retain authored names and source maps.
+        // Compact generated transport; source maps retain the authored source.
         minifyWhitespace: true,
+        minifySyntax: true,
+        minifyIdentifiers: true,
+        keepNames: true,
         write: false,
         format: 'iife',
         platform: 'browser',
@@ -316,7 +319,9 @@ export function compiler({
         f.path.endsWith('bundle.js'),
       );
       if (bundle.contents.length > 65536)
-        throw Error('Addon bundle exceeds 64 KiB');
+        throw Error(
+          `Addon bundle exceeds 64 KiB (${bundle.contents.length} bytes)`,
+        );
       const sourceManifest = manifest
         ? JSON.parse(await fs.readFile(manifest, 'utf8'))
         : null;
