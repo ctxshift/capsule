@@ -74,6 +74,8 @@ export function createBrowserTheme(
   .hover,.highlight {position:absolute;inset:${b.highlightInset}px;pointer-events:none;opacity:0;}
   .hover {background:${color(b.hover)};} .highlight {mix-blend-mode:soft-light;}
   .theme-button:hover .hover {opacity:1;} .theme-button:hover .highlight {opacity:${b.highlightOpacity};}
+  .theme-button[data-selected-tint] .hover {opacity:1;background:var(--selected-tint);}
+  .theme-button[data-selected-tint] .highlight {opacity:var(--selected-texture-opacity);}
   button:focus-visible,input:focus-visible,select:focus-visible {outline:${f.width}px solid ${color(f.color)};outline-offset:${-f.inset - f.width}px;}
   input[type="range"] {appearance:none;background:transparent;border:0;cursor:pointer;}
   input[type="range"]::-webkit-slider-runnable-track {height:${r.trackHeight}px;border:${r.borderWidth}px solid ${color(r.border)};border-radius:${r.trackRadius}px;background:linear-gradient(to right,${color(r.fill)} var(--value),${color(r.track)} var(--value));}
@@ -85,6 +87,26 @@ export function createBrowserTheme(
     images: [...new Set([...art.values()].map((image) => image.url))],
     update(element, node) {
       updateImage(element, node);
+      if (node.kind === 10) {
+        const variant = theme.buttonStyles?.find(
+          (style) => style.key === node.style,
+        );
+        if (variant) {
+          element.dataset.selectedTint = '';
+          element.style.setProperty(
+            '--selected-texture-opacity',
+            String(variant.selectedTextureOpacity),
+          );
+          element.style.setProperty(
+            '--selected-tint',
+            color(variant.selectedTint),
+          );
+        } else {
+          delete element.dataset.selectedTint;
+          element.style.removeProperty('--selected-texture-opacity');
+          element.style.removeProperty('--selected-tint');
+        }
+      }
       if (node.kind === 1) {
         const variant = theme.text.find((text) => text.key === node.style);
         const title = element.querySelector<HTMLElement>('.window-title');
@@ -101,6 +123,17 @@ export function createBrowserTheme(
           (surface) => surface.key === node.style,
         );
         element.style.backgroundColor = color(surface?.color ?? [0, 0, 0, 0]);
+        element.style.boxShadow = Object.entries(surface?.rules ?? {})
+          .map(([edge, rule]) => {
+            const offsets = {
+              top: [0, rule[0]],
+              right: [-rule[0], 0],
+              bottom: [0, -rule[0]],
+              left: [rule[0], 0],
+            };
+            return `inset ${offsets[edge as keyof typeof offsets][0]}px ${offsets[edge as keyof typeof offsets][1]}px 0 ${color(rule.slice(1) as Rgba)}`;
+          })
+          .join(',');
         element.dataset.themeFilter = surface?.shadow
           ? ` drop-shadow(0 0 ${surface.shadow.blur / 2}px ${color(surface.shadow.color)})`
           : '';

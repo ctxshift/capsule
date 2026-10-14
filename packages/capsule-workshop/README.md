@@ -31,3 +31,12 @@ The repository Vitest suite includes an isolated-workspace proof that copies
 only the Capsule packages and fictional example, supplies an SDK artifact, and
 checks HTTP preview, valid hot reload and invalid-TypeScript last-good retention.
 Host theme/workshop tests live separately under the tooling's `tests/host`.
+
+Host themes may declare up to 16 named `buttonStyles` with `selectedTint` RGBA
+values and `selectedTextureOpacity` in [0, 1]. Selecting that style retains
+the normal button artwork, with the selected tint and texture strength.
+Surface `rules` name up to four edges (`top`, `right`, `bottom`, `left`), each an
+array `[width, red, green, blue, alpha]`, with width greater than zero and at most
+8 logical pixels. These are inset decorations: they do not change layout or
+intercept input. Style changes clear old decorations; absent tokens preserve
+existing presentation. Authors reserve any desired content inset in normal layout.

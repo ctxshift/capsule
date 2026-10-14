@@ -95,10 +95,19 @@ export interface UiTheme {
     color: Rgba;
   }[];
   assets: ThemeAsset[];
+  buttonStyles?: {
+    key: string;
+    selectedTint: Rgba;
+    selectedTextureOpacity: number;
+  }[];
   surfaces?: {
     key: string;
     color: Rgba;
     shadow?: { blur: number; color: Rgba };
+    /** Edge tuples are [width, red, green, blue, alpha]; rules do not affect layout. */
+    rules?: Partial<
+      Record<'top' | 'right' | 'bottom' | 'left', [number, ...Rgba]>
+    >;
   }[];
 }
 export interface FontMetrics {
@@ -185,6 +194,30 @@ export function parseTheme(
     throw Error('Theme collection bounds');
   const keys = new Set<string>();
   const surfaces = new Set<string>();
+  const rgba = (value: unknown): value is Rgba =>
+    Array.isArray(value) &&
+    value.length === 4 &&
+    value.every((n) => Number.isInteger(n) && n >= 0 && n <= 255);
+  const buttons = new Set<string>();
+  if (
+    theme.buttonStyles !== undefined &&
+    (!Array.isArray(theme.buttonStyles) || theme.buttonStyles.length > 16)
+  )
+    throw Error('Theme button style quota');
+  for (const style of theme.buttonStyles ?? []) {
+    if (
+      !style ||
+      !/^[a-z0-9-]{1,64}$/.test(style.key) ||
+      buttons.has(style.key) ||
+      style.key === theme.components.button ||
+      !rgba(style.selectedTint) ||
+      !Number.isFinite(style.selectedTextureOpacity) ||
+      style.selectedTextureOpacity < 0 ||
+      style.selectedTextureOpacity > 1
+    )
+      throw Error('Theme button style bounds');
+    buttons.add(style.key);
+  }
   if ((theme.surfaces?.length ?? 0) > 30) throw Error('Theme surface quota');
   for (const surface of theme.surfaces ?? []) {
     if (
@@ -196,6 +229,27 @@ export function parseTheme(
     )
       throw Error('Theme surface bounds');
     surfaces.add(surface.key);
+    if (surface.rules !== undefined) {
+      if (
+        !surface.rules ||
+        typeof surface.rules !== 'object' ||
+        Array.isArray(surface.rules) ||
+        Object.keys(surface.rules).length > 4
+      )
+        throw Error('Theme surface rule quota');
+      for (const [edge, rule] of Object.entries(surface.rules)) {
+        if (
+          !['top', 'right', 'bottom', 'left'].includes(edge) ||
+          !Array.isArray(rule) ||
+          rule.length !== 5 ||
+          !Number.isFinite(rule[0]) ||
+          rule[0] <= 0 ||
+          rule[0] > 8 ||
+          !rgba(rule.slice(1))
+        )
+          throw Error('Theme surface rule bounds');
+      }
+    }
     if (
       surface.shadow !== undefined &&
       (!surface.shadow ||
