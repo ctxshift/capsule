@@ -27,6 +27,16 @@ generated `dist/` output is ignored. The current addon compiler bundles the sour
 and binds React to the host-provided compatible runtime. Importing this package
 outside a host does not create a renderer or grant native capabilities.
 
+`Viewport surface="preview-key"` describes a live host-rendered resource in the
+normal layout tree. It is separate from `Image asset`: only explicit immutable
+host surface admission grants access, with a bounded lease count. The wire uses
+node kind13 and the existing resource-key field/SetImage opcode; the key is
+validated against surface admission rather than sprite/theme assets. An empty
+or unknown surface is rejected. Existing hosts default to no admitted surfaces.
+The node/SDK contract is available; native and browser rendering providers are
+not installed yet and currently reject viewport commits explicitly. No static
+image fallback or per-frame React update is implied.
+
 Install the repository workspace with `bun install --frozen-lockfile` at its root.
 Run `bun run typecheck` here or `mise run check-ui` at the root. Addons depend on
 this package normally; they do not include ambient declarations from tool paths.

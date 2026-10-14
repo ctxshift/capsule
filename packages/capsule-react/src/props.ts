@@ -39,6 +39,8 @@ export interface WheelEvent {
   modifiers: number;
 }
 export interface Props {
+  /** Opaque host-admitted live surface key, only for Viewport. */
+  surface?: string;
   children?: ReactNode;
   width?: number;
   height?: number;

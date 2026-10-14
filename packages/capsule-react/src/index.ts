@@ -17,6 +17,7 @@ interface Runtime {
   Image: ComponentType<Props>;
   Window: ComponentType<Props>;
   Portrait: ComponentType<Props>;
+  Viewport: ComponentType<Props>;
   Slot: ComponentType<Props>;
   Progress: ComponentType<Props>;
   Overlay: ComponentType<Props>;
@@ -44,6 +45,7 @@ export const {
   Image,
   Window,
   Portrait,
+  Viewport,
   Slot,
   Progress,
   Overlay,

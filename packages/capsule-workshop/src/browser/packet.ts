@@ -13,6 +13,34 @@ export interface UiNode {
   layout: number[] | null;
 }
 
+export interface SurfaceAdmission {
+  readonly maxLeases: number;
+  allows(key: string): boolean;
+}
+/** Host-side resource admission, independent of addon assets and theme keys. */
+export function admitSurfaces(
+  keys: readonly string[],
+  maxLeases = 1,
+): SurfaceAdmission {
+  if (
+    !Number.isInteger(maxLeases) ||
+    maxLeases < 1 ||
+    maxLeases > 4 ||
+    keys.length < 1 ||
+    keys.length > 4 ||
+    new Set(keys).size !== keys.length ||
+    keys.some(
+      (key) => typeof key !== 'string' || !/^[a-zA-Z0-9._-]{1,64}$/.test(key),
+    )
+  )
+    throw Error('Invalid surface admission');
+  const admitted = new Set(keys);
+  return Object.freeze({
+    maxLeases,
+    allows: (key: string) => admitted.has(key),
+  });
+}
+
 class Reader {
   private at = 0;
   private view: DataView;
@@ -96,6 +124,7 @@ export function applyPacket(
   previous: ReadonlyMap<bigint, UiNode>,
   bytes: Uint8Array,
   maxNodes = 128,
+  surfaces?: SurfaceAdmission,
 ): Map<bigint, UiNode> {
   if (bytes.length < 16 || bytes.length > 65536)
     throw Error('Packet byte quota');
@@ -137,7 +166,7 @@ export function applyPacket(
         brightness: 10000,
         visible: true,
       };
-      if (node.kind < 1 || node.kind > 12) throw Error('Unknown UI kind');
+      if (node.kind < 1 || node.kind > 13) throw Error('Unknown UI kind');
       next.set(id, node);
     } else {
       const node = next.get(id);
@@ -194,7 +223,13 @@ export function applyPacket(
     next.size > maxNodes
   )
     throw Error('Packet/node quota');
+  let surfaceCount = 0;
   for (const node of next.values()) {
+    if (
+      node.kind === 13 &&
+      (!surfaces?.allows(node.asset) || ++surfaceCount > surfaces.maxLeases)
+    )
+      throw Error('Live surface admission or quota invalid');
     if (node.value > 10000 || (node.events & ~1023) !== 0)
       throw Error('UI value/event bounds');
     if (

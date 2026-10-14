@@ -329,6 +329,8 @@ export class DomTarget {
     return element;
   }
   apply(nodes: ReadonlyMap<bigint, UiNode>) {
+    if ([...nodes.values()].some((node) => node.kind === 13))
+      throw Error('Live surface provider is not configured');
     const focusPath: bigint[] = [];
     for (
       let element = this.stage.ownerDocument
