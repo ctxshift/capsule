@@ -38,8 +38,16 @@ namespace PortableUi.Package
                 throw new ArgumentException("Theme collection quota.");
             foreach(var asset in CopyAssets()) { }
             foreach(var style in text)
+            {
+                if(style["ruleInset"]!=null && (style["ruleInset"].Type!=JTokenType.Integer && style["ruleInset"].Type!=JTokenType.Float || (float)style["ruleInset"]<0 || (float)style["ruleInset"]>256))throw new ArgumentException("Theme window rule inset bounds.");
+                if(style["ruleColor"]!=null)
+                {
+                    if(!(style["ruleColor"] is JArray c) || c.Count!=4)throw new ArgumentException("Theme window rule color bounds.");
+                    foreach(var channel in c)if(channel.Type!=JTokenType.Integer || (int)channel<0 || (int)channel>255)throw new ArgumentException("Theme window rule color bounds.");
+                }
                 if(style["weight"]!=null && (style["weight"].Type!=JTokenType.Integer || ((int)style["weight"]!=400 && (int)style["weight"]!=700)))
                     throw new ArgumentException("Theme text weight bounds.");
+            }
             if(value["surfaces"] != null)
             {
                 if(!(value["surfaces"] is JArray surfaces) || surfaces.Count > 30) throw new ArgumentException("Theme surface quota.");
@@ -121,6 +129,10 @@ namespace PortableUi.Package
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["brightness"]??1;return 1;}
         public float ImageOpacity(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["opacity"]??1;return 1;}
+        public float WindowRuleInset(string key)
+        {foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float?)item["ruleInset"]??Number("components","windowInset");return Number("components","windowInset");}
+        public byte[] WindowRuleColor(string key)
+        {foreach(var item in (JArray)value["text"])if((string)item["key"]==key && item["ruleColor"] is JArray c)return new[]{(byte)c[0],(byte)c[1],(byte)c[2],(byte)c[3]};return Color("window","ruleColor");}
         public bool TrySurfaceShadow(string key,out float blur,out byte[] color)
         {
             if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)if((string)surface["key"]==key && surface["shadow"] is JObject shadow)

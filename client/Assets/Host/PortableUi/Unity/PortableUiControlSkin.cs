@@ -20,6 +20,10 @@ namespace PortableUi.Unity
  {var root=widget.Rect;
             if(node.Kind==UiNodeKind.Image && widget.Image)
             {
+                // UGUI uses the RectTransform pivot to position aspect-fit
+                // letterboxing. Match SVG xMidYMid without moving the layout box.
+                root.pivot=new Vector2(.5f,.5f);
+                root.anchoredPosition+=new Vector2(root.sizeDelta.x*.5f,-root.sizeDelta.y*.5f);
                 bool alphaAware=theme.ImageAlphaAware(node.AssetKey);
                 var sampling=widget.Image.GetComponent<PortableUiAlphaAwareImage>();
                 if(alphaAware&&!sampling)sampling=widget.Image.gameObject.AddComponent<PortableUiAlphaAwareImage>();
@@ -158,11 +162,13 @@ namespace PortableUi.Unity
                 widget.Label.margin = Vector4.zero;
                 widget.Label.color = C("window","titleColor");
                 var rule = parts.Rule(widget);
-                TopRect(rule.rectTransform, N("components","windowInset"),N("window","ruleTop"),node.Rect.Width/64f-2*N("components","windowInset"),N("window","ruleHeight"));
+                float ruleInset=theme.WindowRuleInset(node.StyleKey);
+                TopRect(rule.rectTransform, ruleInset,N("window","ruleTop"),node.Rect.Width/64f-2*ruleInset,N("window","ruleHeight"));
                 rule.sprite = null;
                 // Display-space bronze calibrated at the reference scale. A
                 // translucent bright bronze blends much brighter in linear UI.
-                rule.color = C("window","ruleColor");
+                var ruleColor=theme.WindowRuleColor(node.StyleKey);
+                rule.color = new Color32(ruleColor[0],ruleColor[1],ruleColor[2],ruleColor[3]);
                 var close = widget.CloseButton.GetComponent<Image>();
                 close.transform.SetParent(root, false);
                 close.transform.SetAsLastSibling();
