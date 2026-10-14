@@ -25,6 +25,10 @@ namespace PortableUi.Unity
                 // letterboxing. Match SVG xMidYMid without moving the layout box.
                 root.pivot=new Vector2(.5f,.5f);
                 root.anchoredPosition+=new Vector2(root.sizeDelta.x*.5f,-root.sizeDelta.y*.5f);
+                int degrees=theme.ImageRotation(node.AssetKey);
+                var rotation=widget.Image.GetComponent<PortableUiImageRotation>();
+                if(degrees!=0 && !rotation)rotation=widget.Image.gameObject.AddComponent<PortableUiImageRotation>();
+                if(rotation)rotation.SetRotation(degrees);
                 bool alphaAware=theme.ImageAlphaAware(node.AssetKey);
                 var sampling=widget.Image.GetComponent<PortableUiAlphaAwareImage>();
                 if(alphaAware&&!sampling)sampling=widget.Image.gameObject.AddComponent<PortableUiAlphaAwareImage>();
@@ -201,7 +205,7 @@ namespace PortableUi.Unity
                 var closeFeedback=close.GetComponent<PortableUiControlFeedback>()??close.gameObject.AddComponent<PortableUiControlFeedback>();
                 closeFeedback.Configure(closeHover,null,FocusFrame(close.rectTransform),C("button","hover"));
             }
- else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;label.font=font;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=theme.TextBold(key)?FontStyles.Bold:FontStyles.Normal;label.characterSpacing=0;label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=font.faceInfo.lineHeight*size/font.faceInfo.pointSize*font.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
+ else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;label.font=font;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=(theme.TextBold(key)?FontStyles.Bold:FontStyles.Normal)|(theme.TextSmallCaps(key)?FontStyles.SmallCaps:FontStyles.Normal);label.characterSpacing=theme.TextLetterSpacing(key)/(size/100);label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=font.faceInfo.lineHeight*size/font.faceInfo.pointSize*font.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
  bool HasText(string key){foreach(string candidate in theme.TextKeys)if(candidate==key)return true;return false;}
  public void Dispose(){foreach(var material in selectedButtonMaterials.Values){if(Application.isPlaying)UnityEngine.Object.Destroy(material);else UnityEngine.Object.DestroyImmediate(material);}selectedButtonMaterials.Clear();if(buttonSoftLight){if(Application.isPlaying)UnityEngine.Object.Destroy(buttonSoftLight);else UnityEngine.Object.DestroyImmediate(buttonSoftLight);buttonSoftLight=null;}}
         void ApplySurfaceRules(RectTransform root, string style)

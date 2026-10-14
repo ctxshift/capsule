@@ -11,10 +11,14 @@ namespace PortableUi.Yoga
         readonly Dictionary<int, float> advances;
         readonly Dictionary<ulong, float> pairs;
         public float LineHeight { get; }
+        public float TrailingSpacing { get; }
         public YogaFontMetrics(IDictionary<int, float> glyphAdvances, IDictionary<ulong, float> pairAdvances, float lineHeight)
+            : this(glyphAdvances, pairAdvances, lineHeight, 0) { }
+        public YogaFontMetrics(IDictionary<int, float> glyphAdvances, IDictionary<ulong, float> pairAdvances, float lineHeight, float trailingSpacing)
         {
             if (glyphAdvances == null || glyphAdvances.Count > 4096 || pairAdvances == null || pairAdvances.Count > 16384 ||
-                !Finite(lineHeight) || lineHeight <= 0 || lineHeight > 4096) throw new ArgumentException("Font metrics quota.");
+                !Finite(lineHeight) || lineHeight <= 0 || lineHeight > 4096 || !Finite(trailingSpacing) || trailingSpacing<0 || trailingSpacing>8) throw new ArgumentException("Font metrics quota.");
+            TrailingSpacing=trailingSpacing;
             advances = new Dictionary<int, float>(glyphAdvances); pairs = new Dictionary<ulong, float>(pairAdvances); LineHeight = lineHeight;
             foreach (var value in advances.Values) if (!Finite(value) || value < 0 || value > 4096) throw new ArgumentException("Invalid glyph advance.");
             foreach (var value in pairs.Values) if (!Finite(value) || Math.Abs(value) > 4096) throw new ArgumentException("Invalid pair adjustment.");
@@ -49,7 +53,7 @@ namespace PortableUi.Yoga
             if (text == null || text.Length > 512 || widthMode < 0 || widthMode > 2 || heightMode < 0 || heightMode > 2 ||
                 (widthMode != 0 && (float.IsNaN(width) || float.IsInfinity(width) || width < 0)) ||
                 (heightMode != 0 && (float.IsNaN(height) || float.IsInfinity(height) || height < 0))) throw new ArgumentException("Text measurement envelope.");
-            float limit = widthMode == 0 ? float.PositiveInfinity : width;
+            float limit = widthMode == 0 ? float.PositiveInfinity : width + font.TrailingSpacing;
             float line = 0, maximum = 0, word = 0, pendingSpace = 0;
             int lines = 1, previous = -1;
             // Greedy word wrap, bounded fallback within an overlong word. Space
@@ -78,6 +82,7 @@ namespace PortableUi.Yoga
                 word += advance;
             }
             FlushWord(); maximum = Math.Max(maximum, line);
+            maximum = Math.Max(0, maximum - font.TrailingSpacing);
             measuredWidth = widthMode == 1 ? width : widthMode == 2 ? Math.Min(width, maximum) : maximum;
             float naturalHeight = lines * font.LineHeight;
             measuredHeight = heightMode == 1 ? height : heightMode == 2 ? Math.Min(height, naturalHeight) : naturalHeight;

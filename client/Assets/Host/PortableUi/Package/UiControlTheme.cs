@@ -51,6 +51,8 @@ namespace PortableUi.Package
             }
             foreach(var style in text)
             {
+                if(style["smallCaps"]!=null && style["smallCaps"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme smallcaps bounds.");
+                if(style["letterSpacing"]!=null && (style["letterSpacing"].Type!=JTokenType.Integer && style["letterSpacing"].Type!=JTokenType.Float || float.IsNaN((float)style["letterSpacing"]) || (float)style["letterSpacing"]<0 || (float)style["letterSpacing"]>8))throw new ArgumentException("Theme letter spacing bounds.");
                 if(style["ruleInset"]!=null && (style["ruleInset"].Type!=JTokenType.Integer && style["ruleInset"].Type!=JTokenType.Float || (float)style["ruleInset"]<0 || (float)style["ruleInset"]>256))throw new ArgumentException("Theme window rule inset bounds.");
                 if(style["ruleColor"]!=null)
                 {
@@ -188,12 +190,16 @@ namespace PortableUi.Package
             {blur=(float)shadow["blur"];var rgba=(JArray)shadow["color"];color=new[]{(byte)rgba[0],(byte)rgba[1],(byte)rgba[2],(byte)rgba[3]};return true;}
             blur=0;color=null;return false;
         }
+        public int ImageRotation(string key)
+        {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return(int?)asset["rotation"]??0;return 0;}
         public bool ImageStretch(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool?)asset["stretch"]??false;return false;}
         public bool ImageAlphaAware(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool)asset["alphaAware"];return false;}
         public float TextNumber(string key,string property) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown text style."); }
         public bool TextWrap(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(bool)item["wrap"];throw new ArgumentException("Unknown text style."); }
+        public bool TextSmallCaps(string key) {foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(bool?)item["smallCaps"]??false;return false;}
+        public float TextLetterSpacing(string key) {foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float?)item["letterSpacing"]??0;return 0;}
         public bool TextBold(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(int?)item["weight"]==700;return false; }
         public byte[] TextColor(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key){var c=(JArray)item["color"];return new[]{(byte)c[0],(byte)c[1],(byte)c[2],(byte)c[3]};}throw new ArgumentException("Unknown text style."); }
         public float AssetNumber(string key,string property) {foreach(var item in (JArray)value["assets"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown theme asset.");}
@@ -210,6 +216,7 @@ namespace PortableUi.Package
                 float brightness=(float?)item["brightness"]??1;
                 float opacity=(float?)item["opacity"]??1;
                 if(float.IsNaN(opacity)||float.IsInfinity(opacity)||opacity<0||opacity>1)throw new ArgumentException("Theme image opacity bounds.");
+                if(item["rotation"]!=null && (item["rotation"].Type!=JTokenType.Integer || Array.IndexOf(new[]{0,90,180,270},(int)item["rotation"])<0))throw new ArgumentException("Theme image rotation bounds.");
                 if(item["stretch"]!=null && item["stretch"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme image stretch must be boolean.");
                 if(float.IsNaN(brightness)||float.IsInfinity(brightness)||brightness<0||brightness>2)throw new ArgumentException("Theme image brightness bounds.");
                 string imageKey = item["image"] == null ? key : (string)item["image"];
