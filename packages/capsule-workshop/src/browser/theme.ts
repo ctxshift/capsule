@@ -86,9 +86,15 @@ export function createBrowserTheme(
     update(element, node) {
       updateImage(element, node);
       if (node.kind === 1) {
+        const variant = theme.text.find((text) => text.key === node.style);
         const title = element.querySelector<HTMLElement>('.window-title');
-        if (title)
-          title.style.fontSize = `${theme.text.find((text) => text.key === node.style)?.size ?? w.titleSize}px`;
+        if (title) title.style.fontSize = `${variant?.size ?? w.titleSize}px`;
+        const rule = element.querySelector<HTMLElement>('.window-rule');
+        if (rule) {
+          rule.style.left =
+            rule.style.right = `${variant?.ruleInset ?? c.windowInset}px`;
+          rule.style.backgroundColor = color(variant?.ruleColor ?? w.ruleColor);
+        }
       }
       if (node.kind === 8) {
         const surface = theme.surfaces?.find(

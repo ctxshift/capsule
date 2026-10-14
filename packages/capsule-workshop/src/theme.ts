@@ -89,6 +89,8 @@ export interface UiTheme {
     size: number;
     lineHeight: number;
     weight?: 400 | 700;
+    ruleInset?: number;
+    ruleColor?: Rgba;
     wrap: boolean;
     color: Rgba;
   }[];
@@ -277,6 +279,16 @@ export function parseTheme(
       (text.weight !== undefined &&
         text.weight !== 400 &&
         text.weight !== 700) ||
+      (text.ruleInset !== undefined &&
+        (!Number.isFinite(text.ruleInset) ||
+          text.ruleInset < 0 ||
+          text.ruleInset > 256)) ||
+      (text.ruleColor !== undefined &&
+        (!Array.isArray(text.ruleColor) ||
+          text.ruleColor.length !== 4 ||
+          !text.ruleColor.every(
+            (n) => Number.isInteger(n) && n >= 0 && n <= 255,
+          ))) ||
       text.color.length !== 4 ||
       text.color.some((n) => !Number.isInteger(n) || n < 0 || n > 255)
     )
