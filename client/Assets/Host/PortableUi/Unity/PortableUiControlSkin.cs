@@ -20,6 +20,10 @@ namespace PortableUi.Unity
  {var root=widget.Rect;
             if(node.Kind==UiNodeKind.Image && widget.Image)
             {
+                bool alphaAware=theme.ImageAlphaAware(node.AssetKey);
+                var sampling=widget.Image.GetComponent<PortableUiAlphaAwareImage>();
+                if(alphaAware&&!sampling)sampling=widget.Image.gameObject.AddComponent<PortableUiAlphaAwareImage>();
+                if(sampling)sampling.SetPolicy(alphaAware);
                 float gain=theme.ImageBrightness(node.AssetKey);
                 var tint=widget.Image.GetComponent<PortableUiBrightness>();
                 if(gain!=1 && !tint)tint=widget.Image.gameObject.AddComponent<PortableUiBrightness>();

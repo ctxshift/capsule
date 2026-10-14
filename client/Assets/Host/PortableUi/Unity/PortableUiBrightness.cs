@@ -40,6 +40,8 @@ namespace PortableUi.Unity
             if (owned) { if (Application.isPlaying) Destroy(owned); else DestroyImmediate(owned); }
             owned = null; source = null;
         }
+        // Sampling policy changes must unwind the tint before replacing its source.
+        public void ResetMaterial() => Release();
         void OnDestroy() => Release();
     }
 }
