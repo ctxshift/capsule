@@ -74,7 +74,7 @@ namespace PortableUi.Wasmtime
             if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
             return operationMetrics[index];
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null)
         {
             if (hostCallsPerInvocation != UiHostBridgeContract.MaxCallsPerInvocation && hostCallsPerInvocation != UiHostBridgeContract.ExtendedCallsPerInvocation)
                 throw new ArgumentOutOfRangeException(nameof(hostCallsPerInvocation));
@@ -89,7 +89,7 @@ namespace PortableUi.Wasmtime
             this.invocationRunner = invocationRunner;
             SupportsScheduling = scheduling;
             grant = activation.Grant;
-            Session = new UiSession(activation.ConsumeOwner(), theme, layoutNodeLimit);
+            Session = new UiSession(activation.ConsumeOwner(), theme, layoutNodeLimit, surfaceAdmission);
             lock (BootstrapLock)
             {
                 if (!bootstrapped)

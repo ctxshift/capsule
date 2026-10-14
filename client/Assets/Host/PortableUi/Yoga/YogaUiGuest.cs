@@ -17,10 +17,10 @@ namespace PortableUi.Yoga
         public double LastForwardMilliseconds { get; private set; }
         public int LastCalculations { get; private set; }
         public int LastMeasurements { get; private set; }
-        public YogaUiGuest(uint owner, IUiTheme theme, YogaTextCatalog metrics, IUiCommitTarget output, Func<IUiCommitTarget, IUiGuest> factory, int layoutNodeLimit = UiSession.DefaultLayoutNodes)
+        public YogaUiGuest(uint owner, IUiTheme theme, YogaTextCatalog metrics, IUiCommitTarget output, Func<IUiCommitTarget, IUiGuest> factory, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null)
         {
             this.owner = owner; this.output = output;
-            coordinator = new YogaCoordinator(metrics); coordinator.Register(owner, theme, layoutNodeLimit);
+            coordinator = new YogaCoordinator(metrics); coordinator.Register(owner, theme, layoutNodeLimit, surfaceAdmission);
             try { inner = factory(this); }
             catch { coordinator.Dispose(); throw; }
         }

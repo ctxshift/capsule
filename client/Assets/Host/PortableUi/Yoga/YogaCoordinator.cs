@@ -46,6 +46,7 @@ namespace PortableUi.Yoga
         {
             public int LayoutNodeLimit;
             public IUiTheme Theme;
+            public UiSurfaceAdmission Surfaces;
             public bool Pending, Presented, ValidPresentation;
             public long Revision, OutstandingRevision;
             public Dictionary<ulong, Root> Roots = new Dictionary<ulong, Root>();
@@ -75,12 +76,12 @@ namespace PortableUi.Yoga
             if (Thread.CurrentThread.ManagedThreadId != ownerThread) throw new InvalidOperationException("Yoga coordinator owner thread required.");
             if (disposed) throw new ObjectDisposedException(nameof(YogaCoordinator));
         }
-        public void Register(uint owner, IUiTheme theme, int layoutNodeLimit = UiSession.DefaultLayoutNodes)
+        public void Register(uint owner, IUiTheme theme, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null)
         {
             Check();
             if (layoutNodeLimit != UiSession.DefaultLayoutNodes && layoutNodeLimit != UiSession.ExtendedLayoutNodes) throw new ArgumentOutOfRangeException(nameof(layoutNodeLimit));
             if (owner == 0 || theme == null || addons.Count >= MaxAddons || addons.ContainsKey(owner)) throw new ArgumentException("Yoga registration quota or identity.");
-            addons.Add(owner, new Addon { Theme = theme, LayoutNodeLimit = layoutNodeLimit });
+            addons.Add(owner, new Addon { Theme = theme, LayoutNodeLimit = layoutNodeLimit, Surfaces = surfaceAdmission ?? UiSurfaceAdmission.None });
         }
         public static YogaStyle[] ReadIntent(UiSnapshot snapshot)
         {
@@ -106,7 +107,7 @@ namespace PortableUi.Yoga
             if (!addons.TryGetValue(owner, out var addon) || addon.Pending || revision <= addon.Revision)
             { error = "Yoga registration, revision or backpressure."; return false; }
             if (snapshot == null || snapshot.Nodes.Count > addon.LayoutNodeLimit || styles == null || styles.Length != snapshot.Nodes.Count ||
-                !UiSnapshotValidator.Validate(snapshot, owner, addon.Theme, out error, addon.LayoutNodeLimit))
+                !UiSnapshotValidator.Validate(snapshot, owner, addon.Theme, out error, addon.LayoutNodeLimit, addon.Surfaces))
             { error = error ?? "Yoga transaction quota."; return false; }
             addon.Pending = true; addon.Presented = false; addon.OutstandingRevision = revision;
             ready.Enqueue(new Batch { Owner = owner, Revision = revision, Snapshot = snapshot, Styles = (YogaStyle[])styles.Clone(), Enqueued = Stopwatch.GetTimestamp() });
@@ -178,7 +179,7 @@ namespace PortableUi.Yoga
                     }
                 }
                 var snapshot = new UiSnapshot(batch.Snapshot.Generation, nodes);
-                if (!UiSnapshotValidator.Validate(snapshot, batch.Owner, addon.Theme, out string validation, addon.LayoutNodeLimit)) throw new InvalidOperationException(validation);
+                if (!UiSnapshotValidator.Validate(snapshot, batch.Owner, addon.Theme, out string validation, addon.LayoutNodeLimit, addon.Surfaces)) throw new InvalidOperationException(validation);
                 foreach (var pair in addon.Roots) if (!staged.TryGetValue(pair.Key, out var retained) || retained != pair.Value) pair.Value.Dispose();
                 addon.Roots = staged; addon.Revision = batch.Revision;
                 return new YogaPresentation(batch.Owner, batch.Revision, snapshot, null, elapsed, queue, calculations, measurements,
