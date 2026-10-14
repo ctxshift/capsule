@@ -158,13 +158,56 @@ export class DomTarget {
       padding: '0',
       margin: '0',
       pointerEvents:
-        (node.kind === 8 && !(node.events & (4 | 64))) ||
+        (node.kind === 8 && !(node.events & (4 | 64 | 512))) ||
         (node.kind === 4 && node.events === 0)
           ? 'none'
           : 'auto',
     });
     this.theme.decorate(element, node, () => this.send(input(node.id, 2)));
     const options = { signal: this.subscriptions.signal };
+    element.addEventListener(
+      'wheel',
+      (rawEvent) => {
+        const event = rawEvent as WheelEvent;
+        if (!((this.nodes.get(node.id)?.events ?? 0) & 512)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const scale =
+          event.deltaMode === 1
+            ? 16
+            : event.deltaMode === 2
+              ? element.clientHeight
+              : 1;
+        const bytes = input(node.id, 512, new Array(12).fill(0));
+        const view = new DataView(
+          bytes.buffer,
+          bytes.byteOffset,
+          bytes.byteLength,
+        );
+        bytes[16] = 1;
+        bytes[17] =
+          (event.shiftKey ? 1 : 0) |
+          (event.ctrlKey ? 2 : 0) |
+          (event.altKey ? 4 : 0) |
+          (event.metaKey ? 8 : 0);
+        view.setInt32(
+          20,
+          Math.round(
+            Math.max(-8192, Math.min(8192, event.deltaX * scale)) * 64,
+          ),
+          true,
+        );
+        view.setInt32(
+          24,
+          Math.round(
+            Math.max(-8192, Math.min(8192, event.deltaY * scale)) * 64,
+          ),
+          true,
+        );
+        this.send(bytes);
+      },
+      { ...options, passive: false },
+    );
     element.addEventListener(
       'contextmenu',
       (event) => {
@@ -253,7 +296,7 @@ export class DomTarget {
       this.elements.set(node.id, element);
       element.dataset.style = node.style;
       element.style.pointerEvents =
-        (node.kind === 8 && !(node.events & (4 | 64))) ||
+        (node.kind === 8 && !(node.events & (4 | 64 | 512))) ||
         (node.kind === 4 && node.events === 0)
           ? 'none'
           : 'auto';

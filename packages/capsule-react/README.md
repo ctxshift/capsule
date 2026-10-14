@@ -8,6 +8,12 @@ it is not yet published to a registry.
 - `@capsule/react/components`: theme-driven composed controls.
 - `@capsule/react/window-state`: bounded window placement/state helpers.
 
+`onWheel` receives `{ deltaX, deltaY, modifiers }` in design units, positive
+right/down. Native wheel steps map to 64 design units; the browser normalizes
+pixel, line and page deltas. Events target the nearest subscribed ancestor and
+do not move keyboard focus. Hosts bound each axis to ±8192 units. Compose scroll
+state and clipped content in the addon; wheel input itself grants no game action.
+
 Exports include TypeScript source as the authoritative development types. Run
 `bun run declarations` here to emit declaration files from the implementation;
 generated `dist/` output is ignored. The current addon compiler bundles the source

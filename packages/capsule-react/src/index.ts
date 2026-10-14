@@ -1,6 +1,12 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { Props } from './props';
-export type { ActionEvent, PointerEvent, KeyEvent, Props } from './props';
+export type {
+  ActionEvent,
+  PointerEvent,
+  KeyEvent,
+  WheelEvent,
+  Props,
+} from './props';
 
 interface Runtime {
   Box: ComponentType<Props>;

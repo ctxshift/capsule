@@ -189,7 +189,7 @@ export function applyPacket(
   }
   if (reader.remaining || next.size > 128) throw Error('Packet/node quota');
   for (const node of next.values()) {
-    if (node.value > 10000 || (node.events & ~511) !== 0)
+    if (node.value > 10000 || (node.events & ~1023) !== 0)
       throw Error('UI value/event bounds');
     if (
       node.rect.some(

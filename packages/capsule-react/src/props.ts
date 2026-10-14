@@ -17,6 +17,12 @@ export interface KeyEvent {
   modifiers: number;
   repeat: boolean;
 }
+export interface WheelEvent {
+  /** Design-unit deltas; positive values scroll right/down. */
+  deltaX: number;
+  deltaY: number;
+  modifiers: number;
+}
 export interface Props {
   children?: ReactNode;
   width?: number;
@@ -50,6 +56,7 @@ export interface Props {
   onHoverChange?: (hovered: boolean) => void;
   onPointer?: (event: PointerEvent) => void;
   onKey?: (event: KeyEvent) => void;
+  onWheel?: (event: WheelEvent) => void;
   onFocus?: () => void;
   onValueChange?: (value: number) => void;
   options?: readonly string[];
