@@ -28,8 +28,22 @@ namespace PortableUi.Unity
         {
             if (string.IsNullOrEmpty(surfaceKey) || !visualSource || !idleClip)
                 throw new ArgumentException("A surface key, visual source and idle clip are required.");
+            Prepare(surfaceKey,idleClip);
+            SetOwner(visualSource);
+        }
+        public void Prepare(string surfaceKey, AnimationClip idleClip)
+        {
+            if(string.IsNullOrEmpty(surfaceKey) || !idleClip)
+                throw new ArgumentException("A surface key and idle clip are required.");
             if(leases.Count!=0)throw new InvalidOperationException("Retire live leases before rebinding the character owner.");
-            Clear(); key=surfaceKey; source=visualSource; idle=idleClip; baseline=false;
+            Clear(); key=surfaceKey; idle=idleClip;
+        }
+        // Preserve the UI's texture leases while replacing or removing an owner.
+        public void SetOwner(Transform visualSource)
+        {
+            if(!idle)throw new InvalidOperationException("Prepare the character surface first.");
+            source=visualSource; baseline=false; revision=0;
+            foreach(var lease in leases)lease.ReplaceOwner();
         }
         // Call only after confirmed visuals have been applied. First/repeated revisions do not celebrate.
         public void Observe(ulong confirmedRevision, AnimationClip cue = null)
@@ -41,14 +55,14 @@ namespace PortableUi.Unity
         }
         public INativeUiSurfaceLease Acquire(string admittedKey)
         {
-            if (!source || !idle || admittedKey != key || leases.Count >= 2)
+            if (!idle || admittedKey != key || leases.Count >= 2)
                 throw new InvalidOperationException("Character surface unavailable or lease quota reached.");
             // Two leases permit transactional guest replacement; both are independently rendered.
             var lease=new Lease(this); leases.Add(lease); return lease;
         }
         void LateUpdate()
         {
-            if (!source) { Clear(); return; }
+            if (!source && !ReferenceEquals(source,null))SetOwner(null);
             foreach(var lease in leases)lease.Tick();
         }
         public void Clear()
@@ -103,6 +117,7 @@ namespace PortableUi.Unity
             {
                 if(disposed)return;
                 ReleaseRig();
+                if(!owner.source)return;
                 var map=new Dictionary<Transform,Transform>();
                 Transform Copy(Transform original,Transform parent)
                 {
@@ -156,9 +171,21 @@ namespace PortableUi.Unity
                 foreach(var renderer in rig.GetComponentsInChildren<Renderer>())
                 { ++RenderPartCount; if(first){bounds=renderer.bounds; first=false;}else bounds.Encapsulate(renderer.bounds); }
                 if(first)throw new InvalidOperationException("Visual source has no renderable geometry.");
-                Frame();
+                Frame(); camera.enabled=visible;
             }
             T Own<T>(T value) where T:UnityEngine.Object {owned.Add(value);return value;}
+            public void ReplaceOwner()
+            {
+                dragging=false; Yaw=180;
+                Refresh();
+                if(texture && !owner.source)ClearTexture();
+            }
+            void ClearTexture()
+            {
+                var previous=RenderTexture.active;
+                try {RenderTexture.active=texture;GL.Clear(true,true,Color.clear);}
+                finally {RenderTexture.active=previous;}
+            }
             public void Play(AnimationClip clip)
             {
                 if(disposed || !graph.IsValid() || !clip)return;
@@ -182,7 +209,7 @@ namespace PortableUi.Unity
                 var next=new RenderTexture(width,height,24,RenderTextureFormat.ARGB32) {name="Character surface",antiAliasing=1};
                 if(!next.Create()){Destroy(next);throw new InvalidOperationException("Cannot allocate character surface.");}
                 var old=texture; texture=next; camera.targetTexture=next;
-                if(old){old.Release();Destroy(old);} Frame(); return texture;
+                if(old){old.Release();Destroy(old);} ClearTexture(); Frame(); return texture;
             }
             void Frame()
             {
@@ -196,12 +223,12 @@ namespace PortableUi.Unity
             public void SetVisible(bool value)
             {
                 if(disposed || !stage || !camera)return;
-                visible=value; stage.SetActive(value); camera.enabled=value;
+                visible=value; stage.SetActive(value); camera.enabled=value && rig;
                 if(!value)dragging=false;
             }
             public void Pointer(UiPointerPhase phase,int id,Vector2 point,PointerEventData.InputButton button)
             {
-                if(disposed || !visible)return;
+                if(disposed || !visible || !owner.source)return;
                 if(phase==UiPointerPhase.Down){dragging=true;lastPoint=point;}
                 else if(phase==UiPointerPhase.Move && dragging)
                 {Yaw=Mathf.Repeat(Yaw+(point.x-lastPoint.x)*.35f,360);lastPoint=point;Frame();}
@@ -210,8 +237,10 @@ namespace PortableUi.Unity
             public void Scroll(Vector2 point,Vector2 delta) { }
             void ReleaseRig()
             {
+                if(camera)camera.enabled=false;
                 if(graph.IsValid())graph.Destroy();
-                if(rig)Destroy(rig);
+                if(rig){rig.SetActive(false);Destroy(rig);}
+                rig=null; playing=null; RenderPartCount=0;
                 foreach(var item in owned)Destroy(item);owned.Clear();
             }
             public void Dispose()
