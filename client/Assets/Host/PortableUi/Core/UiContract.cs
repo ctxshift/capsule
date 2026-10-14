@@ -26,7 +26,7 @@ namespace PortableUi
     public enum UiNodeKind : byte
     {
         Window = 1, Panel = 2, Text = 3, Image = 4, Portrait = 5,
-        Slot = 6, Progress = 7, Box = 8, ClipBox = 9, Button = 10, Range = 11, Select = 12
+        Slot = 6, Progress = 7, Box = 8, ClipBox = 9, Button = 10, Range = 11, Select = 12, Viewport = 13
     }
 
     [Flags]

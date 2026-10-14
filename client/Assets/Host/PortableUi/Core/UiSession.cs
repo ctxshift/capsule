@@ -15,6 +15,7 @@ namespace PortableUi
         const ushort AllowedEvents = UiInputPayload.AllowedEvents;
         readonly uint owner;
         readonly IUiTheme theme;
+        readonly UiSurfaceAdmission surfaces;
         readonly Dictionary<ulong, UiNode> nodes = new Dictionary<ulong, UiNode>();
         readonly HashSet<ulong> reserved = new HashSet<ulong>();
         readonly Queue<UiEvent> events = new Queue<UiEvent>();
@@ -26,13 +27,14 @@ namespace PortableUi
         public int NodeCount => nodes.Count;
         public int PendingEventCount => events.Count;
 
-        public UiSession(uint ownerNonce, IUiTheme injectedTheme, int layoutNodeLimit = DefaultLayoutNodes)
+        public UiSession(uint ownerNonce, IUiTheme injectedTheme, int layoutNodeLimit = DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null)
         {
             if (ownerNonce == 0) throw new ArgumentOutOfRangeException(nameof(ownerNonce));
             if (layoutNodeLimit != DefaultLayoutNodes && layoutNodeLimit != ExtendedLayoutNodes) throw new ArgumentOutOfRangeException(nameof(layoutNodeLimit));
             LayoutNodeLimit = layoutNodeLimit;
             owner = ownerNonce;
             theme = injectedTheme ?? throw new ArgumentNullException(nameof(injectedTheme));
+            surfaces = surfaceAdmission ?? UiSurfaceAdmission.None;
         }
 
         // Called by the trusted guest import. Reservation has no visible UI effect.
@@ -64,7 +66,7 @@ namespace PortableUi
             var snapshot = Snapshot(proposed);
             bool hasLayout = false;
             foreach (var node in snapshot.Nodes) if (node.Layout != null) { hasLayout = true; break; }
-            if (hasLayout && !UiSnapshotValidator.Validate(snapshot, owner, theme, out string layoutError, LayoutNodeLimit))
+            if (hasLayout && !UiSnapshotValidator.Validate(snapshot, owner, theme, out string layoutError, LayoutNodeLimit, surfaces))
                 return new UiResult(UiError.InvalidCommand, layoutError);
             try
             {
@@ -113,8 +115,14 @@ namespace PortableUi
                 if (next.Count >= MaxNodes) return new UiResult(UiError.QuotaExceeded, "Node quota exceeded.");
                 var style = CheckTheme(command.Style, false);
                 if (!style.Success) return style;
-                var asset = CheckTheme(command.Asset, true);
+                var asset = command.Kind == UiNodeKind.Viewport ? CheckSurface(command.Asset) : CheckTheme(command.Asset, true);
                 if (!asset.Success) return asset;
+                if (command.Kind == UiNodeKind.Viewport)
+                {
+                    int leases = 1;
+                    foreach (var node in next.Values) if (node.Kind == UiNodeKind.Viewport) ++leases;
+                    if (leases > surfaces.MaxLeases) return new UiResult(UiError.QuotaExceeded, "Surface lease quota exceeded.");
+                }
                 if ((command.Kind == UiNodeKind.Image || command.Kind == UiNodeKind.Portrait) &&
                     string.IsNullOrEmpty(command.Asset))
                     return new UiResult(UiError.InvalidCommand, "Image requires an asset key.");
@@ -146,9 +154,9 @@ namespace PortableUi
                     next[handle] = current.With(style: command.Style); break;
                 case UiOpcode.SetImage:
                     if (current.Kind != UiNodeKind.Image && current.Kind != UiNodeKind.Portrait &&
-                        current.Kind != UiNodeKind.Slot)
+                        current.Kind != UiNodeKind.Slot && current.Kind != UiNodeKind.Viewport)
                         return new UiResult(UiError.InvalidCommand, "Node has no image.");
-                    var asset = CheckTheme(command.Asset, true);
+                    var asset = current.Kind == UiNodeKind.Viewport ? CheckSurface(command.Asset) : CheckTheme(command.Asset, true);
                     if (!asset.Success) return asset;
                     next[handle] = current.With(asset: command.Asset); break;
                 case UiOpcode.SetProgress:
@@ -186,6 +194,9 @@ namespace PortableUi
             }
             return UiResult.Ok;
         }
+
+        UiResult CheckSurface(string key) => surfaces.Allows(key) ? UiResult.Ok :
+            new UiResult(UiError.ForbiddenThemeKey, "Live surface key not admitted by host.");
 
         UiResult CheckTheme(string key, bool asset)
         {

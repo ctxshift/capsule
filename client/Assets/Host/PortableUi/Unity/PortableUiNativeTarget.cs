@@ -88,6 +88,8 @@ namespace PortableUi.Unity
                 // Prepare new widgets off-tree before touching retained keyed objects.
                 foreach (var node in proposed.Nodes)
                 {
+                    if (node.Kind == UiNodeKind.Viewport)
+                        throw new InvalidOperationException("Live surface provider is not configured.");
                     if (!string.IsNullOrEmpty(node.AssetKey) &&
                         (!factory.TryGetSprite(node.AssetKey, out var sprite) || !sprite))
                         throw new InvalidOperationException("Asset key unavailable: " + node.AssetKey);

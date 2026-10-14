@@ -7,7 +7,7 @@ namespace PortableUi
     // runs in the worker session; this independently bounds the immutable handoff.
     public static class UiSnapshotValidator
     {
-        public static bool Validate(UiSnapshot snapshot, uint owner, IUiTheme theme, out string error, int layoutNodeLimit = UiSession.DefaultLayoutNodes)
+        public static bool Validate(UiSnapshot snapshot, uint owner, IUiTheme theme, out string error, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null)
         {
             error = null;
             if (layoutNodeLimit != UiSession.DefaultLayoutNodes && layoutNodeLimit != UiSession.ExtendedLayoutNodes)
@@ -18,6 +18,8 @@ namespace PortableUi
             var depths = new Dictionary<ulong, int>();
             bool? layoutMode = null;
             int roots = 0;
+            int surfaceCount = 0;
+            var surfaces = surfaceAdmission ?? UiSurfaceAdmission.None;
             foreach (var node in snapshot.Nodes)
             {
                 if (node == null || (uint)(node.Handle >> 32) != owner || (ushort)node.Handle == 0 ||
@@ -38,14 +40,16 @@ namespace PortableUi
                 if (layout && (!node.Layout.Valid() || depth > 24 || snapshot.Nodes.Count > layoutNodeLimit))
                 { error = "Layout intent quota or value invalid."; return false; }
                 var r = node.Rect;
+                if (node.Kind == UiNodeKind.Viewport && (!surfaces.Allows(node.AssetKey) || ++surfaceCount > surfaces.MaxLeases))
+                { error = "Live surface admission or quota invalid."; return false; }
                 if (r.X < -8192 * 64 || r.X > 8192 * 64 || r.Y < -8192 * 64 || r.Y > 8192 * 64 ||
                     r.Width < 1 || r.Width > 4096 * 64 || r.Height < 1 || r.Height > 4096 * 64 ||
                     (long)r.X + r.Width > 8192 * 64 || (long)r.Y + r.Height > 8192 * 64 ||
-                    node.Kind < UiNodeKind.Window || node.Kind > UiNodeKind.Select ||
+                    node.Kind < UiNodeKind.Window || node.Kind > UiNodeKind.Viewport ||
                     node.Progress > 10000 || node.Brightness < 8000 || node.Brightness > 12000 ||
                     ((ushort)node.Events & ~UiInputPayload.AllowedEvents) != 0 ||
                     System.Text.Encoding.UTF8.GetByteCount(node.Text ?? "") > 512 ||
-                    !theme.AllowsStyle(node.StyleKey) || !theme.AllowsAsset(node.AssetKey))
+                    !theme.AllowsStyle(node.StyleKey) || (node.Kind != UiNodeKind.Viewport && !theme.AllowsAsset(node.AssetKey)))
                 { error = "Snapshot property or theme invalid."; return false; }
             }
             return true;
