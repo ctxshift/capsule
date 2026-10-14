@@ -36,7 +36,7 @@ namespace PortableUi.Unity
         {
             target?.QueueFocusPath(handle);
             if ((mask & UiEventMask.Pointer) == 0 || captured || !Point(data)) return;
-            pointerId = data.pointerId; button = (byte)data.button;
+            pointerId = data.pointerId; button = data.button==PointerEventData.InputButton.Right?(byte)2:data.button==PointerEventData.InputButton.Middle?(byte)1:(byte)0;
             captured = Emit(UiPointerPhase.Down);
         }
         public void OnSelect(BaseEventData data)
