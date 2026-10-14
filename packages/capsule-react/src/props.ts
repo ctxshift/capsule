@@ -27,7 +27,9 @@ export interface KeyEvent extends ActionEvent {
     | 'Home'
     | 'End'
     | 'PageUp'
-    | 'PageDown';
+    | 'PageDown'
+    | 'J'
+    | 'K';
   down: boolean;
   modifiers: number;
   repeat: boolean;

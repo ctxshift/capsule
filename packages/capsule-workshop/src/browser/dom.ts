@@ -75,8 +75,17 @@ export class DomTarget {
         'End',
         'PageUp',
         'PageDown',
+        'j',
+        'J',
+        'k',
+        'K',
       ].includes(event.key)
     ) {
+      if (
+        /^[jk]$/i.test(event.key) &&
+        (event.ctrlKey || event.altKey || event.metaKey)
+      )
+        return;
       const active = this.stage.ownerDocument.activeElement;
       if (
         event.key !== 'Escape' &&
@@ -97,6 +106,10 @@ export class DomTarget {
               End: 13,
               PageUp: 14,
               PageDown: 15,
+              j: 16,
+              J: 16,
+              k: 17,
+              K: 17,
             } as Record<string, number>
           )[event.key],
           1,
