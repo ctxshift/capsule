@@ -12,6 +12,7 @@ namespace PortableUi.Unity
     {
         readonly RectTransform canvas;
         readonly INativeUiWidgetFactory factory;
+        readonly INativeUiSurfaceFactory surfaces;
         readonly RectTransform layer;
         RectTransform current;
         UiSnapshot currentSnapshot;
@@ -25,6 +26,7 @@ namespace PortableUi.Unity
         // Async integration installs a main-thread queue sink, never a worker session.
         public Func<ulong, UiEventMask, byte[], bool> InputSink { get; set; }
         public long CommitCount { get; private set; }
+        internal bool SurfaceInputActive => active && !disposed;
 
         public bool TryDesignPoint(Vector2 screen, Camera camera, out Vector2 point)
         {
@@ -34,16 +36,26 @@ namespace PortableUi.Unity
             return true;
         }
 
-        public PortableUiNativeTarget(RectTransform canvasRoot, INativeUiWidgetFactory widgetFactory)
+        public PortableUiNativeTarget(RectTransform canvasRoot, INativeUiWidgetFactory widgetFactory, INativeUiSurfaceFactory surfaceFactory = null)
         {
             canvas = canvasRoot ? canvasRoot : throw new ArgumentNullException(nameof(canvasRoot));
             factory = widgetFactory ?? throw new ArgumentNullException(nameof(widgetFactory));
+            surfaces = surfaceFactory;
             layer = NewRoot("Portable UI guest layer", canvas);
             layer.gameObject.AddComponent<PortableUiKeyboardInput>().Bind(this);
             layer.gameObject.SetActive(false);
         }
 
-        public void Activate() { active = true; keyboardOwner = this; if (layer) layer.gameObject.SetActive(true); MaintainFocus(); }
+        public void Activate()
+        {
+            active = true; keyboardOwner = this;
+            if (layer)
+            {
+                layer.gameObject.SetActive(true);
+                foreach (var surface in layer.GetComponentsInChildren<PortableUiSurfaceView>(true)) surface.Synchronize();
+            }
+            MaintainFocus();
+        }
         public void SuspendInput()
         {
             active=false;
@@ -53,6 +65,7 @@ namespace PortableUi.Unity
             foreach(var selectable in layer.GetComponentsInChildren<Selectable>(true))selectable.interactable=false;
             foreach(var graphic in layer.GetComponentsInChildren<Graphic>(true))graphic.raycastTarget=false;
             foreach(var input in layer.GetComponentsInChildren<PortableUiNodeInput>(true))input.enabled=false;
+            foreach(var surface in layer.GetComponentsInChildren<PortableUiSurfaceView>(true))surface.Cancel();
         }
 
         public bool TryGetNode(ulong handle, out UiNode node)
@@ -88,15 +101,24 @@ namespace PortableUi.Unity
                 // Prepare new widgets off-tree before touching retained keyed objects.
                 foreach (var node in proposed.Nodes)
                 {
-                    if (node.Kind == UiNodeKind.Viewport)
+                    if (node.Kind == UiNodeKind.Viewport && surfaces == null)
                         throw new InvalidOperationException("Live surface provider is not configured.");
-                    if (!string.IsNullOrEmpty(node.AssetKey) &&
+                    if (node.Kind != UiNodeKind.Viewport && !string.IsNullOrEmpty(node.AssetKey) &&
                         (!factory.TryGetSprite(node.AssetKey, out var sprite) || !sprite))
                         throw new InvalidOperationException("Asset key unavailable: " + node.AssetKey);
-                    if (currentWidgets.ContainsKey(node.Handle)) continue;
+                    if (currentWidgets.TryGetValue(node.Handle, out var existing) &&
+                        (node.Kind != UiNodeKind.Viewport || existing.Rect.GetComponent<PortableUiSurfaceView>().SurfaceKey == node.AssetKey)) continue;
                     if (!stage) { stage = NewRoot("Candidate", layer); stage.gameObject.SetActive(false); }
                     NativeUiWidget widget;
-                    if (node.Kind == UiNodeKind.Box || node.Kind == UiNodeKind.ClipBox || node.Kind == UiNodeKind.Button)
+                    if (node.Kind == UiNodeKind.Viewport)
+                    {
+                        var surface = new GameObject("Live viewport", typeof(RectTransform), typeof(RawImage), typeof(PortableUiSurfaceView));
+                        surface.transform.SetParent(stage, false);
+                        var rect = (RectTransform)surface.transform; SetRect(rect, node.Rect);
+                        surface.GetComponent<PortableUiSurfaceView>().Prepare(surfaces.Acquire(node.AssetKey), node.AssetKey, this, node.Handle);
+                        widget = new NativeUiWidget(rect, null, null, null);
+                    }
+                    else if (node.Kind == UiNodeKind.Box || node.Kind == UiNodeKind.ClipBox || node.Kind == UiNodeKind.Button)
                     {
                         var box = new GameObject("Box", typeof(RectTransform));
                         box.transform.SetParent(stage, false);
@@ -129,8 +151,9 @@ namespace PortableUi.Unity
                 var nextWidgets = new Dictionary<ulong, NativeUiWidget>();
                 foreach (var node in proposed.Nodes)
                 {
-                    var widget = currentWidgets.TryGetValue(node.Handle, out var retained) ? retained : staged[node.Handle];
-                    if (currentWidgets.ContainsKey(node.Handle)) ApplyNode(widget, node);
+                    bool isStaged = staged.TryGetValue(node.Handle, out var prepared);
+                    var widget = isStaged ? prepared : currentWidgets[node.Handle];
+                    if (!isStaged) ApplyNode(widget, node);
                     nextWidgets.Add(node.Handle, widget);
                 }
                 if (!current) current = NewRoot("Active", layer);
@@ -141,10 +164,12 @@ namespace PortableUi.Unity
                     rect.SetAsLastSibling();
                 }
                 ApplyPresentation(proposed, nextWidgets);
+                foreach (var widget in nextWidgets.Values)
+                    widget.Rect.GetComponent<PortableUiSurfaceView>()?.Synchronize();
                 var removed = new HashSet<ulong>();
-                foreach(var old in currentWidgets) if(!nextWidgets.ContainsKey(old.Key))removed.Add(old.Key);
+                foreach(var old in currentWidgets) if(!nextWidgets.TryGetValue(old.Key,out var next) || next.Rect != old.Value.Rect)removed.Add(old.Key);
                 foreach (var old in currentWidgets)
-                    if (!nextWidgets.ContainsKey(old.Key))
+                    if (removed.Contains(old.Key))
                     {
                         // Retire each removed subtree once. DestroyImmediate in
                         // authoring/tests would otherwise invalidate child entries.
@@ -464,6 +489,10 @@ namespace PortableUi.Unity
             (factory as INativeUiScopeLifetime)?.Dispose();
         }
         static void DestroyOwned(GameObject value)
-        { if(Application.isPlaying)UnityEngine.Object.Destroy(value);else UnityEngine.Object.DestroyImmediate(value); }
+        {
+            // Inactive candidates may never receive Unity's OnDestroy callback.
+            foreach (var surface in value.GetComponentsInChildren<PortableUiSurfaceView>(true)) surface.Release();
+            if(Application.isPlaying)UnityEngine.Object.Destroy(value);else UnityEngine.Object.DestroyImmediate(value);
+        }
     }
 }
