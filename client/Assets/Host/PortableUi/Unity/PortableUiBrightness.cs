@@ -8,6 +8,7 @@ namespace PortableUi.Unity
     // quantizing it through Color32 vertices; the original alpha is preserved.
     public sealed class PortableUiBrightness : MonoBehaviour
     {
+        public float ThemeFactor { get; set; } = 1;
         Graphic graphic;
         Material source, owned;
         int property;

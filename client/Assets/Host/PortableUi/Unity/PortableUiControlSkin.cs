@@ -18,6 +18,20 @@ namespace PortableUi.Unity
  float Slice(string group,string field){string key=theme.String(group,field);return theme.AssetNumber(key,"border")/theme.AssetNumber(key,"edge");}
  public bool Apply(NativeUiWidget widget,UiNode node)
  {var root=widget.Rect;
+            if(node.Kind==UiNodeKind.Image && widget.Image)
+            {
+                float gain=theme.ImageBrightness(node.AssetKey);
+                var tint=widget.Image.GetComponent<PortableUiBrightness>();
+                if(gain!=1 && !tint)tint=widget.Image.gameObject.AddComponent<PortableUiBrightness>();
+                if(tint)tint.ThemeFactor=gain;
+            }
+            if(node.Kind==UiNodeKind.Box && widget.Image) widget.Image.color=Color.clear;
+            if(node.Kind==UiNodeKind.Box && theme.TrySurfaceColor(node.StyleKey,out var surface))
+            {
+                widget.Image.sprite=null;
+                widget.Image.color=new Color32(surface[0],surface[1],surface[2],surface[3]);
+                return true;
+            }
             if (node.Kind == UiNodeKind.Button && (node.StyleKey == theme.String("components","button") || string.IsNullOrEmpty(node.StyleKey)))
             {
                 var control = root.GetComponent<Button>(); control.transition = Selectable.Transition.None;

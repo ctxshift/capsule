@@ -22,6 +22,19 @@ namespace PortableUi.Package
                 if (!(value[group] is JObject)) throw new ArgumentException("Missing theme group: " + group);
             if (!(value["assets"] is JArray assets) || assets.Count > 30 || !(value["text"] is JArray text) || text.Count > 16)
                 throw new ArgumentException("Theme collection quota.");
+            foreach(var asset in CopyAssets()) { }
+            if(value["surfaces"] != null)
+            {
+                if(!(value["surfaces"] is JArray surfaces) || surfaces.Count > 30) throw new ArgumentException("Theme surface quota.");
+                var keys=new HashSet<string>(StringComparer.Ordinal);
+                foreach(var surface in surfaces)
+                {
+                    string key=(string)surface["key"];
+                    if(string.IsNullOrEmpty(key) || !System.Text.RegularExpressions.Regex.IsMatch(key,"^[a-z0-9-]{1,64}$") || !keys.Add(key) ||
+                        !(surface["color"] is JArray rgba) || rgba.Count!=4) throw new ArgumentException("Theme surface bounds.");
+                    foreach(var channel in rgba) if(channel.Type!=JTokenType.Integer || (int)channel<0 || (int)channel>255) throw new ArgumentException("Theme surface bounds.");
+                }
+            }
         }
         UiControlTheme(JObject source) { value = source; }
         static void Validate(JToken token, int depth)
@@ -72,7 +85,15 @@ namespace PortableUi.Package
             var result = new byte[4]; for (int i=0;i<4;++i) { int c=(int)rgba[i]; if(c<0||c>255)throw new ArgumentException("Theme color bounds.");result[i]=(byte)c; } return result;
         }
         public IEnumerable<string> TextKeys { get { foreach (var item in (JArray)value["text"]) yield return (string)item["key"]; } }
-        public IEnumerable<string> StyleKeys {get{foreach(string key in new[]{"button","buttonLabel","fieldLabel","slider","select","paragraph"})yield return String("components",key);foreach(string key in TextKeys)yield return key;}}
+        public IEnumerable<string> StyleKeys {get{foreach(string key in new[]{"button","buttonLabel","fieldLabel","slider","select","paragraph"})yield return String("components",key);foreach(string key in TextKeys)yield return key;if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)yield return (string)surface["key"];}}
+        public bool TrySurfaceColor(string key,out byte[] color)
+        {
+            if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)if((string)surface["key"]==key)
+            {var rgba=(JArray)surface["color"];color=new[]{(byte)rgba[0],(byte)rgba[1],(byte)rgba[2],(byte)rgba[3]};return true;}
+            color=null;return false;
+        }
+        public float ImageBrightness(string key)
+        {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["brightness"]??1;return 1;}
         public float TextNumber(string key,string property) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown text style."); }
         public bool TextWrap(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(bool)item["wrap"];throw new ArgumentException("Unknown text style."); }
         public byte[] TextColor(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key){var c=(JArray)item["color"];return new[]{(byte)c[0],(byte)c[1],(byte)c[2],(byte)c[3]};}throw new ArgumentException("Unknown text style."); }
@@ -87,6 +108,8 @@ namespace PortableUi.Package
                 string path=(string)item["path"],key=(string)item["key"];
                 if(string.IsNullOrEmpty(path)||System.IO.Path.IsPathRooted(path)||path.Contains("..")||path.Contains("\\")||string.IsNullOrEmpty(key)||key.IndexOfAny(new[]{'/','\\','.'})>=0)throw new ArgumentException("Invalid theme asset path.");
                 var rect=(JArray)item["rect"];
+                float brightness=(float?)item["brightness"]??1;
+                if(float.IsNaN(brightness)||float.IsInfinity(brightness)||brightness<0||brightness>2)throw new ArgumentException("Theme image brightness bounds.");
                 string imageKey = item["image"] == null ? key : (string)item["image"];
                 if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z0-9-]{1,64}$") ||
                     string.IsNullOrEmpty(imageKey) || !System.Text.RegularExpressions.Regex.IsMatch(imageKey, "^[a-z0-9-]{1,64}$"))

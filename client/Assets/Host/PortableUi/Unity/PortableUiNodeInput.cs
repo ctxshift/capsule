@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 namespace PortableUi.Unity
 {
     public sealed class PortableUiNodeInput : MonoBehaviour, IPointerClickHandler,
-        IPointerEnterHandler, IPointerDownHandler, IPointerUpHandler,
+        IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler,
         IBeginDragHandler, IDragHandler, IEndDragHandler, ISelectHandler, ISubmitHandler, ICancelHandler
     {
         PortableUiNativeTarget target;
@@ -30,6 +30,8 @@ namespace PortableUi.Unity
         }
         public void OnPointerEnter(PointerEventData data)
         { if ((mask & UiEventMask.Hover) != 0) target?.Queue(handle, UiEventMask.Hover); }
+        public void OnPointerExit(PointerEventData data)
+        { if ((mask & UiEventMask.Hover) != 0) target?.Queue(handle, UiEventMask.Hover, new byte[] { UiInputPayload.Version, 0 }); }
         public void OnPointerDown(PointerEventData data)
         {
             target?.QueueFocusPath(handle);

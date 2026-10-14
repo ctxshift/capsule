@@ -205,6 +205,7 @@ namespace PortableUi.Unity
                 if(sampling)sampling.Apply(graphic);
                 float factor = factors[ancestor];
                 var effect = graphic.GetComponent<PortableUiBrightness>();
+                if (effect) factor *= effect.ThemeFactor;
                 if (!effect && factor == 1) continue;
                 if (!effect) effect = graphic.gameObject.AddComponent<PortableUiBrightness>();
                 effect.Apply(graphic, factor);
