@@ -38,5 +38,19 @@ reattaches the same connection; old callbacks are ignored and in-flight requests
 reject with an unknown outcome without automatic retry. Dispose connections at addon
 teardown. State delivery is implemented; transient event streams remain future work.
 
+`./addon` supplies `createAddonFeatures(observe)` for loader-admitted native
+providers. Connect using the contract, version range and generated fingerprint;
+pass the input action context to requests. The native loader has already checked
+dependency closure and explicit per-addon grants. This transport exposes only direct
+selected features and permitted members. Metadata, state and results are fenced by
+activation identity. Pending outcomes become unknown on retirement; no automatic
+retries occur. Call `dispose()` at addon teardown. Contract-owned browser mocks can
+continue composing the runtime directly without a native engine.
+
+The current native action channel allows 244 bytes of typed request payload after
+framing; larger requests reject explicitly. State observations use the whole-payload
+channel, coalesced per member on the native host. The feature frame adds one host
+copy; decoding uses subarray views rather than additional envelope payload copies.
+
 Run `bun run --cwd packages/capsule-features typecheck` and
 `bun run --cwd packages/capsule-features test` from the repository root.
