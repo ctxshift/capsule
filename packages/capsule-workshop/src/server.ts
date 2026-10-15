@@ -30,6 +30,7 @@ export async function startWorkshop(options: WorkshopOptions) {
   ];
   const worker = compiler({
     maxDeclarations: options.maxDeclarations,
+    themeLimits: options.themeLimits,
     source,
     output,
     runtimeStatus,

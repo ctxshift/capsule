@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/server.ts",
     "./compiler": "./src/compiler.mjs",
+    "./deploy": "./src/deploy.ts",
     "./browser": "./src/browser/runtime.ts",
     "./browser-theme": "./src/browser/theme.ts",
     "./theme": "./src/theme.ts",

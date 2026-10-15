@@ -6,6 +6,7 @@ import { resolve, dirname, join, relative, isAbsolute } from 'node:path';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { capsuleEntry, capsuleSourceRoot, reactTypes } from './sdk-paths.mjs';
 import { scriptChunks } from './script-chunks.mjs';
+import { validatePackageTheme } from './package-theme.ts';
 const packageRoot = resolve(import.meta.dirname, '..');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const exists = async (path) => {
@@ -40,7 +41,8 @@ const names = [
 /**
  * @param {{source: string, output: string, assets?: string | null,
  * runtimeStatus?: string | null, beforePublish?: (() => Promise<unknown>) | null,
- * watchRoots?: string[], projectRoot?: string, manifest?: string, maxDeclarations?: number}} options
+ * watchRoots?: string[], projectRoot?: string, manifest?: string, maxDeclarations?: number,
+ * themeLimits?: import('./theme').ThemeLimits}} options
  */
 export function compiler({
   source,
@@ -52,6 +54,7 @@ export function compiler({
   projectRoot,
   manifest,
   maxDeclarations = 30,
+  themeLimits,
 }) {
   if (
     !Number.isInteger(maxDeclarations) ||
@@ -415,6 +418,7 @@ export function compiler({
           assets: declarations,
         }),
       );
+      await validatePackageTheme(stage, themeLimits);
       if (beforePublish) await beforePublish();
       if (before !== (await fingerprint())) {
         await clean(stage);
@@ -457,6 +461,7 @@ export function compiler({
         error: '',
         source,
         bundleSha256: bundleHash,
+        fingerprint: before,
       });
       console.log(
         `Published ${current}: ${modular?.total ?? bundle.contents.length} bytes${modular ? ' across ' + modular.chunks.length + ' script chunks' : ''}`,
