@@ -8,13 +8,13 @@ namespace PortableUi.Package
     // Selected by trusted host composition, never by fields inside a theme.
     public readonly struct UiThemeLimits
     {
-        public readonly int AssetRecipes, TextStyles;
+        public readonly int AssetRecipes, TextStyles, SurfaceStyles;
         public static readonly UiThemeLimits Default = new UiThemeLimits(30,16);
-        public UiThemeLimits(int assetRecipes,int textStyles)
+        public UiThemeLimits(int assetRecipes,int textStyles,int surfaceStyles=30)
         {
-            if(assetRecipes<1 || assetRecipes>64 || textStyles<1 || textStyles>64)
+            if(assetRecipes<1 || assetRecipes>64 || textStyles<1 || textStyles>64 || surfaceStyles<1 || surfaceStyles>64)
                 throw new ArgumentOutOfRangeException();
-            AssetRecipes=assetRecipes;TextStyles=textStyles;
+            AssetRecipes=assetRecipes;TextStyles=textStyles;SurfaceStyles=surfaceStyles;
         }
     }
     // Immutable host-owned provider data. Untrusted packages can only derive a
@@ -64,7 +64,7 @@ namespace PortableUi.Package
             }
             if(value["surfaces"] != null)
             {
-                if(!(value["surfaces"] is JArray surfaces) || surfaces.Count > 30) throw new ArgumentException("Theme surface quota.");
+                if(!(value["surfaces"] is JArray surfaces) || surfaces.Count > capacity.SurfaceStyles) throw new ArgumentException("Theme surface quota.");
                 var keys=new HashSet<string>(StringComparer.Ordinal);
                 foreach(var surface in surfaces)
                 {
