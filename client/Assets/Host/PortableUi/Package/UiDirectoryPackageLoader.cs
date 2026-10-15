@@ -87,7 +87,7 @@ namespace PortableUi.Package
                 int decodedTotal = 0;
                 foreach (var asset in manifest.Declarations)
                 {
-                    int limit = asset.Kind == UiPackageAssetKind.Image ? MaxImageBytes : MaxDataBytes;
+                    int limit = asset.Kind == UiPackageAssetKind.Image ? limits.MaxEncodedImageBytes : MaxDataBytes;
                     if (!TryRead(root, asset.Path, limit, out var bytes, out error)) return false;
                     total = checked(total + bytes.Length);
                     if (total > limits.MaxTotalBytes)
