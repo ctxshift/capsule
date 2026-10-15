@@ -32,6 +32,7 @@ export class BrowserGeneration {
   private target: DomTarget;
   private realm: GuestRealm;
   private scheduled = false;
+  private wakeScheduled = false;
   private active = false;
   private stagedRequests: { capability: number; payload: Uint8Array }[] = [];
   readonly frame: HTMLIFrameElement;
@@ -48,6 +49,18 @@ export class BrowserGeneration {
       'width:1440px;height:900px;border:0;display:none';
     document.querySelector('#stage-host')!.append(this.frame);
     this.realm = this.frame.contentWindow as GuestRealm;
+    // The SDK reports newly scheduled work, including Promise continuations that
+    // run after the current input pump. Coalesce notifications without idle polling.
+    Object.defineProperty(this.realm, '__portableWakeV1', {
+      value: () => {
+        if (!this.active || this.retired || this.wakeScheduled) return;
+        this.wakeScheduled = true;
+        queueMicrotask(() => {
+          this.wakeScheduled = false;
+          if (!this.retired) this.schedule();
+        });
+      },
+    });
     const doc = this.realm.document;
     const style = doc.createElement('style');
     style.textContent = theme.css;
