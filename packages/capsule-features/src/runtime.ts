@@ -15,7 +15,12 @@ export interface RequestCancellation {
   readonly aborted: boolean;
 }
 export interface ProviderTransport {
-  subscribe(state: string, receive: (bytes: Uint8Array) => void): () => void;
+  subscribe(
+    state: string,
+    receive: (bytes: Uint8Array) => void,
+    invalidate?: () => void,
+  ): () => void;
+  refresh?(state: string): void;
   request(
     operation: string,
     bytes: Uint8Array,
@@ -203,14 +208,22 @@ export class FeatureConnection<F extends Feature> {
     },
     registration: Registration,
   ) {
-    state.stop = registration.transport.subscribe(name, (bytes) => {
-      if (this.registration !== registration || this.disposed) return;
-      const decoded = codec(this.feature.states[name].schema).decode(bytes);
-      this.metrics.decodedMessages++;
-      this.metrics.decodedBytes += bytes.length;
-      state.snapshot = Object.freeze({ available: true, value: decoded });
-      for (const listener of [...state.listeners]) listener();
-    });
+    state.stop = registration.transport.subscribe(
+      name,
+      (bytes) => {
+        if (this.registration !== registration || this.disposed) return;
+        const decoded = codec(this.feature.states[name].schema).decode(bytes);
+        this.metrics.decodedMessages++;
+        this.metrics.decodedBytes += bytes.length;
+        state.snapshot = Object.freeze({ available: true, value: decoded });
+        for (const listener of [...state.listeners]) listener();
+      },
+      () => {
+        if (this.registration !== registration || this.disposed) return;
+        state.snapshot = Object.freeze({ available: false });
+        for (const listener of [...state.listeners]) listener();
+      },
+    );
   }
   private state(name: string) {
     if (this.disposed)
@@ -231,6 +244,18 @@ export class FeatureConnection<F extends Feature> {
   }
   snapshot<K extends StateKey<F>>(name: K): Snapshot<StateValue<F, K>> {
     return this.state(name).snapshot as Snapshot<StateValue<F, K>>;
+  }
+  /** Re-read granted state; never executes a gameplay operation. */
+  refreshSnapshot<K extends StateKey<F>>(name: K): void {
+    const state = this.state(name);
+    const registration = this.registration;
+    if (!registration)
+      throw new FeatureError('unavailable', 'Provider unavailable');
+    if (registration.transport.refresh) registration.transport.refresh(name);
+    else {
+      state.stop?.();
+      this.attach(name, state, registration);
+    }
   }
   subscribe<K extends StateKey<F>>(name: K, listener: () => void): () => void {
     const state = this.state(name);

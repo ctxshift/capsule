@@ -14,6 +14,7 @@ export type {
 } from './props';
 
 interface Runtime {
+  requestReadOnly?(capability: number, payload: Uint8Array): void;
   Box: ComponentType<Props>;
   WorldAnchor: ComponentType<Props>;
   Effect: ComponentType<Props>;
@@ -91,6 +92,12 @@ export function observe(
   receive: (bytes: Uint8Array) => void,
 ): () => void {
   return runtime.observe(topic, schema, receive);
+}
+
+/** Host-granted reads only; gameplay requests still require an ActionEvent. */
+export function requestReadOnly(capability: number, payload: Uint8Array): void {
+  if (!runtime.requestReadOnly) throw Error('Read-only transport unavailable');
+  runtime.requestReadOnly(capability, payload);
 }
 
 /** One-shot work on the guest's bounded scheduler; cancel on unmount. */

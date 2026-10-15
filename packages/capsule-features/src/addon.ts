@@ -11,6 +11,7 @@ export const featureChannels = {
   state: 65001,
   result: 65002,
   request: 65000,
+  recovery: 65001,
 } as const;
 export type FeatureObserver = (
   topic: number,
@@ -23,17 +24,26 @@ type Descriptor = {
   version: string;
   fingerprint: string;
   states: Record<string, number>;
+  deliveries?: Record<string, 'latest' | 'ordered'>;
   requests: Record<string, number>;
 };
 type Action = { request(capability: number, payload: Uint8Array): void };
 
 /** Private registry fed exclusively by loader admission. No game/engine identities here. */
-export function createAddonFeatures(observe: FeatureObserver) {
+export function createAddonFeatures(
+  observe: FeatureObserver,
+  recover?: (capability: number, payload: Uint8Array) => void,
+) {
   const registry = new FeatureRegistry();
   const removals: (() => void)[] = [];
   const connections: { dispose(): void }[] = [];
   const latest = new Map<number, Uint8Array>();
   const listeners = new Map<number, Set<(bytes: Uint8Array) => void>>();
+  const invalidators = new Map<number, Set<() => void>>();
+  const ordered = new Set<number>();
+  const revisions = new Map<number, number>();
+  const awaiting = new Set<number>();
+  const admitted = new Set<number>();
   const pending = new Map<
     number,
     { resolve(bytes: Uint8Array): void; reject(error: Error): void }
@@ -54,6 +64,25 @@ export function createAddonFeatures(observe: FeatureObserver) {
     pending.clear();
     latest.clear();
     listeners.clear();
+    invalidators.clear();
+    ordered.clear();
+    revisions.clear();
+    awaiting.clear();
+    admitted.clear();
+  }
+  function refresh(id: number) {
+    if (!admitted.has(id))
+      throw new FeatureError('denied', 'State not granted');
+    if (!recover)
+      throw new FeatureError(
+        'unavailable',
+        'Snapshot recovery transport unavailable',
+      );
+    const frame = new Uint8Array(8),
+      view = new DataView(frame.buffer);
+    view.setUint32(0, epoch, true);
+    view.setUint32(4, id, true);
+    recover(featureChannels.recovery, frame);
   }
   const stopMetadata = observe(featureChannels.metadata, 1, (bytes) => {
     // Metadata contains only validated ASCII identities, permissions and identifiers.
@@ -64,19 +93,34 @@ export function createAddonFeatures(observe: FeatureObserver) {
     epoch = metadata.epoch;
     sequence = 0;
     for (const descriptor of metadata.features) {
+      for (const [name, member] of Object.entries(descriptor.states)) {
+        const id = key(descriptor.id, member);
+        admitted.add(id);
+        if (descriptor.deliveries?.[name] === 'ordered') ordered.add(id);
+      }
       const transport: ProviderTransport = {
-        subscribe(name, receive) {
+        subscribe(name, receive, invalidate) {
           const member = descriptor.states[name];
           if (member === undefined) return () => {};
           const id = key(descriptor.id, member);
           let set = listeners.get(id);
           if (!set) listeners.set(id, (set = new Set()));
           set.add(receive);
+          let invalid = invalidators.get(id);
+          if (!invalid) invalidators.set(id, (invalid = new Set()));
+          if (invalidate) invalid.add(invalidate);
           const bytes = latest.get(id);
           if (bytes) receive(bytes);
           return () => {
             set.delete(receive);
+            if (invalidate) invalid.delete(invalidate);
           };
+        },
+        refresh(name) {
+          const member = descriptor.states[name];
+          if (member === undefined)
+            throw new FeatureError('denied', 'State not granted');
+          refresh(key(descriptor.id, member));
         },
         request(name, bytes, signal, context) {
           const member = descriptor.requests[name];
@@ -146,8 +190,32 @@ export function createAddonFeatures(observe: FeatureObserver) {
     if (bytes.length < 8) return;
     const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     if (view.getUint32(0, true) !== epoch) return;
-    const id = view.getUint32(4, true),
-      payload = bytes.subarray(8);
+    const id = view.getUint32(4, true);
+    if (!admitted.has(id)) return;
+    let offset = 8;
+    if (ordered.has(id)) {
+      if (bytes.length < 16) return;
+      const revision = view.getUint32(8, true),
+        reset = view.getUint32(12, true);
+      const previous = revisions.get(id) ?? 0;
+      if (revision === 0 || revision <= previous || reset > 1) return;
+      if (
+        reset !== 1 &&
+        (awaiting.has(id) || previous === 0 || revision !== previous + 1)
+      ) {
+        if (!awaiting.has(id)) {
+          awaiting.add(id);
+          latest.delete(id);
+          for (const invalidate of invalidators.get(id) ?? []) invalidate();
+          if (recover) refresh(id);
+        }
+        return;
+      }
+      revisions.set(id, revision);
+      awaiting.delete(id);
+      offset = 16;
+    }
+    const payload = bytes.subarray(offset);
     latest.set(id, payload);
     for (const receive of listeners.get(id) ?? []) receive(payload);
   });

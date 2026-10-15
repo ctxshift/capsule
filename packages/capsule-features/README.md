@@ -57,10 +57,20 @@ not transient events or incremental patches.
 The native session's ordered capacity is host-configurable (256 queued updates by
 default). Exhaustion fences requests and retires the activation with an explicit
 `ordered-overflow` metadata reason; it never silently publishes a partial sequence.
-A fresh activation receives current provider snapshots. Automatic recovery is not
-yet implemented, so addons must handle unavailable state. Metadata retirement may
-itself wait for downstream backpressure to clear. Segmented feature envelopes avoid
+A fresh activation receives current provider snapshots. The Unity host replaces an
+overflowed session with a fresh epoch; addons must handle unavailable state during
+replacement. Metadata retirement may itself wait for downstream backpressure to clear. Segmented feature envelopes avoid
 an intermediate payload copy; decoding uses subarray views.
+
+Ordered frames carry a revision and snapshot-reset marker. A missing revision
+invalidates the cached state and requests one new snapshot; ordinary updates are
+ignored until a reset arrives. Late subscribers receive the last complete state.
+`connection.refreshSnapshot(name)` explicitly re-reads a granted state. Native
+bindings supply `requestReadOnly` as the second `createAddonFeatures` argument;
+browser providers may supply `refresh` or replay their snapshot on resubscription.
+The dedicated recovery capability accepts only an epoch and granted state key,
+never an operation or gameplay payload. The host must explicitly grant read-only
+requests; all gameplay operations retain live input and native visibility checks.
 
 Run `bun run --cwd packages/capsule-features typecheck` and
 `bun run --cwd packages/capsule-features test` from the repository root.
