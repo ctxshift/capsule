@@ -40,7 +40,12 @@ namespace PortableUi.Unity
                 if(tint)tint.ThemeFactor=gain;
                 if(theme.ImageStretch(node.AssetKey))
                 {
-                    widget.Image.type=Image.Type.Simple;
+                    float border=theme.AssetNumber(node.AssetKey,"border");
+                    float edge=theme.AssetNumber(node.AssetKey,"edge");
+                    bool sliced=border>0 && edge>0;
+                    widget.Image.type=sliced ? Image.Type.Sliced : Image.Type.Simple;
+                    widget.Image.fillCenter=!sliced;
+                    widget.Image.pixelsPerUnitMultiplier=sliced ? border/edge : 1;
                     widget.Image.preserveAspect=false;
                     return true;
                 }
