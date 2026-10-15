@@ -111,6 +111,17 @@ namespace PortableUi.Unity
                 var feedback=root.GetComponent<PortableUiControlFeedback>()??root.gameObject.AddComponent<PortableUiControlFeedback>();
                 feedback.Configure(null,null,FocusFrame(root),Color.clear);
             }
+            else if (node.Kind == UiNodeKind.TextInput)
+            {
+                var input = root.GetComponent<PortableUiTextInput>(); input.transition = Selectable.Transition.None;
+                widget.Image.sprite = null; widget.Image.color = C("select", "background");
+                RectangleBorder(root, "Theme input border", N("select", "borderWidth"), C("select", "border"), 0);
+                StyleSelectLabel(widget.Label); widget.Label.richText = false;
+                input.textViewport.offsetMin = new Vector2(N("select", "paddingLeft"), 0);
+                input.textViewport.offsetMax = new Vector2(-N("select", "paddingLeft"), 0);
+                var feedback = root.GetComponent<PortableUiControlFeedback>() ?? root.gameObject.AddComponent<PortableUiControlFeedback>();
+                feedback.Configure(null, null, FocusFrame(root), Color.clear);
+            }
             else if (node.Kind == UiNodeKind.Select && (node.StyleKey == theme.String("components","select") || string.IsNullOrEmpty(node.StyleKey)))
             {
                 var select = root.GetComponent<TMP_Dropdown>(); select.transition=Selectable.Transition.None;

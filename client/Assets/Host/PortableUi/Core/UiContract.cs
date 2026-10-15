@@ -26,7 +26,7 @@ namespace PortableUi
     public enum UiNodeKind : byte
     {
         Window = 1, Panel = 2, Text = 3, Image = 4, Portrait = 5,
-        Slot = 6, Progress = 7, Box = 8, ClipBox = 9, Button = 10, Range = 11, Select = 12, Viewport = 13
+        Slot = 6, Progress = 7, Box = 8, ClipBox = 9, Button = 10, Range = 11, Select = 12, Viewport = 13, TextInput = 14
     }
 
     [Flags]
@@ -60,23 +60,25 @@ namespace PortableUi
         public UiLayout Layout { get; }
         // Bounded subtree RGB multiplier; alpha and layout are unchanged.
         public ushort Brightness { get; }
+        public UiTextInputOptions TextInput { get; }
 
         public UiNode(ulong handle, ulong parent, UiNodeKind kind, UiRect rect,
             string styleKey, string assetKey, string text, ushort progress,
-            bool visible, UiEventMask events, int order, UiLayout layout = null, ushort brightness = 10000)
+            bool visible, UiEventMask events, int order, UiLayout layout = null, ushort brightness = 10000, UiTextInputOptions textInput = null)
         {
             Handle = handle; Parent = parent; Kind = kind; Rect = rect;
             StyleKey = styleKey; AssetKey = assetKey; Text = text;
             Progress = progress; Visible = visible; Events = events; Order = order; Layout = layout;
             Brightness = brightness;
+            TextInput = textInput ?? UiTextInputOptions.Default;
         }
 
         public UiNode With(UiRect? rect = null, string style = null, string asset = null,
             string text = null, ushort? progress = null, bool? visible = null,
-            UiEventMask? events = null, int? order = null, UiLayout layout = null, ushort? brightness = null) =>
+            UiEventMask? events = null, int? order = null, UiLayout layout = null, ushort? brightness = null, UiTextInputOptions textInput = null) =>
             new UiNode(Handle, Parent, Kind, rect ?? Rect, style ?? StyleKey,
                 asset ?? AssetKey, text ?? Text, progress ?? Progress,
-                visible ?? Visible, events ?? Events, order ?? Order, layout ?? Layout, brightness ?? Brightness);
+                visible ?? Visible, events ?? Events, order ?? Order, layout ?? Layout, brightness ?? Brightness, textInput ?? TextInput);
     }
 
     public sealed class UiSnapshot

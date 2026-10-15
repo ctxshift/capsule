@@ -8,7 +8,7 @@ namespace PortableUi
     {
         Create = 1, SetText = 2, SetImage = 3, SetProgress = 4,
         SetVisible = 5, Remove = 6, SetEvents = 7, SetRect = 8, Raise = 9, SetStyle = 10,
-        CreateLayout = 11, SetLayout = 12, SetBrightness = 13
+        CreateLayout = 11, SetLayout = 12, SetBrightness = 13, SetTextInput = 14
     }
 
     internal sealed class UiCommand
@@ -22,6 +22,7 @@ namespace PortableUi
         internal bool Visible;
         internal UiEventMask Events;
         internal UiLayout Layout;
+        internal UiTextInputOptions TextInput;
     }
 
     // PUI1, little-endian, exact lengths; no guest-owned span is retained.
@@ -60,6 +61,13 @@ namespace PortableUi
                     var command = new UiCommand { Opcode = opcode };
                     switch (opcode)
                     {
+                        case UiOpcode.SetTextInput:
+                            command.Handle = body.U64();
+                            ushort maxLength = body.U16(), maxBytes = body.U16();
+                            byte flags = body.U8();
+                            if (flags > 3 || body.U8() != 0) return new UiResult(UiError.InvalidCommand, "Text input flags.");
+                            command.TextInput = new UiTextInputOptions(maxLength, maxBytes, (flags & 1) != 0, (flags & 2) != 0, body.U32());
+                            break;
                         case UiOpcode.Create:
                         case UiOpcode.CreateLayout:
                             command.Handle = body.U64(); command.Parent = body.U64();

@@ -63,6 +63,7 @@ namespace PortableUi.Unity
             active=false;
             if(keyboardOwner==this)keyboardOwner=null;
             if(!layer)return;
+            foreach(var field in layer.GetComponentsInChildren<PortableUiTextInput>(true))field.RetireFocus();
             foreach(var select in layer.GetComponentsInChildren<TMP_Dropdown>(true))select.Hide();
             foreach(var selectable in layer.GetComponentsInChildren<Selectable>(true))selectable.interactable=false;
             foreach(var graphic in layer.GetComponentsInChildren<Graphic>(true))graphic.raycastTarget=false;
@@ -140,6 +141,7 @@ namespace PortableUi.Unity
                     }
                     else if (node.Kind == UiNodeKind.Range) widget = CreateRange(stage, node.Handle);
                     else if (node.Kind == UiNodeKind.Select) widget = CreateSelect(stage, node.Handle);
+                    else if (node.Kind == UiNodeKind.TextInput) widget = CreateTextInput(stage, node.Handle);
                     else widget = factory.Create(node.Kind, stage);
                     if (!widget.Rect) throw new InvalidOperationException("Factory returned no RectTransform.");
                     ApplyNode(widget, node);
@@ -226,6 +228,7 @@ namespace PortableUi.Unity
                 var next=proposed.Nodes[i];var old=currentSnapshot.Nodes[i];
                 if(next.Handle!=old.Handle || next.Parent!=old.Parent || next.Kind!=old.Kind || next.Order!=old.Order ||
                     next.StyleKey!=old.StyleKey || next.AssetKey!=old.AssetKey || next.Text!=old.Text ||
+                    next.TextInput != old.TextInput ||
                     next.Progress!=old.Progress || next.Visible!=old.Visible || next.Events!=old.Events || next.Brightness!=old.Brightness ||
                     next.Rect.Width!=old.Rect.Width || next.Rect.Height!=old.Rect.Height)return false;
                 if(next.Rect.X!=old.Rect.X || next.Rect.Y!=old.Rect.Y)
@@ -277,7 +280,8 @@ namespace PortableUi.Unity
         void ApplyNode(NativeUiWidget widget, UiNode node)
         {
             SetRect(widget.Rect, node.Rect);
-            if (widget.Label) { widget.Label.text = node.Text ?? ""; widget.Label.richText = false; }
+            if (widget.Label && node.Kind != UiNodeKind.TextInput) { widget.Label.text = node.Text ?? ""; widget.Label.richText = false; }
+            if (node.Kind == UiNodeKind.TextInput) widget.Rect.GetComponent<PortableUiTextInput>().Apply(node);
             if (widget.Image && !string.IsNullOrEmpty(node.AssetKey))
             {
                 if (!factory.TryGetSprite(node.AssetKey, out var sprite) || !sprite)
@@ -421,6 +425,19 @@ namespace PortableUi.Unity
             }
         }
 
+        public void RouteTextTab(PortableUiTextInput field, bool backwards)
+        {
+            if (!active || disposed || !field || !field.transform.IsChildOf(layer)) return;
+            var controls = new List<Selectable>();
+            Transform scope = field.transform;
+            while (scope.parent && scope.parent != current) scope = scope.parent;
+            foreach (var control in scope.GetComponentsInChildren<Selectable>())
+                if (control.IsActive() && control.IsInteractable()) controls.Add(control);
+            if (controls.Count < 2) return;
+            int index = controls.IndexOf(field);
+            controls[(index + (backwards ? -1 : 1) + controls.Count) % controls.Count].Select();
+        }
+
         void MaintainFocus(Selectable[] retainedFocusPath = null)
         {
             if (!active || currentSnapshot == null || !EventSystem.current) return;
@@ -501,6 +518,27 @@ namespace PortableUi.Unity
             select.navigation = new Navigation { mode = Navigation.Mode.None };
             select.onValueChanged.AddListener(value => Queue(handle, UiEventMask.ValueChange, UiInputPayload.Value((ushort)value)));
             return new NativeUiWidget((RectTransform)obj.transform, obj.GetComponent<Image>(), null, null);
+        }
+
+        NativeUiWidget CreateTextInput(Transform parent, ulong handle)
+        {
+            var obj = new GameObject("Text Input", typeof(RectTransform), typeof(Image));
+            obj.transform.SetParent(parent, false);
+            var viewport = NewRoot("Text Viewport", obj.transform);
+            viewport.offsetMin = new Vector2(6, 2); viewport.offsetMax = new Vector2(-6, -2);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            var textWidget = factory.Create(UiNodeKind.Text, viewport);
+            if (!textWidget.Label) throw new InvalidOperationException("Text factory must provide a TMP label.");
+            var label = textWidget.Label;
+            label.richText = false; label.raycastTarget = false;
+            label.rectTransform.anchorMin = Vector2.zero; label.rectTransform.anchorMax = Vector2.one;
+            label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
+            var field = obj.AddComponent<PortableUiTextInput>();
+            field.textViewport = viewport; field.textComponent = label;
+            field.targetGraphic = obj.GetComponent<Image>();
+            field.navigation = new Navigation { mode = Navigation.Mode.None };
+            field.Bind(this, handle);
+            return new NativeUiWidget((RectTransform)obj.transform, obj.GetComponent<Image>(), null, label);
         }
 
         static void SetRect(RectTransform rect, UiRect fixedRect)

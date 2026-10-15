@@ -3,6 +3,25 @@ using System.Text;
 
 namespace PortableUi
 {
+    public sealed class UiTextInputOptions
+    {
+        static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
+        static readonly char[] Controls = { '\0', '\r', '\n', '\t' };
+        public static readonly UiTextInputOptions Default = new UiTextInputOptions(512, 512, false, false, 0);
+        public readonly ushort MaxLength, MaxBytes;
+        public readonly bool ReadOnly, Numeric;
+        public readonly uint Revision;
+        public UiTextInputOptions(ushort maxLength, ushort maxBytes, bool readOnly, bool numeric, uint revision)
+        { MaxLength = maxLength; MaxBytes = maxBytes; ReadOnly = readOnly; Numeric = numeric; Revision = revision; }
+        public bool Valid => MaxLength >= 1 && MaxLength <= 512 && MaxBytes >= 1 && MaxBytes <= 512;
+        public bool Accepts(string text)
+        {
+            if (!Valid || text == null || text.Length > MaxLength || text.IndexOfAny(Controls) >= 0) return false;
+            if (Numeric) foreach (char c in text) if (c < '0' || c > '9') return false;
+            try { return Utf8.GetByteCount(text) <= MaxBytes; }
+            catch (EncoderFallbackException) { return false; }
+        }
+    }
     public enum UiTextEditPhase : byte { Change = 1, Composition = 2, Submit = 3, Cancel = 4, Focus = 5, Blur = 6 }
 
     // Selection offsets are UTF-16 boundaries, matching TMP and browser editors.

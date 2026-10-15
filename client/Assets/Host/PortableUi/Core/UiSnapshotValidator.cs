@@ -45,7 +45,8 @@ namespace PortableUi
                 if (r.X < -8192 * 64 || r.X > 8192 * 64 || r.Y < -8192 * 64 || r.Y > 8192 * 64 ||
                     r.Width < 1 || r.Width > 4096 * 64 || r.Height < 1 || r.Height > 4096 * 64 ||
                     (long)r.X + r.Width > 8192 * 64 || (long)r.Y + r.Height > 8192 * 64 ||
-                    node.Kind < UiNodeKind.Window || node.Kind > UiNodeKind.Viewport ||
+                    node.Kind < UiNodeKind.Window || node.Kind > UiNodeKind.TextInput ||
+                    (node.Kind == UiNodeKind.TextInput && !node.TextInput.Accepts(node.Text)) ||
                     node.Progress > 10000 || node.Brightness < 8000 || node.Brightness > 12000 ||
                     ((ushort)node.Events & ~UiInputPayload.AllowedEvents) != 0 ||
                     System.Text.Encoding.UTF8.GetByteCount(node.Text ?? "") > 512 ||

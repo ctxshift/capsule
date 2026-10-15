@@ -64,6 +64,9 @@ namespace PortableUi
                 if (!result.Success) return result;
             }
             var snapshot = Snapshot(proposed);
+            foreach (var node in snapshot.Nodes)
+                if (node.Kind == UiNodeKind.TextInput && !node.TextInput.Accepts(node.Text))
+                    return new UiResult(UiError.InvalidCommand, "Text input value or options invalid.");
             bool hasLayout = false;
             foreach (var node in snapshot.Nodes) if (node.Layout != null) { hasLayout = true; break; }
             if (hasLayout && !UiSnapshotValidator.Validate(snapshot, owner, theme, out string layoutError, LayoutNodeLimit, surfaces))
@@ -135,6 +138,10 @@ namespace PortableUi
             if (!live.Success) return live;
             switch (command.Opcode)
             {
+                case UiOpcode.SetTextInput:
+                    if (current.Kind != UiNodeKind.TextInput || !command.TextInput.Valid)
+                        return new UiResult(UiError.InvalidCommand, "Text input options invalid.");
+                    next[handle] = current.With(textInput: command.TextInput); break;
                 case UiOpcode.SetBrightness:
                     if (command.Value < 8000 || command.Value > 12000)
                         return new UiResult(UiError.InvalidCommand, "Brightness must be 8000..12000.");
@@ -145,7 +152,7 @@ namespace PortableUi
                 case UiOpcode.SetText:
                     if (current.Kind != UiNodeKind.Text && current.Kind != UiNodeKind.Window &&
                         current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select &&
-                        current.Kind != UiNodeKind.Slot)
+                        current.Kind != UiNodeKind.Slot && current.Kind != UiNodeKind.TextInput)
                         return new UiResult(UiError.InvalidCommand, "Node has no text.");
                     next[handle] = current.With(text: command.Text); break;
                 case UiOpcode.SetStyle:
