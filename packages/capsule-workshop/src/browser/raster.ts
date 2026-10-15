@@ -77,6 +77,7 @@ export function frame(
   asset: ImageRegion,
   sourceBorder: number,
   edge: number,
+  horizontalRailWidth?: number,
 ): HTMLElement {
   const container = document.createElement('span');
   Object.assign(container.style, {
@@ -107,7 +108,9 @@ export function frame(
         image(document, asset, [
           xs[column],
           ys[row],
-          widths[column],
+          column === 1
+            ? (horizontalRailWidth ?? widths[column])
+            : widths[column],
           heights[row],
         ]),
       );

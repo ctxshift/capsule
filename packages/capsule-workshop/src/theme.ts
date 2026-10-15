@@ -17,6 +17,8 @@ export interface ThemeAsset {
   rotation?: 0 | 90 | 180 | 270;
   /** Fill the image rectangle without preserving aspect ratio; defaults to false. */
   stretch?: boolean;
+  /** Source pixels sampled after the left border for top/bottom rails. */
+  horizontalRailWidth?: number;
 }
 export interface UiTheme {
   schemaVersion: 1;
@@ -303,6 +305,16 @@ export function parseTheme(
       throw Error('Theme image brightness bounds');
     if (asset.stretch !== undefined && typeof asset.stretch !== 'boolean')
       throw Error('Theme image stretch must be boolean');
+    if (
+      asset.horizontalRailWidth !== undefined &&
+      (!Number.isInteger(asset.horizontalRailWidth) ||
+        asset.horizontalRailWidth <= 0 ||
+        asset.horizontalRailWidth > asset.rect[2] - 2 * asset.border ||
+        asset.border <= 0 ||
+        asset.edge <= 0 ||
+        asset.stretch !== true)
+    )
+      throw Error('Theme horizontal rail width bounds');
     themePath(asset.path);
     const image = asset.image ?? asset.key;
     if (!/^[a-z0-9-]{1,64}$/.test(image)) throw Error('Theme image identity');

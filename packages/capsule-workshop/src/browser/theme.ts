@@ -27,23 +27,33 @@ export function createBrowserTheme(
   const definition = (key: string) =>
     theme.assets.find((item) => item.key === key)!;
   const framed = (document: Document, key: string) =>
-    frame(document, asset(key), definition(key).border, definition(key).edge);
+    frame(
+      document,
+      asset(key),
+      definition(key).border,
+      definition(key).edge,
+      definition(key).horizontalRailWidth,
+    );
   const renderedImages = new WeakMap<
     HTMLElement,
-    { key: string; svg: SVGSVGElement }
+    { key: string; svg: SVGSVGElement | HTMLElement }
   >();
   const updateImage = (element: HTMLElement, node: UiNode) => {
     if (node.kind !== 4) return;
     const previous = renderedImages.get(element);
     if (previous?.key === node.asset) return;
     const region = asset(node.asset);
-    const svg = image(
-      element.ownerDocument,
-      region,
-      undefined,
-      definition(node.asset).stretch ?? false,
-      definition(node.asset).rotation ?? 0,
-    );
+    const recipe = definition(node.asset);
+    const svg =
+      recipe.stretch && recipe.border > 0 && recipe.edge > 0
+        ? framed(element.ownerDocument, node.asset)
+        : image(
+            element.ownerDocument,
+            region,
+            undefined,
+            definition(node.asset).stretch ?? false,
+            definition(node.asset).rotation ?? 0,
+          );
     svg.style.filter = `brightness(${definition(node.asset).brightness ?? 1})`;
     svg.style.opacity = String(definition(node.asset).opacity ?? 1);
     if (previous) previous.svg.replaceWith(svg);
