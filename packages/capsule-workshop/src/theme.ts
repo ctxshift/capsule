@@ -149,13 +149,13 @@ export function parseTheme(
   if (
     !Number.isInteger(limits.assetRecipes) ||
     limits.assetRecipes < 1 ||
-    limits.assetRecipes > 64 ||
+    limits.assetRecipes > 2147483647 ||
     !Number.isInteger(limits.textStyles) ||
     limits.textStyles < 1 ||
-    limits.textStyles > 64 ||
+    limits.textStyles > 2147483647 ||
     !Number.isInteger(surfaceLimit) ||
     surfaceLimit < 1 ||
-    surfaceLimit > 64
+    surfaceLimit > 2147483647
   )
     throw Error('Host theme profile bounds');
   if (!value || typeof value !== 'object') throw Error('Missing theme');
