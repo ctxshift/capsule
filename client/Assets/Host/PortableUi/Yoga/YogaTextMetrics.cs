@@ -92,9 +92,9 @@ namespace PortableUi.Yoga
     public sealed class YogaTextCatalog
     {
         readonly Dictionary<string, YogaFontMetrics> fonts;
-        public YogaTextCatalog(IDictionary<string, YogaFontMetrics> source)
+        public YogaTextCatalog(IDictionary<string, YogaFontMetrics> source, int maxStyles = 64)
         {
-            if (source == null || source.Count > 64) throw new ArgumentException("Text style quota.");
+            if (maxStyles < 1 || source == null || source.Count > maxStyles) throw new ArgumentException("Text style quota.");
             fonts = new Dictionary<string, YogaFontMetrics>(source, StringComparer.Ordinal);
         }
         internal YogaFontMetrics Require(string style) => fonts.TryGetValue(style, out var font) ? font : throw new ArgumentException("Uncaptured text style: " + style);
