@@ -209,6 +209,7 @@ export function compiler({
                 'useRef',
                 'useReducer',
                 'useLayoutEffect',
+                'useSyncExternalStore',
                 'Fragment',
                 'createElement',
               ]

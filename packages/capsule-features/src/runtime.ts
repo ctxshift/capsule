@@ -20,6 +20,7 @@ export interface ProviderTransport {
     operation: string,
     bytes: Uint8Array,
     signal: RequestCancellation,
+    context?: unknown,
   ): Promise<Uint8Array>;
 }
 type StateKey<F extends Feature> = keyof F['states'] & string;
@@ -241,6 +242,7 @@ export class FeatureConnection<F extends Feature> {
   request<K extends RequestKey<F>>(
     name: K,
     input: Value<F['requests'][K]['input']>,
+    context?: unknown,
   ): Promise<Value<F['requests'][K]['output']>> {
     const operation = this.feature.requests[name];
     if (!operation || !this.grants.has(operation.permission))
@@ -260,7 +262,12 @@ export class FeatureConnection<F extends Feature> {
         .then(() => {
           if (!this.pending.has(pending))
             throw new FeatureError('unknown', 'Provider retired');
-          return registration.transport.request(name, bytes, pending.signal);
+          return registration.transport.request(
+            name,
+            bytes,
+            pending.signal,
+            context,
+          );
         })
         .then((result) => {
           if (
@@ -284,6 +291,8 @@ export class FeatureConnection<F extends Feature> {
     if (this.disposed) return;
     this.disposed = true;
     this.stopWatch();
+    // Teardown retires callbacks before invalidating state; a subscriber may read its snapshot.
+    for (const state of this.states.values()) state.listeners.clear();
     this.refresh();
     this.states.clear();
   }
