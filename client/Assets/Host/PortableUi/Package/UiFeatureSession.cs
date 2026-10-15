@@ -16,8 +16,8 @@ namespace PortableUi.Package
         readonly uint epoch;
         readonly List<IDisposable> subscriptions = new List<IDisposable>();
         readonly Dictionary<uint, byte[]> dirty = new Dictionary<uint, byte[]>();
-        readonly Dictionary<uint, byte[]> stateFrames = new Dictionary<uint, byte[]>();
-        readonly Dictionary<uint, byte[]> resultFrames = new Dictionary<uint, byte[]>();
+        readonly Dictionary<uint, UiObservationPayload> stateFrames = new Dictionary<uint, UiObservationPayload>();
+        readonly Dictionary<uint, UiObservationPayload> resultFrames = new Dictionary<uint, UiObservationPayload>();
         readonly Dictionary<uint, Task<byte[]>> pending = new Dictionary<uint, Task<byte[]>>();
         readonly Dictionary<uint, Func<byte[], Task<byte[]>>> requests = new Dictionary<uint, Func<byte[], Task<byte[]>>>();
         readonly Dictionary<string, uint> requestKeys = new Dictionary<string, uint>();
@@ -93,7 +93,8 @@ namespace PortableUi.Package
         }
         // Pump and provider callbacks run on the host's owning thread. Dirty state is
         // coalesced by member here; shared transport topics must never be coalesced.
-        public void Pump(Func<ushort, byte[], bool> publish)
+        public void Pump(Func<ushort, byte[], bool> publish) => PumpSegments((topic, payload) => publish(topic, payload.AsContiguous()));
+        public void PumpSegments(Func<ushort, UiObservationPayload, bool> publish)
         {
             if (disposed) return;
             if (!retired && !selection.IsCurrent)
@@ -103,15 +104,15 @@ namespace PortableUi.Package
                 dirty.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear();
                 metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = new object[0] }));
             }
-            if (metadata != null) { if (!publish(MetadataTopic, metadata)) return; metadata = null; }
+            if (metadata != null) { if (!publish(MetadataTopic, UiObservationPayload.Owned(metadata))) return; metadata = null; }
             foreach (var pair in dirty.ToArray())
             {
                 // The callback borrows an immutable frame. Retain it on rejection;
                 // acceptance transfers the same array without another envelope copy.
                 if (!stateFrames.TryGetValue(pair.Key, out var frame))
                 {
-                    frame = new byte[8 + pair.Value.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key);
-                    Buffer.BlockCopy(pair.Value, 0, frame, 8, pair.Value.Length);
+                    var header = new byte[8]; Write32(header, 0, epoch); Write32(header, 4, pair.Key);
+                    frame = new UiObservationPayload(header, pair.Value);
                     stateFrames.Add(pair.Key, frame);
                 }
                 if (!publish(StateTopic, frame)) return;
@@ -126,8 +127,8 @@ namespace PortableUi.Package
                 if (!resultFrames.TryGetValue(pair.Key, out var frame))
                 {
                     byte[] payload = status == 0 ? task.Result : Array.Empty<byte>();
-                    frame = new byte[9 + payload.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key); frame[8] = status;
-                    Buffer.BlockCopy(payload, 0, frame, 9, payload.Length);
+                    var header = new byte[9]; Write32(header, 0, epoch); Write32(header, 4, pair.Key); header[8] = status;
+                    frame = new UiObservationPayload(header, payload);
                     resultFrames.Add(pair.Key, frame);
                 }
                 if (!publish(ResultTopic, frame)) return;

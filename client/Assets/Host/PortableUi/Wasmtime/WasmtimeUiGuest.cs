@@ -45,7 +45,7 @@ namespace PortableUi.Wasmtime
         GCHandle self;
         bool terminal, disposed;
         string callbackError;
-        byte[] pendingObservation;
+        UiObservationPayload pendingObservation;
         ushort pendingTopic, pendingSchema;
         public bool SupportsScheduling { get; }
         public long? NextWakeTimestamp { get; private set; }
@@ -208,7 +208,18 @@ namespace PortableUi.Wasmtime
                     (pendingObservation == null || b != pendingObservation.Length + 8)) return (int)UiHostResult.InvalidArgument;
                 if (b != 0) Address(memory, size, a, (int)b, UiHostBridgeContract.MaxObservationBytes + 8);
                 if (observations == null) return (int)UiHostResult.Unavailable;
-                if (pendingObservation == null && !observations.TryDequeue(out pendingTopic, out pendingSchema, out pendingObservation)) return 0;
+                if (pendingObservation == null)
+                {
+                    if (observations is IUiSegmentedObservationAdapter segmented)
+                    {
+                        if (!segmented.TryDequeueSegments(out pendingTopic, out pendingSchema, out pendingObservation)) return 0;
+                    }
+                    else
+                    {
+                        if (!observations.TryDequeue(out pendingTopic, out pendingSchema, out var bytes)) return 0;
+                        if (bytes != null) pendingObservation = UiObservationPayload.Owned(bytes);
+                    }
+                }
                 if (!grant.AllowsObservation(pendingTopic, pendingSchema)) { pendingObservation = null; return (int)UiHostResult.Rejected; }
                 var payload = pendingObservation;
                 if (payload == null || payload.Length > UiHostBridgeContract.MaxObservationBytes) { pendingObservation = null; return (int)UiHostResult.InvalidArgument; }
@@ -219,7 +230,7 @@ namespace PortableUi.Wasmtime
                 Marshal.WriteInt16(destination, 0, unchecked((short)pendingTopic));
                 Marshal.WriteInt16(destination, 2, unchecked((short)pendingSchema));
                 Marshal.WriteInt32(destination, 4, payload.Length);
-                Marshal.Copy(payload, 0, IntPtr.Add(destination, 8), payload.Length);
+                payload.WriteTo(IntPtr.Add(destination, 8));
                 copiedWritten += length;
                 pendingObservation = null;
                 return length;

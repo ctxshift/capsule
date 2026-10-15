@@ -107,6 +107,11 @@ namespace PortableUi
             CheckAccess();
             return Live(generation) && Worker.EnqueueOwnedObservation(generation, topic, schema, payload, replaceable);
         }
+        public bool EnqueueSegmentedObservation(long generation, ushort topic, ushort schema, UiObservationPayload payload, bool replaceable = true)
+        {
+            CheckAccess();
+            return Live(generation) && Worker.EnqueueSegmentedObservation(generation, topic, schema, payload, replaceable);
+        }
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload)
         {
             CheckAccess();

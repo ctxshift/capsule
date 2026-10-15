@@ -99,6 +99,7 @@ namespace PortableUi
             public long Generation, Enqueued;
             public ushort Topic, Schema;
             public byte[] Payload;
+            public UiObservationPayload Segments;
             public ulong Handle;
             public UiEventMask Event;
             public int Width, Height;
@@ -109,7 +110,7 @@ namespace PortableUi
             public long Generation, Enqueued;
             public UiAsyncGuestFactory Factory;
         }
-        sealed class Exchange : IUiCommitTarget, IUiObservationAdapter, IUiActionAdapter
+        sealed class Exchange : IUiCommitTarget, IUiSegmentedObservationAdapter, IUiActionAdapter
         {
             public UiSnapshot Snapshot;
             public readonly List<UiAsyncAction> Actions = new List<UiAsyncAction>();
@@ -128,7 +129,14 @@ namespace PortableUi
             {
                 var value = Observation; Observation = null;
                 topic = value?.Topic ?? 0; schemaVersion = value?.Schema ?? 0;
-                payload = value?.Payload; // Transfer the worker-owned immutable buffer.
+                payload = value?.Segments?.AsContiguous() ?? value?.Payload; // Legacy guest compatibility.
+                return value != null;
+            }
+            public bool TryDequeueSegments(out ushort topic, out ushort schemaVersion, out UiObservationPayload payload)
+            {
+                var value = Observation; Observation = null;
+                topic = value?.Topic ?? 0; schemaVersion = value?.Schema ?? 0;
+                payload = value == null ? null : value.Segments ?? UiObservationPayload.Owned(value.Payload);
                 return value != null;
             }
             public bool TryRequest(ushort capability, ulong handle, byte[] payload)
@@ -215,6 +223,11 @@ namespace PortableUi
             if (payload == null || payload.Length > UiHostBridgeContract.MaxObservationBytes)
                 throw new ArgumentException("Observation exceeds carrier memory capacity.");
             return Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = payload, Ordered = !replaceable });
+        }
+        public bool EnqueueSegmentedObservation(long generation, ushort topic, ushort schema, UiObservationPayload payload, bool replaceable = true)
+        {
+            if (payload == null || payload.Length > UiHostBridgeContract.MaxObservationBytes) throw new ArgumentException("Observation exceeds carrier memory capacity.");
+            return Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Segments = payload, Ordered = !replaceable });
         }
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload) =>
             UiInputPayload.Valid(kind, payload) &&
