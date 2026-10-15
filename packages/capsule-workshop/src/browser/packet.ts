@@ -230,7 +230,7 @@ export function applyPacket(
       (!surfaces?.allows(node.asset) || ++surfaceCount > surfaces.maxLeases)
     )
       throw Error('Live surface admission or quota invalid');
-    if (node.value > 10000 || (node.events & ~1023) !== 0)
+    if (node.value > 10000 || (node.events & ~2047) !== 0)
       throw Error('UI value/event bounds');
     if (
       node.rect.some(

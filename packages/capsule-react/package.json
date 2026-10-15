@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./text-edit": { "types": "./src/text-edit.ts", "default": "./src/text-edit.ts" },
     ".": { "types": "./src/index.ts", "default": "./src/index.ts" },
     "./components": { "types": "./src/components.tsx", "default": "./src/components.tsx" },
     "./window-state": { "types": "./src/window-state.ts", "default": "./src/window-state.ts" },
