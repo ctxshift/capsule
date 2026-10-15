@@ -102,10 +102,10 @@ namespace PortableUi
             CheckAccess();
             return Live(generation) && Worker.EnqueueViewport(generation, width, height);
         }
-        public bool EnqueueOwnedObservation(long generation, ushort topic, ushort schema, byte[] payload)
+        public bool EnqueueOwnedObservation(long generation, ushort topic, ushort schema, byte[] payload, bool replaceable = true)
         {
             CheckAccess();
-            return Live(generation) && Worker.EnqueueOwnedObservation(generation, topic, schema, payload);
+            return Live(generation) && Worker.EnqueueOwnedObservation(generation, topic, schema, payload, replaceable);
         }
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload)
         {

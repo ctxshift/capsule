@@ -102,6 +102,7 @@ namespace PortableUi
             public ulong Handle;
             public UiEventMask Event;
             public int Width, Height;
+            public bool Ordered;
         }
         sealed class Load
         {
@@ -209,11 +210,11 @@ namespace PortableUi
             Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = Copy(payload) });
         // Host-only ownership transfer. Caller must never mutate payload after this call,
         // including on rejection; unlike the legacy copy API this accepts whole messages.
-        public bool EnqueueOwnedObservation(long generation, ushort topic, ushort schema, byte[] payload)
+        public bool EnqueueOwnedObservation(long generation, ushort topic, ushort schema, byte[] payload, bool replaceable = true)
         {
             if (payload == null || payload.Length > UiHostBridgeContract.MaxObservationBytes)
                 throw new ArgumentException("Observation exceeds carrier memory capacity.");
-            return Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = payload });
+            return Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = payload, Ordered = !replaceable });
         }
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload) =>
             UiInputPayload.Valid(kind, payload) &&
@@ -238,7 +239,7 @@ namespace PortableUi
                     tail.Value.Generation == input.Generation && tail.Value.Handle == input.Handle &&
                     UiInputPayload.SupersedesMove(tail.Value.Payload, input.Payload))
                     tail.Value = input;
-                else if (tail != null && input.Kind != Kind.Event && tail.Value.Kind == input.Kind &&
+                else if (tail != null && input.Kind != Kind.Event && !input.Ordered && !tail.Value.Ordered && tail.Value.Kind == input.Kind &&
                     tail.Value.Generation == input.Generation && tail.Value.Topic == input.Topic && tail.Value.Schema == input.Schema)
                     tail.Value = input;
                 else
