@@ -78,13 +78,15 @@ namespace PortableUi
     public sealed class UiAddonActivation
     {
         public UiCapabilityGrant Grant { get; }
+        public UiFeatureSelection Features { get; }
         readonly uint ownerNonce;
         int consumed;
-        internal UiAddonActivation(uint owner, UiCapabilityGrant grant)
-        { ownerNonce = owner; Grant = grant; }
+        internal UiAddonActivation(uint owner, UiCapabilityGrant grant, UiFeatureSelection features)
+        { ownerNonce = owner; Grant = grant; Features = features; }
         public uint OwnerNonce => ownerNonce;
         public uint ConsumeOwner()
         {
+            if (Features != null && !Features.IsCurrent) throw new InvalidOperationException("Feature providers changed before activation");
             if (Interlocked.Exchange(ref consumed, 1) != 0)
                 throw new InvalidOperationException("Addon activation already used.");
             return ownerNonce;
@@ -144,7 +146,7 @@ namespace PortableUi
             }
         }
 
-        public UiAddonActivation Activate(UiAddonRegistration registration)
+        public UiAddonActivation Activate(UiAddonRegistration registration, UiFeatureSelection features = null)
         {
             if (registration == null) throw new ArgumentNullException(nameof(registration));
             lock (registrations)
@@ -154,7 +156,8 @@ namespace PortableUi
                     !ReferenceEquals(owned, registration))
                     throw new ArgumentException("Registration belongs to another host.", nameof(registration));
             }
-            return new UiAddonActivation(AllocateOwner(ref nextOwner), registration.Grant);
+            if (features != null && !features.IsCurrent) throw new InvalidOperationException("Feature providers changed before activation");
+            return new UiAddonActivation(AllocateOwner(ref nextOwner), registration.Grant, features);
         }
 
         static bool ValidId(string id)

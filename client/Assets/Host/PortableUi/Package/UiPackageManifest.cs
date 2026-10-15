@@ -30,9 +30,10 @@ namespace PortableUi.Package
         public string Id { get; }
         public string EntryPath { get; }
         public IReadOnlyList<UiPackageDeclaration> Declarations => declarations;
+        public IReadOnlyList<UiFeatureRequirement> Features { get; }
 
-        UiPackageManifest(string id, string entry, List<UiPackageDeclaration> assets)
-        { Id = id; EntryPath = entry; declarations = assets.AsReadOnly(); }
+        UiPackageManifest(string id, string entry, List<UiPackageDeclaration> assets, List<UiFeatureRequirement> features)
+        { Id = id; EntryPath = entry; declarations = assets.AsReadOnly(); Features = features.AsReadOnly(); }
 
         public static bool TryParse(byte[] bytes, out UiPackageManifest manifest, out string error)
             => TryParse(bytes,MaxAssets,out manifest,out error);
@@ -67,7 +68,7 @@ namespace PortableUi.Package
             }
             catch (Exception ex) when (ex is JsonException || ex is ArgumentException || ex is OverflowException)
             { error = "Invalid manifest JSON: " + ex.Message; return false; }
-            if (root == null || !HasOnly(root, "schemaVersion", "apiVersion", "id", "entry", "assets") ||
+            if (root == null || !(root.Property("features") == null ? HasOnly(root, "schemaVersion", "apiVersion", "id", "entry", "assets") : HasOnly(root, "schemaVersion", "apiVersion", "id", "entry", "assets", "features")) ||
                 !Integer(root, "schemaVersion", SchemaVersion) || !Integer(root, "apiVersion", ApiVersion))
             { error = "Invalid manifest schema, API version or fields."; return false; }
             var id = String(root, "id");
@@ -103,7 +104,33 @@ namespace PortableUi.Package
                 { error = "Unsupported asset extension."; return false; }
                 assets.Add(new UiPackageDeclaration(kind, key, path));
             }
-            manifest = new UiPackageManifest(id, entry, assets);
+            var features = new List<UiFeatureRequirement>();
+            if (root.Property("features") != null)
+            {
+                if (!(root["features"] is JArray requirements)) { error = "Feature requirements must be an array."; return false; }
+                var names = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var value in requirements)
+                {
+                    if (!(value is JObject requirement) || !HasOnly(requirement, "name", "range", "contractVersion", "fingerprint", "optional", "permissions") ||
+                        requirement["optional"]?.Type != JTokenType.Boolean || !(requirement["permissions"] is JArray permissionArray))
+                    { error = "Invalid feature requirement fields."; return false; }
+                    var permissions = new List<string>();
+                    foreach (var permission in permissionArray)
+                    {
+                        if (permission.Type != JTokenType.String) { error = "Invalid feature permission."; return false; }
+                        permissions.Add((string)permission);
+                    }
+                    try
+                    {
+                        var feature = new UiFeatureRequirement(String(requirement, "name"), String(requirement, "range"), String(requirement, "contractVersion"),
+                            String(requirement, "fingerprint"), (bool)requirement["optional"], permissions);
+                        if (!names.Add(feature.Name)) throw new ArgumentException("Duplicate feature requirement");
+                        features.Add(feature);
+                    }
+                    catch (ArgumentException failure) { error = failure.Message; return false; }
+                }
+            }
+            manifest = new UiPackageManifest(id, entry, assets, features);
             return true;
         }
 
@@ -127,8 +154,9 @@ namespace PortableUi.Package
         {
             bool quoted = false, escaped = false;
             char last = '\0';
-            foreach (char c in source)
+            for (int index = 0; index < source.Length; index++)
             {
+                char c = source[index];
                 if (quoted)
                 {
                     if (escaped) escaped = false;
@@ -137,6 +165,12 @@ namespace PortableUi.Package
                     continue;
                 }
                 if (c == '"') { quoted = true; last = '"'; continue; }
+                if (c == 't' || c == 'f')
+                {
+                    string literal = c == 't' ? "true" : "false";
+                    if (index + literal.Length > source.Length || source.Substring(index, literal.Length) != literal) return false;
+                    index += literal.Length - 1; last = c; continue;
+                }
                 if (c == '/' || c == '\'' || char.IsLetter(c) ||
                     (c == '}' || c == ']') && last == ',') return false;
                 if (!char.IsWhiteSpace(c)) last = c;

@@ -1,7 +1,7 @@
 {
   "name": "PortableUi.Package",
   "rootNamespace": "PortableUi.Package",
-  "references": [],
+  "references": ["PortableUi.Core"],
   "overrideReferences": true,
   "precompiledReferences": ["Newtonsoft.Json.dll"],
   "autoReferenced": true,
