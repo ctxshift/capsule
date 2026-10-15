@@ -200,6 +200,12 @@ namespace PortableUi.Package
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool?)asset["stretch"]??false;return false;}
         public float ImageRailWidth(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["horizontalRailWidth"]??0;return 0;}
+        public bool TryImageTileSize(string key,out float width,out float height)
+        {
+            foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key && asset["tileSize"] is JArray tile)
+            {width=(float)tile[0];height=(float)tile[1];return true;}
+            width=height=0;return false;
+        }
         public bool ImageAlphaAware(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool)asset["alphaAware"];return false;}
         public float TextNumber(string key,string property) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown text style."); }
@@ -224,6 +230,16 @@ namespace PortableUi.Package
                 if(float.IsNaN(opacity)||float.IsInfinity(opacity)||opacity<0||opacity>1)throw new ArgumentException("Theme image opacity bounds.");
                 if(item["rotation"]!=null && (item["rotation"].Type!=JTokenType.Integer || Array.IndexOf(new[]{0,90,180,270},(int)item["rotation"])<0))throw new ArgumentException("Theme image rotation bounds.");
                 if(item["stretch"]!=null && item["stretch"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme image stretch must be boolean.");
+                if(item["tileSize"]!=null)
+                {
+                    var tile=item["tileSize"] as JArray;
+                    if(tile==null || tile.Count!=2 || (int)item["border"]!=0 || (int)item["edge"]!=0 ||
+                       (bool?)item["stretch"]==true || ((int?)item["rotation"]??0)!=0)
+                        throw new ArgumentException("Theme image tile bounds.");
+                    foreach(var dimension in tile)
+                        if((dimension.Type!=JTokenType.Integer && dimension.Type!=JTokenType.Float) ||
+                           !((float)dimension>=64 && (float)dimension<=4096))throw new ArgumentException("Theme image tile bounds.");
+                }
                 if(item["horizontalRailWidth"]!=null &&
                     (item["horizontalRailWidth"].Type!=JTokenType.Integer || (int)item["horizontalRailWidth"]<=0 ||
                      (int)item["horizontalRailWidth"]>(int)rect[2]-2*(int)item["border"] ||

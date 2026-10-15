@@ -42,6 +42,15 @@ namespace PortableUi.Unity
                 var rails=widget.Image.GetComponent<PortableUiFrameRails>();
                 if(railWidth>0 && !rails)rails=widget.Image.gameObject.AddComponent<PortableUiFrameRails>();
                 if(rails)rails.SetRails(railWidth,railWidth>0 ? theme.AssetNumber(node.AssetKey,"edge") : 0);
+                bool tiled=theme.TryImageTileSize(node.AssetKey,out float tileWidth,out float tileHeight);
+                var tiling=widget.Image.GetComponent<PortableUiTiledImage>();
+                if(tiled && !tiling)tiling=widget.Image.gameObject.AddComponent<PortableUiTiledImage>();
+                if(tiling)tiling.SetTileSize(tileWidth,tileHeight);
+                if(tiled)
+                {
+                    widget.Image.type=Image.Type.Simple;widget.Image.fillCenter=true;
+                    widget.Image.pixelsPerUnitMultiplier=1;widget.Image.preserveAspect=false;return true;
+                }
                 if(theme.ImageStretch(node.AssetKey))
                 {
                     float border=theme.AssetNumber(node.AssetKey,"border");
