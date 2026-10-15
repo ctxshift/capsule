@@ -4,6 +4,56 @@ export interface ImageRegion {
   region: readonly [number, number, number, number];
 }
 
+let patternSerial = 0;
+export function tiledImage(
+  document: Document,
+  asset: ImageRegion,
+  tile: readonly [number, number],
+): SVGSVGElement {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  Object.assign(svg.style, {
+    position: 'absolute',
+    inset: '0',
+    width: '100%',
+    height: '100%',
+    pointerEvents: 'none',
+  });
+  svg.setAttribute('aria-hidden', 'true');
+  const pattern = document.createElementNS(ns, 'pattern');
+  const id = `capsule-tile-${++patternSerial}`;
+  pattern.setAttribute('id', id);
+  pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+  pattern.setAttribute('x', '50%');
+  pattern.setAttribute('y', '50%');
+  pattern.setAttribute('width', String(tile[0]));
+  pattern.setAttribute('height', String(tile[1]));
+  pattern.setAttribute(
+    'patternTransform',
+    `translate(${-tile[0] / 2} ${-tile[1] / 2})`,
+  );
+  const crop = document.createElementNS(ns, 'svg');
+  crop.setAttribute('width', String(tile[0]));
+  crop.setAttribute('height', String(tile[1]));
+  crop.setAttribute('viewBox', asset.region.join(' '));
+  crop.setAttribute('preserveAspectRatio', 'none');
+  crop.style.overflow = 'hidden';
+  const pixels = document.createElementNS(ns, 'image');
+  pixels.setAttribute('href', asset.url);
+  pixels.setAttribute('width', String(asset.size[0]));
+  pixels.setAttribute('height', String(asset.size[1]));
+  crop.append(pixels);
+  pattern.append(crop);
+  const defs = document.createElementNS(ns, 'defs');
+  defs.append(pattern);
+  const fill = document.createElementNS(ns, 'rect');
+  fill.setAttribute('width', '100%');
+  fill.setAttribute('height', '100%');
+  fill.setAttribute('fill', `url(#${id})`);
+  svg.append(defs, fill);
+  return svg;
+}
+
 export function image(
   document: Document,
   asset: ImageRegion,

@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./panel": {
+      "types": "./src/panel.tsx",
+      "default": "./src/panel.tsx"
+    },
     "./text-edit": {
       "types": "./src/text-edit.ts",
       "default": "./src/text-edit.ts"

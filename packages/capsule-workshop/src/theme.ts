@@ -19,6 +19,8 @@ export interface ThemeAsset {
   stretch?: boolean;
   /** Source pixels sampled after the left border for top/bottom rails. */
   horizontalRailWidth?: number;
+  /** Centered repeat dimensions in UI units; each axis is bounded to 64..4096. */
+  tileSize?: [number, number];
 }
 export interface UiTheme {
   schemaVersion: 1;
@@ -312,6 +314,17 @@ export function parseTheme(
       throw Error('Theme image brightness bounds');
     if (asset.stretch !== undefined && typeof asset.stretch !== 'boolean')
       throw Error('Theme image stretch must be boolean');
+    if (
+      asset.tileSize !== undefined &&
+      (!Array.isArray(asset.tileSize) ||
+        asset.tileSize.length !== 2 ||
+        asset.tileSize.some((n) => !Number.isFinite(n) || n < 64 || n > 4096) ||
+        asset.border !== 0 ||
+        asset.edge !== 0 ||
+        asset.stretch === true ||
+        (asset.rotation ?? 0) !== 0)
+    )
+      throw Error('Theme image tile bounds');
     if (
       asset.horizontalRailWidth !== undefined &&
       (!Number.isInteger(asset.horizontalRailWidth) ||

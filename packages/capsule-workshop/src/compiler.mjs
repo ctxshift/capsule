@@ -172,6 +172,7 @@ export function compiler({
       builder.onResolve({ filter: /^@capsule\/react(?:\/.*)?$/ }, (args) => {
         const entries = {
           '@capsule/react': capsuleEntry,
+          '@capsule/react/panel': resolve(capsuleSourceRoot, 'panel.tsx'),
           '@capsule/react/scroll-list': resolve(
             capsuleSourceRoot,
             'scroll-list.tsx',
@@ -264,6 +265,7 @@ export function compiler({
         paths: {
           react: [reactTypes],
           '@capsule/react': [capsuleEntry],
+          '@capsule/react/panel': [resolve(capsuleSourceRoot, 'panel.tsx')],
           '@capsule/react/scroll-list': [
             resolve(capsuleSourceRoot, 'scroll-list.tsx'),
           ],

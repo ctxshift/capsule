@@ -1,6 +1,6 @@
 import type { BrowserTheme } from './dom';
 import type { UiNode } from './packet';
-import { frame, image, type ImageRegion } from './raster';
+import { frame, image, tiledImage, type ImageRegion } from './raster';
 import type { UiTheme, FontMetrics, Rgba } from '../theme';
 
 const color = ([r, g, b, a]: Rgba) => `rgba(${r},${g},${b},${a / 255})`;
@@ -44,8 +44,9 @@ export function createBrowserTheme(
     if (previous?.key === node.asset) return;
     const region = asset(node.asset);
     const recipe = definition(node.asset);
-    const svg =
-      recipe.stretch && recipe.border > 0 && recipe.edge > 0
+    const svg = recipe.tileSize
+      ? tiledImage(element.ownerDocument, region, recipe.tileSize)
+      : recipe.stretch && recipe.border > 0 && recipe.edge > 0
         ? framed(element.ownerDocument, node.asset)
         : image(
             element.ownerDocument,
