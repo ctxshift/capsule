@@ -83,3 +83,10 @@ compatibility adapters for existing diagnostics.
 
 Storage, service discovery and public asset exports are separate planned slices;
 they are not advertised here as implemented APIs.
+## World anchors and effects
+
+`WorldAnchor` and `Effect` are Box aliases with optional `worldAnchor` and `effect`
+props. The host projects admitted entity attachments and advances bounded motion,
+fade and expiry without per-frame React updates. See the
+[world presentation contract](../../docs/capsule-world-presentation.md) for
+options, native grants, browser simulation, lifecycle rules and verification.

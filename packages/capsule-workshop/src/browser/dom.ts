@@ -1,6 +1,7 @@
 import { input, type UiNode } from './packet';
 import { layout, type TextMetrics } from './layout';
 import { bindTextInput } from './text-input';
+import { bindPresentation, type BrowserWorldSource } from './presentation';
 
 export interface BrowserTheme {
   css: string;
@@ -15,6 +16,11 @@ export class DomTarget {
   private elements = new Map<bigint, HTMLElement>();
   private nodeSubscriptions = new Map<bigint, AbortController>();
   private textInputs = new Map<bigint, (node: UiNode) => void>();
+  private presentations = new Map<
+    bigint,
+    ReturnType<typeof bindPresentation>
+  >();
+  private animationFrame = 0;
   private nodes: ReadonlyMap<bigint, UiNode> = new Map();
   private subscriptions = new AbortController();
   private capture: {
@@ -30,6 +36,7 @@ export class DomTarget {
     private theme: BrowserTheme,
     private send: (bytes: Uint8Array) => void,
     private restoreFocus: () => void,
+    private world?: BrowserWorldSource,
   ) {
     stage.ownerDocument.addEventListener('keydown', this.key, {
       signal: this.subscriptions.signal,
@@ -369,8 +376,17 @@ export class DomTarget {
     return element;
   }
   apply(nodes: ReadonlyMap<bigint, UiNode>) {
-    if ([...nodes.values()].some((node) => node.worldAnchor || node.effect))
-      throw Error('World presentation provider not configured');
+    for (const node of nodes.values()) {
+      const old = this.nodes.get(node.id)?.worldAnchor;
+      if (
+        node.worldAnchor &&
+        (!this.world ||
+          ((old?.entity !== node.worldAnchor.entity ||
+            old?.attachment !== node.worldAnchor.attachment) &&
+            !this.world.acquire(node.id, node.worldAnchor)))
+      )
+        throw Error('World attachment not admitted');
+    }
     if ([...nodes.values()].some((node) => node.kind === 13))
       throw Error('Live surface provider is not configured');
     const focusPath: bigint[] = [];
@@ -399,6 +415,7 @@ export class DomTarget {
         this.nodeSubscriptions.get(id)?.abort();
         this.nodeSubscriptions.delete(id);
         this.textInputs.delete(id);
+        this.presentations.delete(id);
       }
     this.nodes = nodes;
     function depth(node: UiNode): number {
@@ -430,6 +447,21 @@ export class DomTarget {
         display: node.visible ? 'block' : 'none',
         filter: `brightness(${node.brightness / 10000})${element.dataset.themeFilter ?? ''}`,
       });
+      let presentation = this.presentations.get(node.id);
+      if (node.worldAnchor || node.effect) {
+        if (!presentation) {
+          presentation = bindPresentation(element, this.stage, this.world);
+          this.presentations.set(node.id, presentation);
+        }
+        presentation.apply(
+          node,
+          rectangles.get(node.id)!,
+          this.stage.ownerDocument.defaultView!.performance.now(),
+        );
+      } else if (presentation) {
+        presentation.reset();
+        this.presentations.delete(node.id);
+      }
       if (node.kind === 3) element.textContent = node.text;
       if (node.kind === 11) {
         const range = element as HTMLInputElement;
@@ -458,6 +490,7 @@ export class DomTarget {
       if (node.kind === 1)
         element.querySelector('[data-title]')!.textContent = node.text;
     }
+    this.present();
     // Only move keyed elements whose actual sibling order changed; preserve focus.
     for (const parent of [this.stage, ...this.elements.values()]) {
       const children = [...nodes.values()].filter(
@@ -518,7 +551,28 @@ export class DomTarget {
         .querySelector<HTMLElement>('button,input,select,[tabindex="0"]')
         ?.focus();
   }
+  private present = () => {
+    const window = this.stage.ownerDocument.defaultView!;
+    if (this.animationFrame) window.cancelAnimationFrame(this.animationFrame);
+    if (!this.presentations.size) {
+      this.animationFrame = 0;
+      return;
+    }
+    const now = window.performance.now();
+    for (const presentation of this.presentations.values())
+      presentation.tick(now);
+    this.animationFrame = this.presentations.size
+      ? window.requestAnimationFrame(this.present)
+      : 0;
+  };
   dispose() {
+    if (this.animationFrame)
+      this.stage.ownerDocument.defaultView!.cancelAnimationFrame(
+        this.animationFrame,
+      );
+    this.animationFrame = 0;
+    this.presentations.clear();
+    this.world?.dispose();
     this.subscriptions.abort();
     this.capture = null;
     this.elements.clear();
