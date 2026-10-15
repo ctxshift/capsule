@@ -228,7 +228,7 @@ namespace PortableUi
             if (rect.X < -coordinate || rect.X > coordinate || rect.Y < -coordinate || rect.Y > coordinate ||
                 rect.Width <= 0 || rect.Width > size || rect.Height <= 0 || rect.Height > size ||
                 (long)rect.X + rect.Width > coordinate || (long)rect.Y + rect.Height > coordinate)
-                return new UiResult(UiError.InvalidCommand, "Rect exceeds 1/64-unit bounds.");
+                return new UiResult(UiError.InvalidCommand, "Rect exceeds 1/64-unit bounds: " + rect.X + "," + rect.Y + "," + rect.Width + "," + rect.Height + ".");
             return UiResult.Ok;
         }
 
