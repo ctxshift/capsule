@@ -38,6 +38,10 @@ namespace PortableUi.Unity
                 var tint=widget.Image.GetComponent<PortableUiBrightness>();
                 if(gain!=1 && !tint)tint=widget.Image.gameObject.AddComponent<PortableUiBrightness>();
                 if(tint)tint.ThemeFactor=gain;
+                float railWidth=theme.ImageRailWidth(node.AssetKey);
+                var rails=widget.Image.GetComponent<PortableUiFrameRails>();
+                if(railWidth>0 && !rails)rails=widget.Image.gameObject.AddComponent<PortableUiFrameRails>();
+                if(rails)rails.SetRails(railWidth,railWidth>0 ? theme.AssetNumber(node.AssetKey,"edge") : 0);
                 if(theme.ImageStretch(node.AssetKey))
                 {
                     float border=theme.AssetNumber(node.AssetKey,"border");

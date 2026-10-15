@@ -198,6 +198,8 @@ namespace PortableUi.Package
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return(int?)asset["rotation"]??0;return 0;}
         public bool ImageStretch(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool?)asset["stretch"]??false;return false;}
+        public float ImageRailWidth(string key)
+        {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["horizontalRailWidth"]??0;return 0;}
         public bool ImageAlphaAware(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (bool)asset["alphaAware"];return false;}
         public float TextNumber(string key,string property) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown text style."); }
@@ -222,6 +224,11 @@ namespace PortableUi.Package
                 if(float.IsNaN(opacity)||float.IsInfinity(opacity)||opacity<0||opacity>1)throw new ArgumentException("Theme image opacity bounds.");
                 if(item["rotation"]!=null && (item["rotation"].Type!=JTokenType.Integer || Array.IndexOf(new[]{0,90,180,270},(int)item["rotation"])<0))throw new ArgumentException("Theme image rotation bounds.");
                 if(item["stretch"]!=null && item["stretch"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme image stretch must be boolean.");
+                if(item["horizontalRailWidth"]!=null &&
+                    (item["horizontalRailWidth"].Type!=JTokenType.Integer || (int)item["horizontalRailWidth"]<=0 ||
+                     (int)item["horizontalRailWidth"]>(int)rect[2]-2*(int)item["border"] ||
+                     (int)item["border"]<=0 || (int)item["edge"]<=0 || (bool?)item["stretch"]!=true))
+                    throw new ArgumentException("Theme horizontal rail width bounds.");
                 if(float.IsNaN(brightness)||float.IsInfinity(brightness)||brightness<0||brightness>2)throw new ArgumentException("Theme image brightness bounds.");
                 string imageKey = item["image"] == null ? key : (string)item["image"];
                 if (!System.Text.RegularExpressions.Regex.IsMatch(key, "^[a-z0-9-]{1,64}$") ||
