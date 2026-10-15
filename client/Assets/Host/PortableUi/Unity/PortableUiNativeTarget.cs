@@ -24,6 +24,7 @@ namespace PortableUi.Unity
         GameObject returnFocus;
         static PortableUiNativeTarget keyboardOwner;
         public UiSession Session { get; set; }
+        public PortableUiWorldRegistry WorldRegistry => world;
         // Async integration installs a main-thread queue sink, never a worker session.
         public Func<ulong, UiEventMask, byte[], bool> InputSink { get; set; }
         public long CommitCount { get; private set; }

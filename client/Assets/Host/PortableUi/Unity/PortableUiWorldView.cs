@@ -78,6 +78,8 @@ namespace PortableUi.Unity
                     }
                 }
             }
+            if(visible && anchor!=null && world!=null)
+                visible=world.TryPlace(anchor,node.Handle,position,new Vector2(node.Rect.Width,node.Rect.Height)*(scale/64f),((RectTransform)rect.parent).rect.size,out position);
             rect.anchoredPosition=position;rect.localScale=Vector3.one*scale;
             group.alpha=visible?alpha:0;group.blocksRaycasts=group.interactable=visible && alpha>0;
             Shown=visible && alpha>0;

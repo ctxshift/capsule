@@ -27,6 +27,31 @@ namespace PortableUi.Unity
         readonly uint owner, generation;
         bool disposed;
         public Camera Camera { get; set; }
+        public string AvoidOverlapAttachment { get; set; }
+        readonly Dictionary<ulong, Rect> placed = new Dictionary<ulong, Rect>();
+        int placementFrame = -1;
+        public bool TryPlace(UiWorldAnchor anchor, ulong handle, Vector2 position, Vector2 size, Vector2 viewport, out Vector2 result)
+        {
+            result = position;
+            if (anchor == null || anchor.Attachment != AvoidOverlapAttachment) return true;
+            if (placementFrame != Time.frameCount) { placed.Clear(); placementFrame = Time.frameCount; }
+            placed.Remove(handle);
+            if (placed.Count >= 64 || size.x <= 0 || size.y <= 0 || viewport.x < size.x || viewport.y < size.y) return false;
+            float x = Mathf.Clamp(position.x, 0, viewport.x - size.x);
+            float y = Mathf.Clamp(position.y, -viewport.y + size.y, 0);
+            for (int lane = 0; lane < 64; lane++)
+            {
+                int shift = lane == 0 ? 0 : (lane + 1) / 2 * (lane % 2 == 1 ? 1 : -1);
+                float top = y + shift * (size.y + 4);
+                if (top > 0 || top - size.y < -viewport.y) continue;
+                var bounds = new Rect(x, top - size.y, size.x, size.y);
+                bool overlaps = false;
+                foreach (var occupied in placed.Values) if (occupied.Overlaps(bounds)) { overlaps = true; break; }
+                if (overlaps) continue;
+                placed.Add(handle, bounds); result = new Vector2(x, top); return true;
+            }
+            return false;
+        }
         // True means visible. Null cannot satisfy an occlusion-enabled anchor.
         public Func<Vector3, bool> Visibility { get; set; }
         public PortableUiWorldRegistry(uint owner, uint generation, Camera camera)
@@ -50,6 +75,6 @@ namespace PortableUi.Unity
         }
         // Retained views keep the original lease, so revoke/regrant cannot revive stale UI.
         public Attachment Acquire(ulong handle,UiWorldAnchor anchor)=>Allows(handle,anchor)?grants[Key(anchor.Entity,anchor.Attachment)]:null;
-        public void Dispose(){disposed=true;grants.Clear();Camera=null;Visibility=null;}
+        public void Dispose(){disposed=true;grants.Clear();placed.Clear();Camera=null;Visibility=null;}
     }
 }
