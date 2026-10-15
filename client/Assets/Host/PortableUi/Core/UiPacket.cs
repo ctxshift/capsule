@@ -8,7 +8,7 @@ namespace PortableUi
     {
         Create = 1, SetText = 2, SetImage = 3, SetProgress = 4,
         SetVisible = 5, Remove = 6, SetEvents = 7, SetRect = 8, Raise = 9, SetStyle = 10,
-        CreateLayout = 11, SetLayout = 12, SetBrightness = 13, SetTextInput = 14
+        CreateLayout = 11, SetLayout = 12, SetBrightness = 13, SetTextInput = 14, SetWorldAnchor = 15, SetEffect = 16
     }
 
     internal sealed class UiCommand
@@ -23,6 +23,8 @@ namespace PortableUi
         internal UiEventMask Events;
         internal UiLayout Layout;
         internal UiTextInputOptions TextInput;
+        internal UiWorldAnchor WorldAnchor;
+        internal UiPresentationEffect Effect;
     }
 
     // PUI1, little-endian, exact lengths; no guest-owned span is retained.
@@ -61,6 +63,24 @@ namespace PortableUi
                     var command = new UiCommand { Opcode = opcode };
                     switch (opcode)
                     {
+                        case UiOpcode.SetWorldAnchor:
+                            command.Handle = body.U64();
+                            byte anchorEnabled = body.U8();
+                            if (anchorEnabled > 1) return new UiResult(UiError.InvalidCommand, "Anchor flag.");
+                            if (anchorEnabled == 1) {
+                                string entity = body.Key(), attachment = body.Key();
+                                int x=body.I32(), y=body.I32(), z=body.I32(), near=body.I32(), far=body.I32(), reference=body.I32(), min=body.I32(), max=body.I32();
+                                byte occlusion=body.U8();
+                                if(occlusion>1) return new UiResult(UiError.InvalidCommand, "Occlusion flag.");
+                                command.WorldAnchor=new UiWorldAnchor(entity,attachment,x,y,z,near,far,reference,min,max,occlusion==1);
+                            }
+                            break;
+                        case UiOpcode.SetEffect:
+                            command.Handle=body.U64();
+                            byte effectEnabled=body.U8();
+                            if(effectEnabled>1) return new UiResult(UiError.InvalidCommand,"Effect flag.");
+                            if(effectEnabled==1) command.Effect=new UiPresentationEffect(body.U32(),body.I32(),body.I32(),body.I32(),body.I32());
+                            break;
                         case UiOpcode.SetTextInput:
                             command.Handle = body.U64();
                             ushort maxLength = body.U16(), maxBytes = body.U16();

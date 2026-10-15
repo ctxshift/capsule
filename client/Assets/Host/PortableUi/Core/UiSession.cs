@@ -64,6 +64,7 @@ namespace PortableUi
                 if (!result.Success) return result;
             }
             var snapshot = Snapshot(proposed);
+            if (!UiPresentation.Validate(snapshot, out string presentationError)) return new UiResult(UiError.InvalidCommand,presentationError);
             foreach (var node in snapshot.Nodes)
                 if (node.Kind == UiNodeKind.TextInput && !node.TextInput.Accepts(node.Text))
                     return new UiResult(UiError.InvalidCommand, "Text input value or options invalid.");
@@ -138,6 +139,10 @@ namespace PortableUi
             if (!live.Success) return live;
             switch (command.Opcode)
             {
+                case UiOpcode.SetWorldAnchor:
+                    next[handle] = current.With(worldAnchor: command.WorldAnchor, replaceAnchor: true); break;
+                case UiOpcode.SetEffect:
+                    next[handle] = current.With(effect: command.Effect, replaceEffect: true); break;
                 case UiOpcode.SetTextInput:
                     if (current.Kind != UiNodeKind.TextInput || !command.TextInput.Valid)
                         return new UiResult(UiError.InvalidCommand, "Text input options invalid.");

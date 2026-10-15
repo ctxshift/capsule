@@ -14,6 +14,7 @@ namespace PortableUi
             { error = "Invalid host layout profile."; return false; }
             if (snapshot == null || snapshot.Nodes.Count > UiSession.MaxNodes || owner == 0)
             { error = "Snapshot quota or owner invalid."; return false; }
+            if (!UiPresentation.Validate(snapshot, out error)) return false;
             var seen = new HashSet<ulong>();
             var depths = new Dictionary<ulong, int>();
             bool? layoutMode = null;

@@ -94,6 +94,8 @@ namespace PortableUi.Unity
         {
             error = null;
             if (disposed) { error = "Native target disposed."; return false; }
+            foreach (var node in proposed.Nodes)
+                if (node.WorldAnchor != null || node.Effect != null) { error="World presentation provider not configured."; return false; }
             if (TryWindowTranslation(proposed)) return true;
             var staged = new Dictionary<ulong, NativeUiWidget>();
             RectTransform stage = null;
