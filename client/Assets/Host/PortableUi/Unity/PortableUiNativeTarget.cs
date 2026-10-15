@@ -347,7 +347,9 @@ namespace PortableUi.Unity
                 if (selectable) selectable.enabled = focusable;
             }
             if (widget.Image && (node.Kind == UiNodeKind.Box || node.Kind == UiNodeKind.ClipBox || node.Kind == UiNodeKind.Button))
-                widget.Image.raycastTarget = node.Events != UiEventMask.None;
+                // Global keyboard listeners must not cover the world with an invisible mouse target.
+                // Focus remains pointer-active so clickable keyboard controls can still be selected.
+                widget.Image.raycastTarget = (node.Events & ~UiEventMask.Key) != UiEventMask.None;
             var input = widget.Rect.GetComponent<PortableUiNodeInput>();
             if (input) input.Bind(this, node.Handle, node.Events);
             widget.Rect.gameObject.SetActive(node.Visible);
