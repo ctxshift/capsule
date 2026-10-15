@@ -124,6 +124,57 @@ ${Object.entries(feature.requests)
 }
 public static class ${name}Contract {
 public const string Name = ${JSON.stringify(feature.name)}, Version = ${JSON.stringify(feature.version)}, Fingerprint = ${JSON.stringify(descriptor(feature).fingerprint)};
+public static readonly PortableUi.UiFeatureDefinition Definition = new PortableUi.UiFeatureDefinition(Name, Version, Fingerprint,
+new PortableUi.UiFeatureDependency[] { ${Object.entries(feature.dependencies)
+        .map(
+          ([dependency, range]) =>
+            `new PortableUi.UiFeatureDependency(${JSON.stringify(dependency)}, ${JSON.stringify(range)})`,
+        )
+        .join(', ')} },
+new string[] { ${[...new Set([...Object.values(feature.states), ...Object.values(feature.requests)].map((member) => member.permission))].map((permission) => JSON.stringify(permission)).join(', ')} });
+public static ${name}Binding Bind(I${name}Provider provider) => new ${name}Binding(provider);
+}`,
+    )
+    .join('\n');
+  const rootRecord = (schema: Schema) => {
+    if (schema.kind !== 'record')
+      throw Error('Native provider bindings require named record roots');
+    return schema.name;
+  };
+  const bindings = Object.entries(contracts)
+    .map(
+      ([
+        name,
+        feature,
+      ]) => `public sealed class ${name}Binding : PortableUi.UiFeatureProvider {
+readonly I${name}Provider provider;
+public ${name}Binding(I${name}Provider provider) : base(${name}Contract.Definition) {
+this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
+${Object.entries(feature.states)
+  .map(([key, state]) => {
+    rootRecord(state.schema);
+    return `AddState(${JSON.stringify(key)}, ${JSON.stringify(state.permission)}, FeatureCodec.Encode(provider.Get${key}()));\nprovider.${key}Changed += On${key};`;
+  })
+  .join('\n')}
+${Object.entries(feature.requests)
+  .map(([key, request]) => {
+    rootRecord(request.output);
+    return `AddRequest(${JSON.stringify(key)}, ${JSON.stringify(request.permission)}, async (bytes, cancellation) => FeatureCodec.Encode(await provider.${key}(FeatureCodec.Decode${rootRecord(request.input)}(bytes), cancellation)));`;
+  })
+  .join('\n')}
+}
+${Object.entries(feature.states)
+  .map(
+    ([key, state]) =>
+      `void On${key}(${type(state.schema)} value) => Publish(${JSON.stringify(key)}, FeatureCodec.Encode(value));`,
+  )
+  .join('\n')}
+public override void Dispose() {
+${Object.keys(feature.states)
+  .map((key) => `provider.${key}Changed -= On${key};`)
+  .join('\n')}
+base.Dispose();
+}
 }`,
     )
     .join('\n');
@@ -146,6 +197,7 @@ using System.Threading.Tasks;
 namespace ${namespace} {
 ${classes}
 ${providers}
+${bindings}
 public static class FeatureCodec {
 ${codecs}
 }
