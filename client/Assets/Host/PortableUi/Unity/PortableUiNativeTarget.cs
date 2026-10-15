@@ -13,6 +13,7 @@ namespace PortableUi.Unity
         readonly RectTransform canvas;
         readonly INativeUiWidgetFactory factory;
         readonly INativeUiSurfaceFactory surfaces;
+        readonly PortableUiWorldRegistry world;
         readonly RectTransform layer;
         RectTransform current;
         UiSnapshot currentSnapshot;
@@ -38,11 +39,11 @@ namespace PortableUi.Unity
             return true;
         }
 
-        public PortableUiNativeTarget(RectTransform canvasRoot, INativeUiWidgetFactory widgetFactory, INativeUiSurfaceFactory surfaceFactory = null)
+        public PortableUiNativeTarget(RectTransform canvasRoot, INativeUiWidgetFactory widgetFactory, INativeUiSurfaceFactory surfaceFactory = null, PortableUiWorldRegistry worldRegistry = null)
         {
             canvas = canvasRoot ? canvasRoot : throw new ArgumentNullException(nameof(canvasRoot));
             factory = widgetFactory ?? throw new ArgumentNullException(nameof(widgetFactory));
-            surfaces = surfaceFactory;
+            surfaces = surfaceFactory; world = worldRegistry;
             layer = NewRoot("Portable UI guest layer", canvas);
             layer.gameObject.AddComponent<PortableUiKeyboardInput>().Bind(this);
             layer.gameObject.SetActive(false);
@@ -94,8 +95,11 @@ namespace PortableUi.Unity
         {
             error = null;
             if (disposed) { error = "Native target disposed."; return false; }
+            if (proposed == null || !UiPresentation.Validate(proposed,out error)) return false;
             foreach (var node in proposed.Nodes)
-                if (node.WorldAnchor != null || node.Effect != null) { error="World presentation provider not configured."; return false; }
+                if (node.WorldAnchor != null && (world == null ||
+                    !(TryGetNode(node.Handle,out var old) && old.WorldAnchor?.Entity==node.WorldAnchor.Entity && old.WorldAnchor?.Attachment==node.WorldAnchor.Attachment) && !world.Allows(node.Handle,node.WorldAnchor)))
+                { error="World attachment is not admitted for this owner and generation."; return false; }
             if (TryWindowTranslation(proposed)) return true;
             var staged = new Dictionary<ulong, NativeUiWidget>();
             RectTransform stage = null;
@@ -186,6 +190,7 @@ namespace PortableUi.Unity
                     }
                 currentWidgets = nextWidgets;
                 currentSnapshot = proposed;
+                foreach(var widget in currentWidgets.Values)widget.Rect.GetComponent<PortableUiWorldView>()?.Present(Time.unscaledTimeAsDouble);
                 ++CommitCount;
                 MaintainFocus(focusPath);
                 return true;
@@ -230,7 +235,7 @@ namespace PortableUi.Unity
                 var next=proposed.Nodes[i];var old=currentSnapshot.Nodes[i];
                 if(next.Handle!=old.Handle || next.Parent!=old.Parent || next.Kind!=old.Kind || next.Order!=old.Order ||
                     next.StyleKey!=old.StyleKey || next.AssetKey!=old.AssetKey || next.Text!=old.Text ||
-                    next.TextInput != old.TextInput ||
+                    next.TextInput != old.TextInput || next.WorldAnchor != old.WorldAnchor || next.Effect != old.Effect ||
                     next.Progress!=old.Progress || next.Visible!=old.Visible || next.Events!=old.Events || next.Brightness!=old.Brightness ||
                     next.Rect.Width!=old.Rect.Width || next.Rect.Height!=old.Rect.Height)return false;
                 if(next.Rect.X!=old.Rect.X || next.Rect.Y!=old.Rect.Y)
@@ -284,6 +289,12 @@ namespace PortableUi.Unity
             SetRect(widget.Rect, node.Rect);
             if (widget.Label && node.Kind != UiNodeKind.TextInput) { widget.Label.text = node.Text ?? ""; widget.Label.richText = false; }
             if (node.Kind == UiNodeKind.TextInput) widget.Rect.GetComponent<PortableUiTextInput>().Apply(node);
+            var presentation=widget.Rect.GetComponent<PortableUiWorldView>();
+            if(node.WorldAnchor!=null || node.Effect!=null || presentation)
+            {
+                if(!presentation)presentation=widget.Rect.gameObject.AddComponent<PortableUiWorldView>();
+                presentation.Apply(node,world,Time.unscaledTimeAsDouble);
+            }
             if (widget.Image && !string.IsNullOrEmpty(node.AssetKey))
             {
                 if (!factory.TryGetSprite(node.AssetKey, out var sprite) || !sprite)
@@ -346,6 +357,12 @@ namespace PortableUi.Unity
         public bool Queue(ulong handle, UiEventMask kind, byte[] payload = null)
         {
             if (!active || disposed) return false;
+            if(currentWidgets.TryGetValue(handle,out var source))
+            {
+                if(!source.Rect.gameObject.activeInHierarchy)return false;
+                for(Transform cursor=source.Rect;cursor && cursor!=layer;cursor=cursor.parent)
+                {var presentation=cursor.GetComponent<PortableUiWorldView>();if(presentation && !presentation.Shown)return false;}
+            }
             payload = payload ?? Array.Empty<byte>();
             if (!UiInputPayload.Valid(kind, payload)) return false;
             if (InputSink != null) return InputSink(handle, kind, payload);
@@ -556,6 +573,7 @@ namespace PortableUi.Unity
         {
             if (disposed) return;
             disposed = true;
+            world?.Dispose();
             if (keyboardOwner == this) keyboardOwner = null;
             if (layer) { layer.gameObject.SetActive(false); DestroyOwned(layer.gameObject); }
             (factory as INativeUiScopeLifetime)?.Dispose();
