@@ -83,6 +83,12 @@ compatibility adapters for existing diagnostics.
 
 Storage, service discovery and public asset exports are separate planned slices;
 they are not advertised here as implemented APIs.
+
+`Range.onValueChange(value, event)` and `Select.onSelectionChange(index, event)`
+provide an `ActionEvent` as their second argument. Use `event.request` to send a
+host-authorized intent associated with that control. Existing callbacks that
+accept only the value remain compatible. The native host still checks the
+capability, generation, source control and payload before applying a setting.
 ## World anchors and effects
 
 `WorldAnchor` and `Effect` are Box aliases with optional `worldAnchor` and `effect`

@@ -97,8 +97,8 @@ export interface Props {
   onKey?: (event: KeyEvent) => void;
   onWheel?: (event: WheelEvent) => void;
   onFocus?: () => void;
-  onValueChange?: (value: number) => void;
+  onValueChange?: (value: number, event: ActionEvent) => void;
   options?: readonly string[];
   selectedIndex?: number;
-  onSelectionChange?: (index: number) => void;
+  onSelectionChange?: (index: number, event: ActionEvent) => void;
 }
