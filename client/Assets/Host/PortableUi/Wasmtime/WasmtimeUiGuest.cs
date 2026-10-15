@@ -34,6 +34,7 @@ namespace PortableUi.Wasmtime
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_error(IntPtr guest);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern void pui_destroy(IntPtr guest);
         readonly byte[] sdk, source;
+        readonly byte[][] modules;
         readonly IUiCommitTarget target;
         readonly IUiObservationAdapter observations;
         readonly IUiActionAdapter actions;
@@ -74,13 +75,25 @@ namespace PortableUi.Wasmtime
             if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
             return operationMetrics[index];
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null)
         {
             if (hostCallsPerInvocation != UiHostBridgeContract.MaxCallsPerInvocation && hostCallsPerInvocation != UiHostBridgeContract.ExtendedCallsPerInvocation)
                 throw new ArgumentOutOfRangeException(nameof(hostCallsPerInvocation));
             HostCallsPerInvocation = hostCallsPerInvocation;
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
             using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != QuickJsSha256) throw new ArgumentException("Pinned carrier changed");
+            scriptModules = scriptModules ?? Array.Empty<byte[]>();
+            if (scriptModules.Length > 8) throw new ArgumentException("Script module count quota");
+            modules = new byte[scriptModules.Length][];
+            int total = source.Length;
+            for (int i = 0; i < modules.Length; ++i)
+            {
+                var bytes = scriptModules[i];
+                if (bytes == null || bytes.Length > 65536) throw new ArgumentException("Script module quota");
+                total = checked(total + bytes.Length);
+                if (total > 262144) throw new ArgumentException("Aggregate source quota");
+                modules[i] = (byte[])bytes.Clone();
+            }
             this.sdk = (byte[])sdk.Clone();
             this.source = (byte[])source.Clone();
             this.target = target;
@@ -317,7 +330,19 @@ namespace PortableUi.Wasmtime
             InitializationTrace?.Invoke("Host SDK eval begin");
             if (!Evaluate(sdk, "portable_ui_bootstrap", 200000000, out error)) return false;
             InitializationTrace?.Invoke("Addon eval begin");
-            return Evaluate(source, "portable_ui_eval", AddonExecutionFuel, out error);
+            ulong start = TotalCallFuel;
+            foreach (var module in modules)
+                if (!EvaluateAddon(module, start, out error)) return false;
+            return EvaluateAddon(source, start, out error);
+        }
+        bool EvaluateAddon(byte[] bytes, ulong start, out string error)
+        {
+            ulong used = TotalCallFuel - start;
+            // Include allocation/free overhead in the single activation allowance.
+            const ulong overhead = 400000;
+            if (used + overhead >= AddonExecutionFuel)
+            { terminal = true; error = "Addon activation fuel exhausted"; return false; }
+            return Evaluate(bytes, "portable_ui_eval", AddonExecutionFuel - used - overhead, out error);
         }
         public bool Update(out string error)
         {

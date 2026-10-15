@@ -8,6 +8,8 @@ namespace PortableUi.Package
     public static class UiDirectoryPackageLoader
     {
         public const int MaxScriptBytes = 64 * 1024;
+        public const int MaxScriptModules = 8;
+        public const int MaxScriptTotalBytes = 256 * 1024;
         public const int MaxDataBytes = 64 * 1024;
         public const int MaxImageBytes = 2 * 1024 * 1024;
         public const int MaxTotalBytes = 4 * 1024 * 1024;
@@ -77,18 +79,27 @@ namespace PortableUi.Package
                 if (total > limits.MaxTotalBytes)
                 { error = "Encoded package quota exceeded."; return false; }
                 var data = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+                var modules = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
+                int scriptTotal = script.Length;
                 var images = new Dictionary<string, byte[]>(StringComparer.OrdinalIgnoreCase);
                 var descriptors = new Dictionary<string, UiPackageImageDescriptor>(
                     StringComparer.OrdinalIgnoreCase);
                 int decodedTotal = 0;
                 foreach (var asset in manifest.Declarations)
                 {
-                    int limit = asset.Kind == UiPackageAssetKind.Data ? MaxDataBytes : MaxImageBytes;
+                    int limit = asset.Kind == UiPackageAssetKind.Image ? MaxImageBytes : MaxDataBytes;
                     if (!TryRead(root, asset.Path, limit, out var bytes, out error)) return false;
                     total = checked(total + bytes.Length);
                     if (total > limits.MaxTotalBytes)
                     { error = "Encoded package quota exceeded."; return false; }
-                    if (asset.Kind == UiPackageAssetKind.Data)
+                    if (asset.Kind == UiPackageAssetKind.Script)
+                    {
+                        scriptTotal = checked(scriptTotal + bytes.Length);
+                        if (modules.Count >= MaxScriptModules || scriptTotal > MaxScriptTotalBytes)
+                        { error = "Script module count or aggregate source quota exceeded."; return false; }
+                        modules.Add(asset.Key, bytes);
+                    }
+                    else if (asset.Kind == UiPackageAssetKind.Data)
                         data.Add(asset.Key, bytes);
                     else
                     {
@@ -102,7 +113,7 @@ namespace PortableUi.Package
                     }
                 }
                 revision = new UiPackageRevision(manifest, manifestBytes, script,
-                    data, images, descriptors);
+                    data, images, descriptors, modules);
                 return true;
             }
             catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException ||

@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace PortableUi.Package
 {
-    public enum UiPackageAssetKind { Data, Image }
+    public enum UiPackageAssetKind { Data, Image, Script }
 
     public sealed class UiPackageDeclaration
     {
@@ -91,13 +91,15 @@ namespace PortableUi.Package
                 UiPackageAssetKind kind;
                 if (kindText == "data") kind = UiPackageAssetKind.Data;
                 else if (kindText == "image") kind = UiPackageAssetKind.Image;
+                else if (kindText == "script") kind = UiPackageAssetKind.Script;
                 else { error = "Unsupported asset kind."; return false; }
                 if (!ValidKey(key) || !ValidPath(path) || !keys.Add(key) || !paths.Add(path))
                 { error = "Invalid, duplicate or case-colliding asset declaration."; return false; }
                 var ext = Path.GetExtension(path).ToLowerInvariant();
                 if (kind == UiPackageAssetKind.Data && ext != ".json" && ext != ".csv" &&
                     ext != ".txt" && ext != ".toml" ||
-                    kind == UiPackageAssetKind.Image && ext != ".png" && ext != ".jpg" && ext != ".jpeg")
+                    kind == UiPackageAssetKind.Image && ext != ".png" && ext != ".jpg" && ext != ".jpeg" ||
+                    kind == UiPackageAssetKind.Script && ext != ".js")
                 { error = "Unsupported asset extension."; return false; }
                 assets.Add(new UiPackageDeclaration(kind, key, path));
             }

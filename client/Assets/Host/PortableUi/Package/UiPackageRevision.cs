@@ -9,6 +9,7 @@ namespace PortableUi.Package
     public sealed class UiPackageRevision
     {
         readonly byte[] script;
+        readonly Dictionary<string, byte[]> modules;
         readonly Dictionary<string, byte[]> data;
         readonly Dictionary<string, byte[]> images;
         readonly Dictionary<string, UiPackageImageDescriptor> descriptors;
@@ -19,10 +20,12 @@ namespace PortableUi.Package
         internal UiPackageRevision(UiPackageManifest manifest, byte[] manifestBytes,
             byte[] entry, Dictionary<string, byte[]> dataBytes,
             Dictionary<string, byte[]> imageBytes,
-            Dictionary<string, UiPackageImageDescriptor> imageDescriptors)
+            Dictionary<string, UiPackageImageDescriptor> imageDescriptors,
+            Dictionary<string, byte[]> scriptModules = null)
         {
             Manifest = manifest;
             script = (byte[])entry.Clone();
+            modules = Clone(scriptModules ?? new Dictionary<string, byte[]>());
             data = Clone(dataBytes);
             images = Clone(imageBytes);
             descriptors = new Dictionary<string, UiPackageImageDescriptor>(imageDescriptors,
@@ -36,7 +39,7 @@ namespace PortableUi.Package
                 };
                 foreach (var asset in manifest.Declarations)
                 {
-                    byte[] bytes = asset.Kind == UiPackageAssetKind.Data ?
+                    byte[] bytes = asset.Kind == UiPackageAssetKind.Script ? modules[asset.Key] : asset.Kind == UiPackageAssetKind.Data ?
                         data[asset.Key] : images[asset.Key];
                     ordered.Add(new KeyValuePair<string, byte[]>(asset.Path, bytes));
                 }
@@ -67,6 +70,13 @@ namespace PortableUi.Package
         }
 
         public byte[] CopyScript() => (byte[])script.Clone();
+        public byte[][] CopyScriptModules()
+        {
+            var result = new List<byte[]>();
+            foreach (var asset in Manifest.Declarations)
+                if (asset.Kind == UiPackageAssetKind.Script) result.Add((byte[])modules[asset.Key].Clone());
+            return result.ToArray();
+        }
         public bool TryCopyData(string key, out byte[] bytes)
         {
             bytes = null;
