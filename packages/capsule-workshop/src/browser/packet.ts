@@ -2,7 +2,15 @@ import {
   validateTextInput,
   type TextInputOptions,
 } from '@capsule/react/text-edit';
+import {
+  anchorValues,
+  effectValues,
+  type WorldAnchorOptions,
+  type PresentationEffectOptions,
+} from '@capsule/react/presentation';
 export interface UiNode {
+  worldAnchor?: WorldAnchorOptions;
+  effect?: PresentationEffectOptions;
   textInput?: TextInputOptions;
   id: bigint;
   parent: bigint;
@@ -177,6 +185,43 @@ export function applyPacket(
       const node = next.get(id);
       if (!node) throw Error('Unknown UI handle');
       switch (opcode) {
+        case 15: {
+          const enabled = body.u8();
+          if (enabled > 1) throw Error('Anchor flag');
+          node.worldAnchor = undefined;
+          if (enabled) {
+            const entity = body.key(),
+              attachment = body.key();
+            const a = Array.from({ length: 8 }, () => body.i32() / 64);
+            const occlusion = body.u8();
+            if (occlusion > 1) throw Error('Occlusion flag');
+            node.worldAnchor = {
+              entity,
+              attachment,
+              offset: [a[0], a[1], a[2]],
+              near: a[3],
+              far: a[4],
+              referenceDistance: a[5],
+              minScale: a[6],
+              maxScale: a[7],
+              occlusion: !!occlusion,
+            };
+          }
+          break;
+        }
+        case 16: {
+          const enabled = body.u8();
+          if (enabled > 1) throw Error('Effect flag');
+          node.effect = enabled
+            ? {
+                revision: body.u32(),
+                durationMs: body.i32(),
+                fadeMs: body.i32(),
+                offset: [body.i32() / 64, body.i32() / 64],
+              }
+            : undefined;
+          break;
+        }
         case 14: {
           if (node.kind !== 14) throw Error('Text input options on wrong kind');
           const maxLength = body.u16(),
@@ -243,8 +288,20 @@ export function applyPacket(
     next.size > maxNodes
   )
     throw Error('Packet/node quota');
-  let surfaceCount = 0;
+  let surfaceCount = 0,
+    anchorCount = 0,
+    effectCount = 0;
   for (const node of next.values()) {
+    if ((node.worldAnchor || node.effect) && node.kind !== 8)
+      throw Error('Presentation requires Box');
+    if (node.worldAnchor) {
+      anchorValues(node.worldAnchor);
+      if (++anchorCount > 64) throw Error('Anchor quota');
+    }
+    if (node.effect) {
+      effectValues(node.effect);
+      if (++effectCount > 64) throw Error('Effect quota');
+    }
     if (node.kind === 14)
       validateTextInput(
         node.text,
@@ -274,6 +331,7 @@ export function applyPacket(
     while (current.parent) {
       const parent = next.get(current.parent);
       if (!parent || ++depth >= 24) throw Error('UI parent/depth');
+      if (node.worldAnchor && parent.worldAnchor) throw Error('Nested anchors');
       current = parent;
     }
   }

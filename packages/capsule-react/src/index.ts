@@ -1,4 +1,8 @@
 import type { ComponentType, ReactNode } from 'react';
+export type {
+  WorldAnchorOptions,
+  PresentationEffectOptions,
+} from './presentation';
 import type { Props } from './props';
 export type {
   ActionEvent,
@@ -11,6 +15,8 @@ export type {
 
 interface Runtime {
   Box: ComponentType<Props>;
+  WorldAnchor: ComponentType<Props>;
+  Effect: ComponentType<Props>;
   Button: ComponentType<Props>;
   Range: ComponentType<Props>;
   Select: ComponentType<Props>;
@@ -40,6 +46,8 @@ if (!runtime) throw new Error('Capsule React runtime is not installed');
 
 export const {
   Box,
+  WorldAnchor,
+  Effect,
   Button,
   Range,
   Select,

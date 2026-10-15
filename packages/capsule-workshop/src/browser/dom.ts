@@ -369,6 +369,8 @@ export class DomTarget {
     return element;
   }
   apply(nodes: ReadonlyMap<bigint, UiNode>) {
+    if ([...nodes.values()].some((node) => node.worldAnchor || node.effect))
+      throw Error('World presentation provider not configured');
     if ([...nodes.values()].some((node) => node.kind === 13))
       throw Error('Live surface provider is not configured');
     const focusPath: bigint[] = [];

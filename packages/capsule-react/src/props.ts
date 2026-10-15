@@ -1,4 +1,8 @@
 import type { ReactNode } from 'react';
+import type {
+  WorldAnchorOptions,
+  PresentationEffectOptions,
+} from './presentation';
 import type { TextEdit } from './text-edit';
 export interface TextEditEvent extends TextEdit, ActionEvent {}
 export interface ActionEvent {
@@ -43,6 +47,8 @@ export interface WheelEvent {
   modifiers: number;
 }
 export interface Props {
+  worldAnchor?: WorldAnchorOptions;
+  effect?: PresentationEffectOptions;
   /** Programmatic text. Unchanged text/revision preserves the native draft. */
   text?: string;
   textRevision?: number;
