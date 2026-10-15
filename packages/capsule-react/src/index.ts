@@ -72,3 +72,15 @@ export function useObservation<T>(
 ): T {
   return runtime.useObservation(topic, schema, decode, fallback);
 }
+
+/** One-shot work on the guest's bounded scheduler; cancel on unmount. */
+export function schedule(delay: number, callback: () => void): () => void {
+  if (!Number.isFinite(delay) || delay < 0 || delay > 60000)
+    throw Error('Invalid scheduled delay');
+  const timers = globalThis as unknown as {
+    setTimeout(callback: () => void, delay: number): number;
+    clearTimeout(id: number): void;
+  };
+  const id = timers.setTimeout(callback, delay);
+  return () => timers.clearTimeout(id);
+}
