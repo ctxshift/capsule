@@ -28,7 +28,8 @@ namespace PortableUi
         readonly HashSet<ushort> actions, inputs;
 
         public UiCapabilityGrant(IEnumerable<UiObservationCapability> observationTopics,
-            IEnumerable<ushort> actionCapabilities, IEnumerable<ushort> inputCapabilities)
+            IEnumerable<ushort> actionCapabilities, IEnumerable<ushort> inputCapabilities,
+            bool unrestrictedCapacity = false)
         {
             observations = new HashSet<uint>();
             actions = new HashSet<ushort>();
@@ -37,18 +38,18 @@ namespace PortableUi
                 foreach (var item in observationTopics)
                 {
                     if (item.Topic == 0 || item.SchemaVersion == 0 ||
-                        !observations.Add(item.Key) || observations.Count > MaxCapabilitiesPerKind)
+                        !observations.Add(item.Key) || (!unrestrictedCapacity && observations.Count > MaxCapabilitiesPerKind))
                         throw new ArgumentException("Invalid or duplicate observation grant.");
                 }
-            CopyIds(actionCapabilities, actions, "action");
-            CopyIds(inputCapabilities, inputs, "input");
+            CopyIds(actionCapabilities, actions, "action", unrestrictedCapacity);
+            CopyIds(inputCapabilities, inputs, "input", unrestrictedCapacity);
         }
 
-        static void CopyIds(IEnumerable<ushort> source, HashSet<ushort> target, string name)
+        static void CopyIds(IEnumerable<ushort> source, HashSet<ushort> target, string name, bool unrestrictedCapacity)
         {
             if (source == null) return;
             foreach (ushort id in source)
-                if (id == 0 || !target.Add(id) || target.Count > MaxCapabilitiesPerKind)
+                if (id == 0 || !target.Add(id) || (!unrestrictedCapacity && target.Count > MaxCapabilitiesPerKind))
                     throw new ArgumentException("Invalid or duplicate " + name + " grant.");
         }
 
