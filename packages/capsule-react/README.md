@@ -21,6 +21,35 @@ pixel, line and page deltas. Events target the nearest subscribed ancestor and
 do not move keyboard focus. Hosts bound each axis to ±8192 units. Compose scroll
 state and clipped content in the addon; wheel input itself grants no game action.
 
+`TextInput` is a single-line native editor. Use `onTextChange`,
+`onCompositionChange`, `onSubmit`, `onCancel` and `onTextFocusChange` for semantic
+events. Each receives text, provisional composition, UTF-16 selection anchor/focus,
+`composing`, `userInput`, phase and the source-bound action context. Enter submits
+once per press outside composition; Escape cancels and releases focus. Tab moves
+between controls. Keyboard editing and clipboard operations stay native.
+
+The `text` prop is a programmatic command, not a value that must be echoed after
+every keystroke. Unchanged text preserves the native draft and caret across React
+renders. Change `text`, or increment `textRevision` to apply the same text again
+(for example, clear a submitted draft). Programmatic changes report
+`userInput: false`; do not mirror them recursively. `maxLength` counts UTF-16
+units, `maxBytes` counts UTF-8 bytes; both default to 512 and accept 1..512.
+Oversized edits revert as a whole. `numeric` accepts ASCII digits and an empty
+draft, and `readOnly` permits focus/selection without edits or submission.
+Both adapters reuse the theme's select colors, border, font and padding.
+Text events do not expand the separate 256-byte gameplay action limit.
+
+```tsx
+const [reset, setReset] = useState(0);
+<TextInput width={240} height={32} text="" textRevision={reset} maxLength={80} maxBytes={160}
+  onSubmit={event => {
+    sendChatIntent(event.text); // The game's authorized API owns the request.
+    setReset(value => value + 1);
+  }} />;
+```
+
+See the [FrameXML findings and wire contract](../../docs/research/framexml-text-input.md).
+
 Activation, pointer, close and key callbacks receive an action context with
 `request(capability, payload?)`. Requests retain the originating widget handle;
 the host still validates capabilities, generation, visibility and game-specific

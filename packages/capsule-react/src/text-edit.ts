@@ -19,6 +19,28 @@ export interface TextEdit {
 }
 export const maxTextBytes = 512;
 export const maxTextEditBytes = 12 + 2 * maxTextBytes;
+export interface TextInputOptions {
+  maxLength: number;
+  maxBytes: number;
+  readOnly: boolean;
+  numeric: boolean;
+  revision: number;
+}
+export function validateTextInput(text: string, options: TextInputOptions) {
+  if (
+    ![options.maxLength, options.maxBytes].every(
+      (n) => Number.isInteger(n) && n >= 1 && n <= 512,
+    ) ||
+    !Number.isInteger(options.revision) ||
+    options.revision < 0 ||
+    options.revision > 0xffffffff ||
+    text.length > options.maxLength ||
+    /[\0\r\n\t]/.test(text) ||
+    (options.numeric && !/^[0-9]*$/.test(text)) ||
+    utf8(text).length > options.maxBytes
+  )
+    throw Error('Invalid text input');
+}
 
 // QuickJS has no browser TextEncoder/TextDecoder. URI conversion is strict about
 // malformed UTF-8 and unpaired UTF-16 surrogates on both runtimes.

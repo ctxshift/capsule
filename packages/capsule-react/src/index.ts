@@ -2,6 +2,7 @@ import type { ComponentType, ReactNode } from 'react';
 import type { Props } from './props';
 export type {
   ActionEvent,
+  TextEditEvent,
   PointerEvent,
   KeyEvent,
   WheelEvent,
@@ -14,6 +15,7 @@ interface Runtime {
   Range: ComponentType<Props>;
   Select: ComponentType<Props>;
   Text: ComponentType<Props>;
+  TextInput: ComponentType<Props>;
   Image: ComponentType<Props>;
   Window: ComponentType<Props>;
   Portrait: ComponentType<Props>;
@@ -42,6 +44,7 @@ export const {
   Range,
   Select,
   Text,
+  TextInput,
   Image,
   Window,
   Portrait,

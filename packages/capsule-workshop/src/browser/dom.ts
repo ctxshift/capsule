@@ -1,5 +1,6 @@
 import { input, type UiNode } from './packet';
 import { layout, type TextMetrics } from './layout';
+import { bindTextInput } from './text-input';
 
 export interface BrowserTheme {
   css: string;
@@ -12,6 +13,8 @@ export interface BrowserTheme {
 
 export class DomTarget {
   private elements = new Map<bigint, HTMLElement>();
+  private nodeSubscriptions = new Map<bigint, AbortController>();
+  private textInputs = new Map<bigint, (node: UiNode) => void>();
   private nodes: ReadonlyMap<bigint, UiNode> = new Map();
   private subscriptions = new AbortController();
   private capture: {
@@ -183,7 +186,7 @@ export class DomTarget {
     const element = document.createElement(
       node.kind === 10
         ? 'button'
-        : node.kind === 11
+        : node.kind === 11 || node.kind === 14
           ? 'input'
           : node.kind === 12
             ? 'select'
@@ -204,7 +207,31 @@ export class DomTarget {
           : 'auto',
     });
     this.theme.decorate(element, node, () => this.send(input(node.id, 2)));
-    const options = { signal: this.subscriptions.signal };
+    const subscriptions = new AbortController();
+    this.nodeSubscriptions.set(node.id, subscriptions);
+    const options = { signal: subscriptions.signal };
+    if (node.kind === 14)
+      this.textInputs.set(
+        node.id,
+        bindTextInput(
+          element as HTMLInputElement,
+          () => {
+            const current = this.nodes.get(node.id);
+            for (
+              let ancestor = current;
+              ancestor;
+              ancestor = this.nodes.get(ancestor.parent)
+            )
+              if (!ancestor.visible) return undefined;
+            return current;
+          },
+          (payload) => {
+            if ((this.nodes.get(node.id)?.events ?? 0) & 1024)
+              this.send(input(node.id, 1024, Array.from(payload)));
+          },
+          subscriptions.signal,
+        ),
+      );
     element.addEventListener(
       'focus',
       () => {
@@ -367,6 +394,9 @@ export class DomTarget {
         if (this.capture?.id === id) this.capture = null;
         element.remove();
         this.elements.delete(id);
+        this.nodeSubscriptions.get(id)?.abort();
+        this.nodeSubscriptions.delete(id);
+        this.textInputs.delete(id);
       }
     this.nodes = nodes;
     function depth(node: UiNode): number {
@@ -388,6 +418,7 @@ export class DomTarget {
           : 'auto';
       const parent = node.parent ? this.elements.get(node.parent)! : this.stage;
       if (element.parentElement !== parent) parent.append(element);
+      this.textInputs.get(node.id)?.(node);
       const [x, y, width, height] = rectangles.get(node.id)!;
       Object.assign(element.style, {
         left: `${x}px`,
@@ -454,7 +485,7 @@ export class DomTarget {
         const candidate = nodes.get(id);
         if (
           !candidate ||
-          !(candidate.events & 32 || [10, 11, 12].includes(candidate.kind))
+          !(candidate.events & 32 || [10, 11, 12, 14].includes(candidate.kind))
         )
           return false;
         let withinFront = !front;
@@ -489,6 +520,10 @@ export class DomTarget {
     this.subscriptions.abort();
     this.capture = null;
     this.elements.clear();
+    for (const subscriptions of this.nodeSubscriptions.values())
+      subscriptions.abort();
+    this.nodeSubscriptions.clear();
+    this.textInputs.clear();
     this.stage.replaceChildren();
     this.nodes = new Map();
   }

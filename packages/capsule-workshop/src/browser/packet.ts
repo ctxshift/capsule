@@ -1,4 +1,9 @@
+import {
+  validateTextInput,
+  type TextInputOptions,
+} from '@capsule/react/text-edit';
 export interface UiNode {
+  textInput?: TextInputOptions;
   id: bigint;
   parent: bigint;
   kind: number;
@@ -148,7 +153,7 @@ export function applyPacket(
     if (reader.u8()) throw Error('UI command flags');
     const body = reader.body(reader.u16());
     const id = body.u64();
-    if (!id || (version === 1 && opcode >= 11))
+    if (!id || (version === 1 && opcode >= 11 && opcode <= 13))
       throw Error('UI handle/version');
     if (opcode === 1 || opcode === 11) {
       if (next.has(id)) throw Error('Duplicate UI handle');
@@ -166,12 +171,27 @@ export function applyPacket(
         brightness: 10000,
         visible: true,
       };
-      if (node.kind < 1 || node.kind > 13) throw Error('Unknown UI kind');
+      if (node.kind < 1 || node.kind > 14) throw Error('Unknown UI kind');
       next.set(id, node);
     } else {
       const node = next.get(id);
       if (!node) throw Error('Unknown UI handle');
       switch (opcode) {
+        case 14: {
+          if (node.kind !== 14) throw Error('Text input options on wrong kind');
+          const maxLength = body.u16(),
+            maxBytes = body.u16(),
+            flags = body.u8();
+          if (flags > 3 || body.u8()) throw Error('Text input flags');
+          node.textInput = {
+            maxLength,
+            maxBytes,
+            readOnly: !!(flags & 1),
+            numeric: !!(flags & 2),
+            revision: body.u32(),
+          };
+          break;
+        }
         case 2:
           node.text = body.text();
           break;
@@ -225,6 +245,17 @@ export function applyPacket(
     throw Error('Packet/node quota');
   let surfaceCount = 0;
   for (const node of next.values()) {
+    if (node.kind === 14)
+      validateTextInput(
+        node.text,
+        node.textInput ?? {
+          maxLength: 512,
+          maxBytes: 512,
+          readOnly: false,
+          numeric: false,
+          revision: 0,
+        },
+      );
     if (
       node.kind === 13 &&
       (!surfaces?.allows(node.asset) || ++surfaceCount > surfaces.maxLeases)

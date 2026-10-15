@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react';
+import type { TextEdit } from './text-edit';
+export interface TextEditEvent extends TextEdit, ActionEvent {}
 export interface ActionEvent {
   request(capability: number, payload?: Uint8Array): void;
 }
@@ -41,6 +43,18 @@ export interface WheelEvent {
   modifiers: number;
 }
 export interface Props {
+  /** Programmatic text. Unchanged text/revision preserves the native draft. */
+  text?: string;
+  textRevision?: number;
+  maxLength?: number;
+  maxBytes?: number;
+  readOnly?: boolean;
+  numeric?: boolean;
+  onTextChange?: (event: TextEditEvent) => void;
+  onCompositionChange?: (event: TextEditEvent) => void;
+  onSubmit?: (event: TextEditEvent) => void;
+  onCancel?: (event: TextEditEvent) => void;
+  onTextFocusChange?: (event: TextEditEvent) => void;
   /** Opaque host-admitted live surface key, only for Viewport. */
   surface?: string;
   children?: ReactNode;

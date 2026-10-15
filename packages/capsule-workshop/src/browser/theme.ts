@@ -81,7 +81,7 @@ export function createBrowserTheme(
   input[type="range"] {appearance:none;background:transparent;border:0;cursor:pointer;}
   input[type="range"]::-webkit-slider-runnable-track {height:${r.trackHeight}px;border:${r.borderWidth}px solid ${color(r.border)};border-radius:${r.trackRadius}px;background:linear-gradient(to right,${color(r.fill)} var(--value),${color(r.track)} var(--value));}
   input[type="range"]::-webkit-slider-thumb {appearance:none;width:${r.thumbWidth}px;height:${r.thumbHeight}px;margin-top:${(r.trackHeight - r.thumbHeight) / 2 - r.borderWidth}px;background:${color(r.fill)};border-radius:${r.thumbRadius}px;}
-  select {background:${color(s.background)};color:${color(s.foreground)};border:${s.borderWidth}px solid ${color(s.border)};padding:0 ${s.paddingLeft}px!important;font:${s.fontSize}px PortableThemeFont;}`;
+  select,input[data-kind="14"] {background:${color(s.background)};color:${color(s.foreground)};border:${s.borderWidth}px solid ${color(s.border)};padding:0 ${s.paddingLeft}px!important;font:${s.fontSize}px PortableThemeFont;}`;
   return {
     css,
     fonts: [`${theme.font.sampleSize}px PortableThemeFont`],
@@ -194,7 +194,7 @@ export function createBrowserTheme(
         highlight.append(image(document, asset(b.highlight)));
         element.append(overlay, highlight, framed(document, b.frame));
       } else if (node.kind === 4) updateImage(element, node);
-      else if (![2, 3, 8, 11, 12].includes(node.kind))
+      else if (![2, 3, 8, 11, 12, 14].includes(node.kind))
         throw Error(
           'Browser control skin does not support primitive ' + node.kind,
         );
