@@ -37,6 +37,11 @@ interface Runtime {
     decode: (bytes: Uint8Array) => T,
     fallback: T,
   ): T;
+  observe(
+    topic: number,
+    schema: number,
+    receive: (bytes: Uint8Array) => void,
+  ): () => void;
 }
 
 // The host installs the compatible runtime before evaluating an addon bundle.
@@ -77,6 +82,15 @@ export function useObservation<T>(
 /** Full host surface in logical UI units; updates when its dimensions change. */
 export function useViewport(): Readonly<{ width: number; height: number }> {
   return runtime.useViewport();
+}
+
+/** Low-level typed-binding transport: borrowed immutable bytes; unsubscribe at teardown. */
+export function observe(
+  topic: number,
+  schema: number,
+  receive: (bytes: Uint8Array) => void,
+): () => void {
+  return runtime.observe(topic, schema, receive);
 }
 
 /** One-shot work on the guest's bounded scheduler; cancel on unmount. */
