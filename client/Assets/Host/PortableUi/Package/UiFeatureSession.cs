@@ -16,6 +16,8 @@ namespace PortableUi.Package
         readonly uint epoch;
         readonly List<IDisposable> subscriptions = new List<IDisposable>();
         readonly Dictionary<uint, byte[]> dirty = new Dictionary<uint, byte[]>();
+        readonly Dictionary<uint, byte[]> stateFrames = new Dictionary<uint, byte[]>();
+        readonly Dictionary<uint, byte[]> resultFrames = new Dictionary<uint, byte[]>();
         readonly Dictionary<uint, Task<byte[]>> pending = new Dictionary<uint, Task<byte[]>>();
         readonly Dictionary<uint, Func<byte[], Task<byte[]>>> requests = new Dictionary<uint, Func<byte[], Task<byte[]>>>();
         readonly Dictionary<string, uint> requestKeys = new Dictionary<string, uint>();
@@ -49,7 +51,7 @@ namespace PortableUi.Package
                         if (!selection.Allows(entry.Key, provider.StatePermission(name))) continue;
                         member = checked((ushort)(member + 1)); states.Add(name, member);
                         uint key = (uint)id << 16 | member;
-                        subscriptions.Add(provider.Subscribe(name, bytes => { if (!disposed && !retired) { dirty[key] = bytes; StatePublished?.Invoke(); } }));
+                        subscriptions.Add(provider.Subscribe(name, bytes => { if (!disposed && !retired) { dirty[key] = bytes; stateFrames.Remove(key); StatePublished?.Invoke(); } }));
                     }
                     member = 0;
                     foreach (string name in provider.RequestNames.OrderBy(n => n, StringComparer.Ordinal))
@@ -98,15 +100,22 @@ namespace PortableUi.Package
             {
                 retired = true; cancellation.Cancel();
                 foreach (var subscription in subscriptions) subscription.Dispose(); subscriptions.Clear();
-                dirty.Clear(); pending.Clear();
+                dirty.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear();
                 metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = new object[0] }));
             }
             if (metadata != null) { if (!publish(MetadataTopic, metadata)) return; metadata = null; }
             foreach (var pair in dirty.ToArray())
             {
-                var frame = new byte[8 + pair.Value.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key);
-                Buffer.BlockCopy(pair.Value, 0, frame, 8, pair.Value.Length);
-                if (!publish(StateTopic, frame)) return; dirty.Remove(pair.Key); PublishedStates++;
+                // The callback borrows an immutable frame. Retain it on rejection;
+                // acceptance transfers the same array without another envelope copy.
+                if (!stateFrames.TryGetValue(pair.Key, out var frame))
+                {
+                    frame = new byte[8 + pair.Value.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key);
+                    Buffer.BlockCopy(pair.Value, 0, frame, 8, pair.Value.Length);
+                    stateFrames.Add(pair.Key, frame);
+                }
+                if (!publish(StateTopic, frame)) return;
+                dirty.Remove(pair.Key); stateFrames.Remove(pair.Key); PublishedStates++;
             }
             foreach (var pair in pending.ToArray())
             {
@@ -114,17 +123,22 @@ namespace PortableUi.Package
                 var task = pair.Value;
                 byte status = task.IsCanceled || task.IsFaulted ? (byte)1 : (byte)0;
                 if (task.Exception?.GetBaseException() is UnauthorizedAccessException) status = 2;
-                byte[] payload = status == 0 ? task.Result : Array.Empty<byte>();
-                var frame = new byte[9 + payload.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key); frame[8] = status;
-                Buffer.BlockCopy(payload, 0, frame, 9, payload.Length);
-                if (!publish(ResultTopic, frame)) return; pending.Remove(pair.Key);
+                if (!resultFrames.TryGetValue(pair.Key, out var frame))
+                {
+                    byte[] payload = status == 0 ? task.Result : Array.Empty<byte>();
+                    frame = new byte[9 + payload.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key); frame[8] = status;
+                    Buffer.BlockCopy(payload, 0, frame, 9, payload.Length);
+                    resultFrames.Add(pair.Key, frame);
+                }
+                if (!publish(ResultTopic, frame)) return;
+                pending.Remove(pair.Key); resultFrames.Remove(pair.Key);
             }
         }
         public void Dispose()
         {
             if (disposed) return; disposed = true; cancellation.Cancel();
             foreach (var subscription in subscriptions) subscription.Dispose(); subscriptions.Clear();
-            dirty.Clear(); pending.Clear(); cancellation.Dispose();
+            dirty.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear(); cancellation.Dispose();
         }
     }
 }
