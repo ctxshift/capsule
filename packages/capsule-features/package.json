@@ -1,0 +1,9 @@
+{
+  "name": "@capsule/features",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/schema.ts", "./codec": "./src/codec.ts", "./codegen": "./src/codegen.ts" },
+  "scripts": { "typecheck": "tsc -p tsconfig.json", "test": "vitest run" },
+  "devDependencies": { "typescript": "5.9.3", "vitest": "4.0.18", "@types/node": "25.0.3" }
+}
