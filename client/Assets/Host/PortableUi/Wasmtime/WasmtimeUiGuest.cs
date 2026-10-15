@@ -18,6 +18,7 @@ namespace PortableUi.Wasmtime
     public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiHostCallDiagnostics, IUiSchedulingDiagnostics
     {
         public const ulong AddonExecutionFuel = 200000000;
+        readonly ulong executionFuel;
         public const string QuickJsSha256 = "75C4EAA8D391AF06B600F263DEB4F0EF5856CFC22DB1FC68BD42E9FA47CC016D";
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
@@ -75,11 +76,13 @@ namespace PortableUi.Wasmtime
             if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
             return operationMetrics[index];
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null, ulong executionFuel = AddonExecutionFuel)
         {
             if (hostCallsPerInvocation != UiHostBridgeContract.MaxCallsPerInvocation && hostCallsPerInvocation != UiHostBridgeContract.ExtendedCallsPerInvocation)
                 throw new ArgumentOutOfRangeException(nameof(hostCallsPerInvocation));
             HostCallsPerInvocation = hostCallsPerInvocation;
+            if (executionFuel == 0) throw new ArgumentOutOfRangeException(nameof(executionFuel));
+            this.executionFuel = executionFuel;
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
             using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != QuickJsSha256) throw new ArgumentException("Pinned carrier changed");
             scriptModules = scriptModules ?? Array.Empty<byte[]>();
@@ -249,6 +252,8 @@ namespace PortableUi.Wasmtime
         }
         bool Call(string name, int a, int b, int nargs, int results, ulong fuel, out int value, out string error)
         {
+            // Core lifecycle helpers can execute addon code too (for example viewport subscribers).
+            if (executionFuel == ulong.MaxValue) fuel = ulong.MaxValue;
             value = 0;
             if (terminal || disposed)
             {
@@ -274,7 +279,7 @@ namespace PortableUi.Wasmtime
             if (code != 0 || callbackError != null)
             {
                 terminal = true;
-                error = callbackError ?? Marshal.PtrToStringAnsi(pui_error(native));
+                error = name + ": " + (callbackError ?? Marshal.PtrToStringAnsi(pui_error(native)));
                 return false;
             }
             error = "";
@@ -340,14 +345,14 @@ namespace PortableUi.Wasmtime
             ulong used = TotalCallFuel - start;
             // Include allocation/free overhead in the single activation allowance.
             const ulong overhead = 400000;
-            if (used + overhead >= AddonExecutionFuel)
+            if (used + overhead >= executionFuel)
             { terminal = true; error = "Addon activation fuel exhausted"; return false; }
-            return Evaluate(bytes, "portable_ui_eval", AddonExecutionFuel - used - overhead, out error);
+            return Evaluate(bytes, "portable_ui_eval", executionFuel - used - overhead, out error);
         }
         public bool Update(out string error)
         {
             ++UpdateCalls;
-            if (!Call(SupportsScheduling ? "portable_ui_update_v2" : "portable_ui_update", 0, 0, 0, 1, AddonExecutionFuel, out int result, out error)) return false;
+            if (!Call(SupportsScheduling ? "portable_ui_update_v2" : "portable_ui_update", 0, 0, 0, 1, executionFuel, out int result, out error)) return false;
             if (SupportsScheduling && result >= 0)
             {
                 NextWakeTimestamp = result == 0 ? (long?)null : Stopwatch.GetTimestamp() +
