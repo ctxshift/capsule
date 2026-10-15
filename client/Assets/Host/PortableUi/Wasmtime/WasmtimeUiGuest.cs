@@ -19,7 +19,7 @@ namespace PortableUi.Wasmtime
     {
         public const ulong AddonExecutionFuel = 200000000;
         readonly ulong executionFuel;
-        public const string QuickJsSha256 = "75C4EAA8D391AF06B600F263DEB4F0EF5856CFC22DB1FC68BD42E9FA47CC016D";
+        public const string QuickJsSha256 = "AEF934D6361DF6AA6BECBD9A80DD49643CA161F1D22DB0567DF2CB065477EEA9";
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
         static readonly HostCallback Callback = Dispatch;
@@ -45,6 +45,8 @@ namespace PortableUi.Wasmtime
         GCHandle self;
         bool terminal, disposed;
         string callbackError;
+        byte[] pendingObservation;
+        ushort pendingTopic, pendingSchema;
         public bool SupportsScheduling { get; }
         public long? NextWakeTimestamp { get; private set; }
         public long UpdateCalls { get; private set; }
@@ -200,22 +202,27 @@ namespace PortableUi.Wasmtime
             }
             if (op == (int)UiHostOperation.NextObservation)
             {
-                if (b != UiHostBridgeContract.ObservationCapacity) return (int)UiHostResult.InvalidArgument;
-                Address(memory, size, a, (int)b, UiHostBridgeContract.ObservationCapacity);
+                // Capacity zero queries length without consuming the pending record.
+                // Legacy callers retain their 264-byte buffer. A short buffer cannot lose data.
+                if (b != 0 && b != UiHostBridgeContract.ObservationCapacity &&
+                    (pendingObservation == null || b != pendingObservation.Length + 8)) return (int)UiHostResult.InvalidArgument;
+                if (b != 0) Address(memory, size, a, (int)b, UiHostBridgeContract.MaxObservationBytes + 8);
                 if (observations == null) return (int)UiHostResult.Unavailable;
-                if (!observations.TryDequeue(out var topic, out var schema, out var payload)) return 0;
-                if (!grant.AllowsObservation(topic, schema)) return (int)UiHostResult.Rejected;
-                if (payload == null || payload.Length > UiHostBridgeContract.MaxPayloadBytes) return (int)UiHostResult.InvalidArgument;
-                var bytes = new byte[payload.Length + 8];
-                bytes[0] = (byte)topic;
-                bytes[1] = (byte)(topic >> 8);
-                bytes[2] = (byte)schema;
-                bytes[3] = (byte)(schema >> 8);
-                bytes[4] = (byte)payload.Length;
-                bytes[5] = (byte)(payload.Length >> 8);
-                Buffer.BlockCopy(payload, 0, bytes, 8, payload.Length);
-                Marshal.Copy(bytes, 0, Address(memory, size, a, bytes.Length, 264), bytes.Length); copiedWritten += bytes.Length;
-                return bytes.Length;
+                if (pendingObservation == null && !observations.TryDequeue(out pendingTopic, out pendingSchema, out pendingObservation)) return 0;
+                if (!grant.AllowsObservation(pendingTopic, pendingSchema)) { pendingObservation = null; return (int)UiHostResult.Rejected; }
+                var payload = pendingObservation;
+                if (payload == null || payload.Length > UiHostBridgeContract.MaxObservationBytes) { pendingObservation = null; return (int)UiHostResult.InvalidArgument; }
+                int length = payload.Length + 8;
+                if (b == 0) return length;
+                if (b < length) return (int)UiHostResult.InvalidArgument;
+                IntPtr destination = Address(memory, size, a, length, UiHostBridgeContract.MaxObservationBytes + 8);
+                Marshal.WriteInt16(destination, 0, unchecked((short)pendingTopic));
+                Marshal.WriteInt16(destination, 2, unchecked((short)pendingSchema));
+                Marshal.WriteInt32(destination, 4, payload.Length);
+                Marshal.Copy(payload, 0, IntPtr.Add(destination, 8), payload.Length);
+                copiedWritten += length;
+                pendingObservation = null;
+                return length;
             }
             if (op == (int)UiHostOperation.RequestAction)
             {

@@ -127,7 +127,7 @@ namespace PortableUi
             {
                 var value = Observation; Observation = null;
                 topic = value?.Topic ?? 0; schemaVersion = value?.Schema ?? 0;
-                payload = value == null ? null : (byte[])value.Payload.Clone();
+                payload = value?.Payload; // Transfer the worker-owned immutable buffer.
                 return value != null;
             }
             public bool TryRequest(ushort capability, ulong handle, byte[] payload)
@@ -207,6 +207,14 @@ namespace PortableUi
         }
         public bool EnqueueObservation(long generation, ushort topic, ushort schema, byte[] payload) =>
             Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = Copy(payload) });
+        // Host-only ownership transfer. Caller must never mutate payload after this call,
+        // including on rejection; unlike the legacy copy API this accepts whole messages.
+        public bool EnqueueOwnedObservation(long generation, ushort topic, ushort schema, byte[] payload)
+        {
+            if (payload == null || payload.Length > UiHostBridgeContract.MaxObservationBytes)
+                throw new ArgumentException("Observation exceeds carrier memory capacity.");
+            return Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = payload });
+        }
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload) =>
             UiInputPayload.Valid(kind, payload) &&
             Enqueue(new Input { Kind = Kind.Event, Generation = generation, Handle = handle, Event = kind, Payload = (byte[])payload.Clone() });

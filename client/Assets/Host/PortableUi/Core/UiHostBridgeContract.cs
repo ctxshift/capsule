@@ -25,6 +25,8 @@ namespace PortableUi
         public const int EventCapacity = 272;
         public const int TextEventCapacity = 16 + UiTextEdit.MaxPayloadBytes;
         public const int ObservationCapacity = 264;
+        // Carrier linear-memory capacity, not a per-feature or community topic quota.
+        public const int MaxObservationBytes = 4 * 1024 * 1024;
         public const int MaxPayloadBytes = 256;
     }
 
