@@ -271,8 +271,9 @@ namespace PortableUi
             if (!ValidEvents(kind) || kind == UiEventMask.None ||
                 (((ushort)kind & ((ushort)kind - 1)) != 0))
                 return new UiResult(UiError.InvalidEvent, "Event kind must be one known bit.");
-            if (copiedPayload == null || copiedPayload.Length > MaxEventPayloadBytes)
-                return new UiResult(UiError.QuotaExceeded, "Event payload exceeds 256 bytes.");
+            int limit = kind == UiEventMask.TextEdit ? UiTextEdit.MaxPayloadBytes : MaxEventPayloadBytes;
+            if (copiedPayload == null || copiedPayload.Length > limit)
+                return new UiResult(UiError.QuotaExceeded, "Event payload exceeds its quota.");
             if (!UiInputPayload.Valid(kind, copiedPayload))
                 return new UiResult(UiError.InvalidEvent, "Malformed versioned input payload.");
             var result = CheckLive(handle, nodes, out var node);
@@ -313,6 +314,8 @@ namespace PortableUi
                 return new UiResult(UiError.InvalidPacket, "Event destination must hold 272 bytes.");
             if (!TryPeekEvent(out var next)) return UiResult.Ok;
             var payload = next.CopyPayload();
+            if (destination.Length < 16 + payload.Length)
+                return new UiResult(UiError.InvalidPacket, "Event destination is too small for queued text.");
             destination[0] = 1; destination[1] = 0;
             destination[2] = (byte)next.Kind; destination[3] = (byte)((ushort)next.Kind >> 8);
             destination[4] = (byte)payload.Length; destination[5] = (byte)(payload.Length >> 8);

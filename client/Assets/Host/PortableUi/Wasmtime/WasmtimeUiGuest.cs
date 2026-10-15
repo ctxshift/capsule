@@ -18,7 +18,7 @@ namespace PortableUi.Wasmtime
     public sealed class WasmtimeUiGuest : IUiGuest, IUiFuelDiagnostics, IUiCallFuelDiagnostics, IUiHostCallDiagnostics, IUiSchedulingDiagnostics
     {
         public const ulong AddonExecutionFuel = 200000000;
-        public const string QuickJsSha256 = "0975D550E2B8A9BA9CBBBEB6B5914157C793631218C222F8BDDF12EB70905835";
+        public const string QuickJsSha256 = "75C4EAA8D391AF06B600F263DEB4F0EF5856CFC22DB1FC68BD42E9FA47CC016D";
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
         static readonly HostCallback Callback = Dispatch;
@@ -174,12 +174,12 @@ namespace PortableUi.Wasmtime
             }
             if (op == (int)UiHostOperation.NextEvent)
             {
-                if (b != UiHostBridgeContract.EventCapacity) return (int)UiHostResult.InvalidArgument;
-                Address(memory, size, a, (int)b, UiHostBridgeContract.EventCapacity);
-                var bytes = new byte[272];
+                if (b != UiHostBridgeContract.EventCapacity && b != UiHostBridgeContract.TextEventCapacity) return (int)UiHostResult.InvalidArgument;
+                Address(memory, size, a, (int)b, UiHostBridgeContract.TextEventCapacity);
+                var bytes = new byte[(int)b];
                 var result = Session.WriteNextEvent(bytes, out int n);
                 if (!result.Success) return Result(result);
-                Marshal.Copy(bytes, 0, Address(memory, size, a, n, 272), n); copiedWritten += n;
+                Marshal.Copy(bytes, 0, Address(memory, size, a, n, UiHostBridgeContract.TextEventCapacity), n); copiedWritten += n;
                 return n;
             }
             if (op == (int)UiHostOperation.NextObservation)

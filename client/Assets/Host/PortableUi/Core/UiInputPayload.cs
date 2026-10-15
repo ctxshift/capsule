@@ -9,7 +9,7 @@ namespace PortableUi
     // design-unit representation as layout. No platform key names cross the ABI.
     public static class UiInputPayload
     {
-        public const ushort AllowedEvents = 1023;
+        public const ushort AllowedEvents = 2047;
         public const byte Version = 1;
         public const int PointerLength = 16;
 
@@ -49,6 +49,7 @@ namespace PortableUi
 
         public static bool Valid(UiEventMask kind, byte[] bytes)
         {
+            if (kind == UiEventMask.TextEdit) return UiTextEdit.TryDecode(bytes, out _);
             if (bytes == null || bytes.Length > UiSession.MaxEventPayloadBytes) return false;
             if (kind == UiEventMask.Wheel)
                 return bytes.Length == 12 && bytes[0] == Version && bytes[1] <= 15 && bytes[2] == 0 && bytes[3] == 0 &&

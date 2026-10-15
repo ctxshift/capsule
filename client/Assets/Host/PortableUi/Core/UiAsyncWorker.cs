@@ -209,7 +209,7 @@ namespace PortableUi
             Enqueue(new Input { Kind = Kind.Observation, Generation = generation, Topic = topic, Schema = schema, Payload = Copy(payload) });
         public bool EnqueueEvent(long generation, ulong handle, UiEventMask kind, byte[] payload) =>
             UiInputPayload.Valid(kind, payload) &&
-            Enqueue(new Input { Kind = Kind.Event, Generation = generation, Handle = handle, Event = kind, Payload = Copy(payload) });
+            Enqueue(new Input { Kind = Kind.Event, Generation = generation, Handle = handle, Event = kind, Payload = (byte[])payload.Clone() });
         public bool EnqueueViewport(long generation, int width, int height) =>
             Enqueue(new Input { Kind = Kind.Viewport, Generation = generation, Width = width, Height = height });
         static byte[] Copy(byte[] payload)

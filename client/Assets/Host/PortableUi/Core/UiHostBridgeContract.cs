@@ -23,6 +23,7 @@ namespace PortableUi
         public const int ExtendedCallsPerInvocation = 256;
         public const int MaxSubmitBytes = 65536;
         public const int EventCapacity = 272;
+        public const int TextEventCapacity = 16 + UiTextEdit.MaxPayloadBytes;
         public const int ObservationCapacity = 264;
         public const int MaxPayloadBytes = 256;
     }
