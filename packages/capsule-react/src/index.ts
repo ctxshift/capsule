@@ -30,6 +30,7 @@ interface Runtime {
   Progress: ComponentType<Props>;
   Overlay: ComponentType<Props>;
   render(node: ReactNode, options?: { layout: 'yoga' }): void;
+  useViewport(): Readonly<{ width: number; height: number }>;
   useObservation<T>(
     topic: number,
     schema: number,
@@ -71,6 +72,11 @@ export function useObservation<T>(
   fallback: T,
 ): T {
   return runtime.useObservation(topic, schema, decode, fallback);
+}
+
+/** Full host surface in logical UI units; updates when its dimensions change. */
+export function useViewport(): Readonly<{ width: number; height: number }> {
+  return runtime.useViewport();
 }
 
 /** One-shot work on the guest's bounded scheduler; cancel on unmount. */
