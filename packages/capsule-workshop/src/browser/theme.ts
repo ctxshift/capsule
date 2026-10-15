@@ -130,10 +130,13 @@ export function createBrowserTheme(
           rule.style.backgroundColor = color(variant?.ruleColor ?? w.ruleColor);
         }
       }
-      if (node.kind === 8) {
+      if (node.kind === 8 || node.kind === 9) {
         const surface = theme.surfaces?.find(
           (surface) => surface.key === node.style,
         );
+        element.style.overflow =
+          node.kind === 9 || surface?.clipCircle ? 'hidden' : '';
+        element.style.borderRadius = surface?.clipCircle ? '50%' : '';
         element.style.backgroundColor = color(surface?.color ?? [0, 0, 0, 0]);
         element.style.boxShadow = Object.entries(surface?.rules ?? {})
           .map(([edge, rule]) => {
@@ -205,7 +208,7 @@ export function createBrowserTheme(
         highlight.append(image(document, asset(b.highlight)));
         element.append(overlay, highlight, framed(document, b.frame));
       } else if (node.kind === 4) updateImage(element, node);
-      else if (![2, 3, 8, 11, 12, 14].includes(node.kind))
+      else if (![2, 3, 8, 9, 11, 12, 14].includes(node.kind))
         throw Error(
           'Browser control skin does not support primitive ' + node.kind,
         );

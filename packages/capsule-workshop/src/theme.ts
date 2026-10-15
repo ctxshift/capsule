@@ -109,6 +109,7 @@ export interface UiTheme {
   }[];
   surfaces?: {
     key: string;
+    clipCircle?: boolean;
     color: Rgba;
     shadow?: { blur: number; color: Rgba };
     /** Edge tuples are [width, red, green, blue, alpha]; rules do not affect layout. */
@@ -243,6 +244,11 @@ export function parseTheme(
     )
       throw Error('Theme surface bounds');
     surfaces.add(surface.key);
+    if (
+      surface.clipCircle !== undefined &&
+      typeof surface.clipCircle !== 'boolean'
+    )
+      throw Error('Theme circular clip must be boolean');
     if (surface.rules !== undefined) {
       if (
         !surface.rules ||
