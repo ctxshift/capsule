@@ -58,6 +58,15 @@ namespace PortableUi
         public bool AllowsAction(ushort capability) => actions.Contains(capability);
         public bool AllowsInput(ushort capability) => inputs.Contains(capability);
         public bool HasInput => inputs.Count != 0;
+        internal UiCapabilityGrant WithFeatureTransport()
+        {
+            var topics = new List<UiObservationCapability>();
+            foreach (uint key in observations) topics.Add(new UiObservationCapability((ushort)(key >> 16), (ushort)key));
+            foreach (ushort topic in new ushort[] { 65000, 65001, 65002 })
+                if (!AllowsObservation(topic, 1)) topics.Add(new UiObservationCapability(topic, 1));
+            var extended = new HashSet<ushort>(actions) { 65000 };
+            return new UiCapabilityGrant(topics, extended, inputs, true);
+        }
         public bool IsSubsetOf(UiCapabilityGrant ceiling) => ceiling != null &&
             observations.IsSubsetOf(ceiling.observations) && actions.IsSubsetOf(ceiling.actions) &&
             inputs.IsSubsetOf(ceiling.inputs);
@@ -157,7 +166,7 @@ namespace PortableUi
                     throw new ArgumentException("Registration belongs to another host.", nameof(registration));
             }
             if (features != null && !features.IsCurrent) throw new InvalidOperationException("Feature providers changed before activation");
-            return new UiAddonActivation(AllocateOwner(ref nextOwner), registration.Grant, features);
+            return new UiAddonActivation(AllocateOwner(ref nextOwner), features != null && features.Providers.Count != 0 ? registration.Grant.WithFeatureTransport() : registration.Grant, features);
         }
 
         static bool ValidId(string id)
