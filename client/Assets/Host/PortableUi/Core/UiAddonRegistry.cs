@@ -26,10 +26,11 @@ namespace PortableUi
         const int MaxCapabilitiesPerKind = 64;
         readonly HashSet<uint> observations;
         readonly HashSet<ushort> actions, inputs;
+        readonly HashSet<ushort> readOnlyActions;
 
         public UiCapabilityGrant(IEnumerable<UiObservationCapability> observationTopics,
             IEnumerable<ushort> actionCapabilities, IEnumerable<ushort> inputCapabilities,
-            bool unrestrictedCapacity = false)
+            bool unrestrictedCapacity = false, IEnumerable<ushort> readOnlyActionCapabilities = null)
         {
             observations = new HashSet<uint>();
             actions = new HashSet<ushort>();
@@ -43,6 +44,9 @@ namespace PortableUi
                 }
             CopyIds(actionCapabilities, actions, "action", unrestrictedCapacity);
             CopyIds(inputCapabilities, inputs, "input", unrestrictedCapacity);
+            readOnlyActions = new HashSet<ushort>();
+            CopyIds(readOnlyActionCapabilities, readOnlyActions, "read-only action", unrestrictedCapacity);
+            if (!readOnlyActions.IsSubsetOf(actions)) throw new ArgumentException("Read-only actions require an action grant.");
         }
 
         static void CopyIds(IEnumerable<ushort> source, HashSet<ushort> target, string name, bool unrestrictedCapacity)
@@ -56,6 +60,7 @@ namespace PortableUi
         public bool AllowsObservation(ushort topic, ushort schemaVersion) =>
             observations.Contains((uint)topic << 16 | schemaVersion);
         public bool AllowsAction(ushort capability) => actions.Contains(capability);
+        public bool AllowsReadOnlyAction(ushort capability) => readOnlyActions.Contains(capability);
         public bool AllowsInput(ushort capability) => inputs.Contains(capability);
         public bool HasInput => inputs.Count != 0;
         internal UiCapabilityGrant WithFeatureTransport()
@@ -64,12 +69,13 @@ namespace PortableUi
             foreach (uint key in observations) topics.Add(new UiObservationCapability((ushort)(key >> 16), (ushort)key));
             foreach (ushort topic in new ushort[] { 65000, 65001, 65002 })
                 if (!AllowsObservation(topic, 1)) topics.Add(new UiObservationCapability(topic, 1));
-            var extended = new HashSet<ushort>(actions) { 65000 };
-            return new UiCapabilityGrant(topics, extended, inputs, true);
+            var extended = new HashSet<ushort>(actions) { 65000, 65001 };
+            var reads = new HashSet<ushort>(readOnlyActions) { 65001 };
+            return new UiCapabilityGrant(topics, extended, inputs, true, reads);
         }
         public bool IsSubsetOf(UiCapabilityGrant ceiling) => ceiling != null &&
             observations.IsSubsetOf(ceiling.observations) && actions.IsSubsetOf(ceiling.actions) &&
-            inputs.IsSubsetOf(ceiling.inputs);
+            inputs.IsSubsetOf(ceiling.inputs) && readOnlyActions.IsSubsetOf(ceiling.readOnlyActions);
     }
 
     public sealed class UiAddonRegistration

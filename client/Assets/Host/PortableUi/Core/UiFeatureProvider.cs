@@ -15,6 +15,7 @@ namespace PortableUi
         IEnumerable<string> RequestNames { get; }
         string StatePermission(string name);
         UiFeatureDelivery StateDelivery(string name);
+        byte[] ReadState(string name);
         string RequestPermission(string name);
         IDisposable Subscribe(string name, Action<byte[]> receive);
         Task<byte[]> Request(string name, byte[] payload, CancellationToken cancellationToken);
@@ -47,6 +48,7 @@ namespace PortableUi
         void Ensure() { if (disposed) throw new ObjectDisposedException(nameof(UiFeatureProvider)); }
         public string StatePermission(string name) { Ensure(); return states.TryGetValue(name, out var state) ? state.Permission : throw new ArgumentException("Unknown feature state"); }
         public UiFeatureDelivery StateDelivery(string name) { Ensure(); return states.TryGetValue(name, out var state) ? state.Delivery : throw new ArgumentException("Unknown feature state"); }
+        public byte[] ReadState(string name) { Ensure(); return states.TryGetValue(name, out var state) ? state.Bytes : throw new ArgumentException("Unknown feature state"); }
         public string RequestPermission(string name) { Ensure(); return requests.TryGetValue(name, out var request) ? request.Permission : throw new ArgumentException("Unknown feature request"); }
         public IDisposable Subscribe(string name, Action<byte[]> receive)
         {

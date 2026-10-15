@@ -11,16 +11,19 @@ namespace PortableUi.Package
     // One activation owns one session. Transport identifiers carry no game semantics.
     public sealed class UiFeatureSession : IDisposable
     {
-        public const ushort MetadataTopic = 65000, StateTopic = 65001, ResultTopic = 65002, Capability = 65000;
+        public const ushort MetadataTopic = 65000, StateTopic = 65001, ResultTopic = 65002, Capability = 65000, RecoveryCapability = 65001;
         readonly UiFeatureSelection selection;
         readonly uint epoch;
         readonly List<IDisposable> subscriptions = new List<IDisposable>();
         readonly Dictionary<uint, byte[]> dirty = new Dictionary<uint, byte[]>();
         readonly Dictionary<uint, UiObservationPayload> stateFrames = new Dictionary<uint, UiObservationPayload>();
-        readonly Queue<UiObservationPayload> ordered = new Queue<UiObservationPayload>();
+        readonly Queue<(uint key, UiObservationPayload frame)> ordered = new Queue<(uint, UiObservationPayload)>();
+        readonly Dictionary<uint, uint> revisions = new Dictionary<uint, uint>();
+        readonly Dictionary<uint, Func<byte[]>> snapshots = new Dictionary<uint, Func<byte[]>>();
         readonly int orderedCapacity;
         bool overflow;
         public bool OrderedOverflow => overflow;
+        public UiFeatureSelection Selection => selection;
         readonly Dictionary<uint, UiObservationPayload> resultFrames = new Dictionary<uint, UiObservationPayload>();
         readonly Dictionary<uint, Task<byte[]>> pending = new Dictionary<uint, Task<byte[]>>();
         readonly Dictionary<uint, Func<byte[], Task<byte[]>>> requests = new Dictionary<uint, Func<byte[], Task<byte[]>>>();
@@ -59,6 +62,8 @@ namespace PortableUi.Package
                         member = checked((ushort)(member + 1)); states.Add(name, member);
                         uint key = (uint)id << 16 | member;
                         var delivery = provider.StateDelivery(name);
+                        string statePermission = provider.StatePermission(name);
+                        snapshots.Add(key, () => selection.Allows(entry.Key, statePermission) ? provider.ReadState(name) : null);
                         deliveries.Add(name, delivery == UiFeatureDelivery.Ordered ? "ordered" : "latest");
                         subscriptions.Add(provider.Subscribe(name, bytes =>
                         {
@@ -67,9 +72,7 @@ namespace PortableUi.Package
                             {
                                 // Never silently lose a sequence. Retire the activation on overflow;
                                 // a fresh activation starts from provider snapshots.
-                                if (ordered.Count >= this.orderedCapacity) { overflow = true; return; }
-                                var header = new byte[8]; Write32(header, 0, this.epoch); Write32(header, 4, key);
-                                ordered.Enqueue(new UiObservationPayload(header, bytes));
+                                EnqueueOrdered(key, bytes, !revisions.ContainsKey(key));
                             }
                             else { dirty[key] = bytes; stateFrames.Remove(key); }
                             StatePublished?.Invoke();
@@ -95,6 +98,32 @@ namespace PortableUi.Package
         }
         public static uint Read32(byte[] bytes, int at) => (uint)(bytes[at] | bytes[at + 1] << 8 | bytes[at + 2] << 16 | bytes[at + 3] << 24);
         static void Write32(byte[] bytes, int at, uint value) { for (int n = 0; n < 4; n++) bytes[at + n] = (byte)(value >> (n * 8)); }
+        void EnqueueOrdered(uint key, byte[] bytes, bool reset)
+        {
+            revisions.TryGetValue(key, out uint revision);
+            if (ordered.Count >= orderedCapacity || revision == uint.MaxValue) { overflow = true; return; }
+            revisions[key] = ++revision;
+            var header = new byte[16]; Write32(header, 0, epoch); Write32(header, 4, key);
+            Write32(header, 8, revision); Write32(header, 12, reset ? 1u : 0u);
+            ordered.Enqueue((key, new UiObservationPayload(header, bytes)));
+        }
+        // Read-only control path: no operation name or gameplay payload can be supplied.
+        public bool Recover(byte[] frame)
+        {
+            if (disposed || retired || overflow || !selection.IsCurrent || frame == null || frame.Length != 8 || Read32(frame, 0) != epoch) return false;
+            uint key = Read32(frame, 4);
+            if (!snapshots.TryGetValue(key, out var read)) return false;
+            byte[] bytes = read(); if (bytes == null) return false;
+            if (revisions.ContainsKey(key))
+            {
+                int count = ordered.Count;
+                while (count-- > 0) { var item = ordered.Dequeue(); if (item.key != key) ordered.Enqueue(item); }
+                EnqueueOrdered(key, bytes, true);
+            }
+            else { dirty[key] = bytes; stateFrames.Remove(key); }
+            StatePublished?.Invoke();
+            return !overflow;
+        }
         public byte[] FrameRequest(string feature, string operation, uint call, byte[] payload)
         {
             uint key = requestKeys[feature + "/" + operation];
@@ -129,7 +158,7 @@ namespace PortableUi.Package
             if (metadata != null) { if (!publish(MetadataTopic, UiObservationPayload.Owned(metadata))) return; metadata = null; }
             while (ordered.Count != 0)
             {
-                if (!publish(StateTopic, ordered.Peek())) return;
+                if (!publish(StateTopic, ordered.Peek().frame)) return;
                 ordered.Dequeue(); PublishedStates++;
             }
             foreach (var pair in dirty.ToArray())

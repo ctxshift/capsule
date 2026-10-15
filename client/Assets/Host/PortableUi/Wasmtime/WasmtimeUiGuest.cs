@@ -242,6 +242,10 @@ namespace PortableUi.Wasmtime
                 if (actions == null) return (int)UiHostResult.Unavailable;
                 var bytes = new byte[(int)d];
                 Marshal.Copy(Address(memory, size, c, bytes.Length, 256), bytes, 0, bytes.Length); copiedRead += bytes.Length;
+                // Only explicit host read grants permit requests without a live node.
+                // The host adapter still enforces member permission and activation identity.
+                if (a == 0 && grant.AllowsReadOnlyAction((ushort)b))
+                    return actions.TryRequest((ushort)b, 0, bytes) ? (int)UiHostResult.Success : (int)UiHostResult.Rejected;
                 return Result(Session.RequestAction(unchecked((ulong)a), (ushort)b, bytes, actions));
             }
             // Package operations are deliberately unavailable in the current host profile.
