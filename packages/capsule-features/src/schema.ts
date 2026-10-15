@@ -70,7 +70,7 @@ export type Feature = {
       {
         readonly schema: Schema;
         readonly permission: string;
-        readonly delivery: 'latest';
+        readonly delivery: 'latest' | 'ordered';
       }
     >
   >;
@@ -86,6 +86,9 @@ export type Feature = {
   >;
 };
 export function defineFeature<const F extends Feature>(feature: F): F {
+  for (const state of Object.values(feature.states))
+    if (state.delivery !== 'latest' && state.delivery !== 'ordered')
+      throw Error('Invalid state delivery');
   if (
     !/^@[a-z0-9-]+\/[a-z0-9-]+$/.test(feature.name) ||
     !/^\d+\.\d+\.\d+$/.test(feature.version)

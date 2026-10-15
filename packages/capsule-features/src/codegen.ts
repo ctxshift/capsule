@@ -153,7 +153,11 @@ this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
 ${Object.entries(feature.states)
   .map(([key, state]) => {
     rootRecord(state.schema);
-    return `AddState(${JSON.stringify(key)}, ${JSON.stringify(state.permission)}, FeatureCodec.Encode(provider.Get${key}()));\nprovider.${key}Changed += On${key};`;
+    const delivery =
+      state.delivery === 'ordered'
+        ? ', PortableUi.UiFeatureDelivery.Ordered'
+        : '';
+    return `AddState(${JSON.stringify(key)}, ${JSON.stringify(state.permission)}, FeatureCodec.Encode(provider.Get${key}())${delivery});\nprovider.${key}Changed += On${key};`;
   })
   .join('\n')}
 ${Object.entries(feature.requests)

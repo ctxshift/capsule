@@ -3,7 +3,7 @@
 Engine-independent TypeScript schema definitions and deterministic native codegen.
 This package imports no Host code, network transport or engine APIs.
 
-`defineFeature` describes versioned dependencies, latest-state observations and
+`defineFeature` describes versioned dependencies, latest or ordered observations and
 request/result operations with separate permissions. `s` defines explicit wire
 types; `Value<typeof schema>` supplies readonly TypeScript types. `codec(schema)`
 provides the compatible JavaScript codec, including QuickJS without TextEncoder.
@@ -49,8 +49,18 @@ continue composing the runtime directly without a native engine.
 
 The current native action channel allows 244 bytes of typed request payload after
 framing; larger requests reject explicitly. State observations use the whole-payload
-channel, coalesced per member on the native host. The feature frame adds one host
-copy; decoding uses subarray views rather than additional envelope payload copies.
+channel. `latest` coalesces per member; `ordered` retains each publication across
+native queue backpressure. Delivery semantics participate in the contract
+fingerprint and generated native binding. These observations are complete states,
+not transient events or incremental patches.
+
+The native session's ordered capacity is host-configurable (256 queued updates by
+default). Exhaustion fences requests and retires the activation with an explicit
+`ordered-overflow` metadata reason; it never silently publishes a partial sequence.
+A fresh activation receives current provider snapshots. Automatic recovery is not
+yet implemented, so addons must handle unavailable state. Metadata retirement may
+itself wait for downstream backpressure to clear. Segmented feature envelopes avoid
+an intermediate payload copy; decoding uses subarray views.
 
 Run `bun run --cwd packages/capsule-features typecheck` and
 `bun run --cwd packages/capsule-features test` from the repository root.
