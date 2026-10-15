@@ -25,5 +25,18 @@ The initial subset supports records, booleans, uint32, bounded text and bounded 
 Transient-event generation and non-C# engine targets are not implemented. Host
 registration, grant enforcement and lifecycle are separate from code generation.
 
+`./runtime` supplies an explicit host registry and stable typed connections for mock
+or bridge transports. Initially version ranges are exact versions or `major.minor.*`;
+unsupported range syntax fails explicitly. Dependencies must resolve before connect.
+The host retains the registry; addons receive grant-scoped connections. Native
+bindings must independently enforce grants and authority. The JS registry is not a
+sandbox security boundary.
+
+Each connection decodes a state publication once and reuses its immutable snapshot
+for subscribers. Provider or dependency loss invalidates availability. Replacement
+reattaches the same connection; old callbacks are ignored and in-flight requests
+reject with an unknown outcome without automatic retry. Dispose connections at addon
+teardown. State delivery is implemented; transient event streams remain future work.
+
 Run `bun run --cwd packages/capsule-features typecheck` and
 `bun run --cwd packages/capsule-features test` from the repository root.
