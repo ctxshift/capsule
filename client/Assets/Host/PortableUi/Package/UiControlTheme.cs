@@ -72,6 +72,8 @@ namespace PortableUi.Package
                     if(string.IsNullOrEmpty(key) || !System.Text.RegularExpressions.Regex.IsMatch(key,"^[a-z0-9-]{1,64}$") || !keys.Add(key) ||
                         !(surface["color"] is JArray rgba) || rgba.Count!=4) throw new ArgumentException("Theme surface bounds.");
                     foreach(var channel in rgba) if(channel.Type!=JTokenType.Integer || (int)channel<0 || (int)channel>255) throw new ArgumentException("Theme surface bounds.");
+                    if(surface["clipCircle"]!=null && surface["clipCircle"].Type!=JTokenType.Boolean)
+                        throw new ArgumentException("Theme circular surface must be boolean.");
                     if (surface["rules"] != null)
                     {
                         if (!(surface["rules"] is JObject rules) || rules.Count > 4) throw new ArgumentException("Theme surface rule quota.");
@@ -176,6 +178,8 @@ namespace PortableUi.Package
             {var rgba=(JArray)surface["color"];color=new[]{(byte)rgba[0],(byte)rgba[1],(byte)rgba[2],(byte)rgba[3]};return true;}
             color=null;return false;
         }
+        public bool SurfaceClipCircle(string key)
+        {if(value["surfaces"] is JArray surfaces)foreach(var surface in surfaces)if((string)surface["key"]==key)return(bool?)surface["clipCircle"]??false;return false;}
         public float ImageBrightness(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return (float?)asset["brightness"]??1;return 1;}
         public float ImageOpacity(string key)

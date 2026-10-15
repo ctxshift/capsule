@@ -50,7 +50,17 @@ namespace PortableUi.Unity
                     return true;
                 }
             }
-            if(node.Kind==UiNodeKind.Box && widget.Image) widget.Image.color=Color.clear;
+            if(node.Kind==UiNodeKind.Box && widget.Image)
+            {
+                widget.Image.color=Color.clear;
+                bool circle=theme.SurfaceClipCircle(node.StyleKey);
+                var shape=root.GetComponent<PortableUiCircleMask>();
+                var mask=root.GetComponent<Mask>();
+                if(circle && !shape)shape=root.gameObject.AddComponent<PortableUiCircleMask>();
+                if(circle && !mask)mask=root.gameObject.AddComponent<Mask>();
+                if(shape)shape.enabled=circle;
+                if(mask){mask.enabled=circle;mask.showMaskGraphic=true;}
+            }
             if (node.Kind == UiNodeKind.Box) ApplySurfaceRules(root, node.StyleKey);
             if(node.Kind==UiNodeKind.Box && parts?.SurfaceShadow!=null)
             {
