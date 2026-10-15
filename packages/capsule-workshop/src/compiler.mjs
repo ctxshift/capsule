@@ -5,6 +5,7 @@ import * as fs from 'node:fs/promises';
 import { resolve, dirname, join, relative, isAbsolute } from 'node:path';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { capsuleEntry, capsuleSourceRoot, reactTypes } from './sdk-paths.mjs';
+import { scriptChunks } from './script-chunks.mjs';
 const packageRoot = resolve(import.meta.dirname, '..');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const exists = async (path) => {
@@ -294,10 +295,34 @@ export function compiler({
       backup = output + `.previous-${process.pid}-${current}`;
     try {
       typecheck();
+      const sourceManifest = manifest
+        ? JSON.parse(await fs.readFile(manifest, 'utf8'))
+        : null;
+      const split = sourceManifest?.scriptEntries;
+      if (
+        split &&
+        (!Array.isArray(split) ||
+          split.length > 7 ||
+          split.some(
+            (path) =>
+              typeof path !== 'string' || !within(root, resolve(root, path)),
+          ))
+      )
+        throw Error('Invalid script entry boundaries');
       const result = await build({
         // Typecheck strictly; preserve the existing bundle's non-strict IIFE emission.
         tsconfigRaw: { compilerOptions: { alwaysStrict: false } },
-        entryPoints: [source],
+        entryPoints: split
+          ? {
+              entry: source,
+              ...Object.fromEntries(
+                split.map((path, index) => [
+                  'module' + index,
+                  resolve(root, path),
+                ]),
+              ),
+            }
+          : [source],
         bundle: true,
         // Compact generated transport; source maps retain the authored source.
         minifyWhitespace: true,
@@ -305,26 +330,35 @@ export function compiler({
         minifyIdentifiers: true,
         keepNames: true,
         write: false,
-        format: 'iife',
+        metafile: true,
+        format: split ? 'esm' : 'iife',
+        splitting: !!split,
         platform: 'browser',
         target: 'es2020',
         jsx: 'transform',
         plugins: [shim],
         sourcemap: 'external',
         sourcesContent: true,
-        outfile: 'bundle.js',
+        ...(split
+          ? { outdir: 'chunks', chunkNames: 'shared-[hash]' }
+          : { outfile: 'bundle.js' }),
         logLevel: 'silent',
       });
-      const bundle = result.outputFiles.find((f) =>
-        f.path.endsWith('bundle.js'),
-      );
+      if (
+        split &&
+        Object.values(result.metafile.outputs).some((output) =>
+          output.imports.some((item) => item.kind === 'dynamic-import'),
+        )
+      )
+        throw Error('Script chunks require static imports');
+      const modular = split ? await scriptChunks(result.outputFiles) : null;
+      const bundle =
+        modular?.bundle ??
+        result.outputFiles.find((f) => f.path.endsWith('bundle.js'));
       if (bundle.contents.length > 65536)
         throw Error(
           `Addon bundle exceeds 64 KiB (${bundle.contents.length} bytes)`,
         );
-      const sourceManifest = manifest
-        ? JSON.parse(await fs.readFile(manifest, 'utf8'))
-        : null;
       if (
         sourceManifest &&
         (sourceManifest.schemaVersion !== 1 ||
@@ -332,16 +366,35 @@ export function compiler({
           typeof sourceManifest.id !== 'string')
       )
         throw Error('Invalid source manifest');
-      const declarations = sourceManifest
-        ? sourceManifest.assets
-        : assets
-          ? JSON.parse(await fs.readFile(assets, 'utf8'))
-          : [];
+      const declarations = [
+        ...(sourceManifest
+          ? sourceManifest.assets
+          : assets
+            ? JSON.parse(await fs.readFile(assets, 'utf8'))
+            : []),
+      ];
+      if (modular)
+        for (const chunk of modular.chunks)
+          declarations.push({
+            kind: 'script',
+            key: chunk.name,
+            path: 'chunks/' + chunk.name,
+          });
       if (!Array.isArray(declarations) || declarations.length > maxDeclarations)
         throw Error('Invalid asset declaration count');
       await fs.mkdir(stage);
       await fs.writeFile(join(stage, 'bundle.js'), bundle.contents);
       for (const asset of declarations) {
+        if (asset.kind === 'script') {
+          const chunk = modular?.chunks.find(
+            (file) => 'chunks/' + file.name === asset.path,
+          );
+          if (!chunk)
+            throw Error('Script declarations must be compiler generated');
+          await fs.mkdir(join(stage, 'chunks'), { recursive: true });
+          await fs.writeFile(join(stage, asset.path), chunk.contents);
+          continue;
+        }
         const assetRoot = manifest ? root : dirname(assets);
         const from = resolve(assetRoot, asset.path),
           destination = resolve(stage, asset.path);
@@ -368,10 +421,26 @@ export function compiler({
       const bundleHash = hash(bundle.contents),
         maps = output + '.maps';
       await fs.mkdir(maps, { recursive: true });
-      await fs.writeFile(
-        join(maps, bundleHash + '.json'),
-        result.outputFiles.find((f) => f.path.endsWith('.map')).contents,
-      );
+      if (!modular)
+        await fs.writeFile(
+          join(maps, bundleHash + '.json'),
+          result.outputFiles.find((f) => f.path.endsWith('.map')).contents,
+        );
+      else {
+        // Carrier stack traces still use bundle.js. Never map those locations
+        // against an unrelated chunk; retain build maps for offline inspection.
+        await fs.writeFile(
+          join(maps, bundleHash + '.json'),
+          JSON.stringify({ modular: true }),
+        );
+        for (const file of result.outputFiles.filter((file) =>
+          file.path.endsWith('.map'),
+        ))
+          await fs.writeFile(
+            join(maps, hash(file.contents) + '.map'),
+            file.contents,
+          );
+      }
       if (await exists(output)) await renamePublished(output, backup);
       try {
         await renamePublished(stage, output);
@@ -387,7 +456,9 @@ export function compiler({
         source,
         bundleSha256: bundleHash,
       });
-      console.log(`Published ${current}: ${bundle.contents.length} bytes`);
+      console.log(
+        `Published ${current}: ${modular?.total ?? bundle.contents.length} bytes${modular ? ' across ' + modular.chunks.length + ' script chunks' : ''}`,
+      );
       return { fingerprint: before, success: true, bundleHash };
     } catch (error) {
       const detail =
@@ -414,14 +485,17 @@ export function compiler({
         raw = state.error || '';
       const locations = [...raw.matchAll(/bundle\.js:(\d+):(\d+)/g)];
       if (!locations.length || !state.diagnosticBundleSha256) return;
-      const map = new TraceMap(
-        JSON.parse(
-          await fs.readFile(
-            join(output + '.maps', state.diagnosticBundleSha256 + '.json'),
-            'utf8',
-          ),
+      const mapData = JSON.parse(
+        await fs.readFile(
+          join(output + '.maps', state.diagnosticBundleSha256 + '.json'),
+          'utf8',
         ),
       );
+      if (mapData.modular) {
+        await atomic(output + '.runtime-diagnostic.json', { raw, error: raw });
+        return;
+      }
+      const map = new TraceMap(mapData);
       let mapped = raw;
       for (const match of locations) {
         const pos = originalPositionFor(map, {

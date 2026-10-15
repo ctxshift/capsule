@@ -27,6 +27,23 @@ Source exports are for this private workspace stage; TypeScript tooling consumer
 enable `allowJs` for the compiler modules. Registry publication and removal of
 the legacy portable-ui import shims are later migration work.
 
+Large addons can declare `scriptEntries` in their source manifest: relative TS/TSX
+module paths that define static bundling boundaries. They do not mount extra UI
+roots. The compiler extracts shared imports and emits declared `kind: "script"`
+assets plus a small entry loader. All modules execute within the same guest and
+React instance; there is no filesystem or network module resolution. Dynamic
+imports are rejected. Omit `scriptEntries` for the existing single-file format.
+
+Each generated script remains limited to 64 KiB, with at most eight module assets
+and 256 KiB of aggregate source including the entry. Script declarations also
+count against the host's existing declaration and encoded-package budgets.
+Native activation shares one 200M fuel allowance across every module and entry;
+memory, action grants and update limits remain unchanged. Module bytes participate
+in revision hashing and atomic reload. The browser preview executes the same
+ordered declarations before the entry. Chunk source maps are retained for offline
+inspection; native carrier errors currently retain raw locations rather than
+misattributing them to a single-file source map.
+
 The repository Vitest suite includes an isolated-workspace proof that copies
 only the Capsule packages and fictional example, supplies an SDK artifact, and
 checks HTTP preview, valid hot reload and invalid-TypeScript last-good retention.

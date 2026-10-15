@@ -129,7 +129,15 @@ export async function startWorkshop(options: WorkshopOptions) {
               ),
               options.themeLimits,
             );
-          const bundle = await readFile(resolve(output, 'bundle.js'), 'utf8');
+          const scripts = await Promise.all(
+            manifest.assets
+              .filter((asset) => asset.kind === 'script')
+              .map((asset) =>
+                readFile(resolve(output, themePath(asset.path)), 'utf8'),
+              ),
+          );
+          scripts.push(await readFile(resolve(output, 'bundle.js'), 'utf8'));
+          const bundle = scripts.join('\n');
           const sdk = await readFile(resolve(options.sdkFile), 'utf8');
           const digest = createHash('sha256')
             .update(bundle)
