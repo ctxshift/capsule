@@ -7,6 +7,7 @@ import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { capsuleEntry, capsuleSourceRoot, reactTypes } from './sdk-paths.mjs';
 import { scriptChunks } from './script-chunks.mjs';
 import { validatePackageTheme } from './package-theme.ts';
+import { featureRequirements } from './feature-requirements.mjs';
 const packageRoot = resolve(import.meta.dirname, '..');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const exists = async (path) => {
@@ -417,6 +418,9 @@ export function compiler({
           id: sourceManifest?.id ?? 'portable.react.fixture',
           entry: 'bundle.js',
           assets: declarations,
+          ...(sourceManifest?.features !== undefined
+            ? { features: featureRequirements(sourceManifest.features) }
+            : {}),
         }),
       );
       await validatePackageTheme(stage, themeLimits);
