@@ -132,22 +132,28 @@ export function themePath(value: string) {
 export interface ThemeLimits {
   assetRecipes: number;
   textStyles: number;
+  surfaceStyles?: number;
 }
 export const defaultThemeLimits: Readonly<ThemeLimits> = Object.freeze({
   assetRecipes: 30,
   textStyles: 16,
+  surfaceStyles: 30,
 });
 export function parseTheme(
   value: unknown,
   limits: Readonly<ThemeLimits> = defaultThemeLimits,
 ): UiTheme {
+  const surfaceLimit = limits.surfaceStyles ?? 30;
   if (
     !Number.isInteger(limits.assetRecipes) ||
     limits.assetRecipes < 1 ||
     limits.assetRecipes > 64 ||
     !Number.isInteger(limits.textStyles) ||
     limits.textStyles < 1 ||
-    limits.textStyles > 64
+    limits.textStyles > 64 ||
+    !Number.isInteger(surfaceLimit) ||
+    surfaceLimit < 1 ||
+    surfaceLimit > 64
   )
     throw Error('Host theme profile bounds');
   if (!value || typeof value !== 'object') throw Error('Missing theme');
@@ -223,7 +229,8 @@ export function parseTheme(
       throw Error('Theme button style bounds');
     buttons.add(style.key);
   }
-  if ((theme.surfaces?.length ?? 0) > 30) throw Error('Theme surface quota');
+  if ((theme.surfaces?.length ?? 0) > surfaceLimit)
+    throw Error('Theme surface quota');
   for (const surface of theme.surfaces ?? []) {
     if (
       !/^[a-z0-9-]{1,64}$/.test(surface.key) ||
