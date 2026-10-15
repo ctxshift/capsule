@@ -248,6 +248,14 @@ export class DomTarget {
       options,
     );
     element.addEventListener(
+      'blur',
+      () => {
+        if ((this.nodes.get(node.id)?.events ?? 0) & 32)
+          this.send(input(node.id, 32, [1, 0]));
+      },
+      options,
+    );
+    element.addEventListener(
       'wheel',
       (rawEvent) => {
         const event = rawEvent as WheelEvent;
