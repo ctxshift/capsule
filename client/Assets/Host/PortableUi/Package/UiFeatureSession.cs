@@ -17,6 +17,10 @@ namespace PortableUi.Package
         readonly List<IDisposable> subscriptions = new List<IDisposable>();
         readonly Dictionary<uint, byte[]> dirty = new Dictionary<uint, byte[]>();
         readonly Dictionary<uint, UiObservationPayload> stateFrames = new Dictionary<uint, UiObservationPayload>();
+        readonly Queue<UiObservationPayload> ordered = new Queue<UiObservationPayload>();
+        readonly int orderedCapacity;
+        bool overflow;
+        public bool OrderedOverflow => overflow;
         readonly Dictionary<uint, UiObservationPayload> resultFrames = new Dictionary<uint, UiObservationPayload>();
         readonly Dictionary<uint, Task<byte[]>> pending = new Dictionary<uint, Task<byte[]>>();
         readonly Dictionary<uint, Func<byte[], Task<byte[]>>> requests = new Dictionary<uint, Func<byte[], Task<byte[]>>>();
@@ -25,14 +29,16 @@ namespace PortableUi.Package
         byte[] metadata;
         uint lastCall;
         bool disposed, retired;
-        public int PendingStateCount => dirty.Count;
+        public int PendingStateCount => dirty.Count + ordered.Count;
         public long PublishedStates { get; private set; }
         public event Action StatePublished;
-        public UiFeatureSession(UiFeatureSelection selection, uint epoch)
+        public UiFeatureSession(UiFeatureSelection selection, uint epoch, int orderedCapacity = 256)
         {
             this.selection = selection ?? throw new ArgumentNullException(nameof(selection));
             if (epoch == 0) throw new ArgumentOutOfRangeException(nameof(epoch));
             this.epoch = epoch;
+            if (orderedCapacity < 1) throw new ArgumentOutOfRangeException(nameof(orderedCapacity));
+            this.orderedCapacity = orderedCapacity;
             var descriptors = new List<object>();
             try
             {
@@ -46,12 +52,28 @@ namespace PortableUi.Package
                     id = checked((ushort)(id + 1));
                     ushort member = 0;
                     var states = new Dictionary<string, ushort>(); var operations = new Dictionary<string, ushort>();
+                    var deliveries = new Dictionary<string, string>();
                     foreach (string name in provider.StateNames.OrderBy(n => n, StringComparer.Ordinal))
                     {
                         if (!selection.Allows(entry.Key, provider.StatePermission(name))) continue;
                         member = checked((ushort)(member + 1)); states.Add(name, member);
                         uint key = (uint)id << 16 | member;
-                        subscriptions.Add(provider.Subscribe(name, bytes => { if (!disposed && !retired) { dirty[key] = bytes; stateFrames.Remove(key); StatePublished?.Invoke(); } }));
+                        var delivery = provider.StateDelivery(name);
+                        deliveries.Add(name, delivery == UiFeatureDelivery.Ordered ? "ordered" : "latest");
+                        subscriptions.Add(provider.Subscribe(name, bytes =>
+                        {
+                            if (disposed || retired || overflow) return;
+                            if (delivery == UiFeatureDelivery.Ordered)
+                            {
+                                // Never silently lose a sequence. Retire the activation on overflow;
+                                // a fresh activation starts from provider snapshots.
+                                if (ordered.Count >= this.orderedCapacity) { overflow = true; return; }
+                                var header = new byte[8]; Write32(header, 0, this.epoch); Write32(header, 4, key);
+                                ordered.Enqueue(new UiObservationPayload(header, bytes));
+                            }
+                            else { dirty[key] = bytes; stateFrames.Remove(key); }
+                            StatePublished?.Invoke();
+                        }));
                     }
                     member = 0;
                     foreach (string name in provider.RequestNames.OrderBy(n => n, StringComparer.Ordinal))
@@ -65,7 +87,7 @@ namespace PortableUi.Package
                         requestKeys.Add(entry.Key + "/" + name, key);
                     }
                     descriptors.Add(new { id, name = definition.Name, version = definition.Version, fingerprint = definition.Fingerprint,
-                        states, requests = operations });
+                        states, deliveries, requests = operations });
                 }
                 metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = descriptors }));
             }
@@ -81,7 +103,7 @@ namespace PortableUi.Package
         }
         public void Dispatch(byte[] frame)
         {
-            if (disposed || retired || !selection.IsCurrent || frame == null || frame.Length < 12 || frame.Length > 256 || Read32(frame, 0) != epoch) return;
+            if (disposed || retired || overflow || !selection.IsCurrent || frame == null || frame.Length < 12 || frame.Length > 256 || Read32(frame, 0) != epoch) return;
             uint call = Read32(frame, 4), key = Read32(frame, 8);
             if (call == 0 || call <= lastCall) return;
             if (pending.Count >= 64) throw new InvalidOperationException("Feature request backpressure exceeded");
@@ -92,23 +114,28 @@ namespace PortableUi.Package
             catch (Exception error) { pending.Add(call, Task.FromException<byte[]>(error)); }
         }
         // Pump and provider callbacks run on the host's owning thread. Dirty state is
-        // coalesced by member here; shared transport topics must never be coalesced.
+        // coalesced only for latest members; shared transport topics must never be coalesced.
         public void Pump(Func<ushort, byte[], bool> publish) => PumpSegments((topic, payload) => publish(topic, payload.AsContiguous()));
         public void PumpSegments(Func<ushort, UiObservationPayload, bool> publish)
         {
             if (disposed) return;
-            if (!retired && !selection.IsCurrent)
+            if (!retired && (overflow || !selection.IsCurrent))
             {
                 retired = true; cancellation.Cancel();
                 foreach (var subscription in subscriptions) subscription.Dispose(); subscriptions.Clear();
-                dirty.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear();
-                metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = new object[0] }));
+                dirty.Clear(); ordered.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear();
+                metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = new object[0], reason = overflow ? "ordered-overflow" : "retired" }));
             }
             if (metadata != null) { if (!publish(MetadataTopic, UiObservationPayload.Owned(metadata))) return; metadata = null; }
+            while (ordered.Count != 0)
+            {
+                if (!publish(StateTopic, ordered.Peek())) return;
+                ordered.Dequeue(); PublishedStates++;
+            }
             foreach (var pair in dirty.ToArray())
             {
                 // The callback borrows an immutable frame. Retain it on rejection;
-                // acceptance transfers the same array without another envelope copy.
+                // acceptance transfers the same segments without another envelope copy.
                 if (!stateFrames.TryGetValue(pair.Key, out var frame))
                 {
                     var header = new byte[8]; Write32(header, 0, epoch); Write32(header, 4, pair.Key);
@@ -139,7 +166,7 @@ namespace PortableUi.Package
         {
             if (disposed) return; disposed = true; cancellation.Cancel();
             foreach (var subscription in subscriptions) subscription.Dispose(); subscriptions.Clear();
-            dirty.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear(); cancellation.Dispose();
+            dirty.Clear(); ordered.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear(); cancellation.Dispose();
         }
     }
 }

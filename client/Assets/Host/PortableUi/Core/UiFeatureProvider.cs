@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace PortableUi
 {
+    public enum UiFeatureDelivery { Latest, Ordered }
     // Engine-independent host interface. Arrays are immutable after publication;
     // getters/subscribers borrow the same encoded state, not per-subscriber copies.
     public interface IUiFeatureProvider : IDisposable
@@ -13,13 +14,14 @@ namespace PortableUi
         IEnumerable<string> StateNames { get; }
         IEnumerable<string> RequestNames { get; }
         string StatePermission(string name);
+        UiFeatureDelivery StateDelivery(string name);
         string RequestPermission(string name);
         IDisposable Subscribe(string name, Action<byte[]> receive);
         Task<byte[]> Request(string name, byte[] payload, CancellationToken cancellationToken);
     }
     public abstract class UiFeatureProvider : IUiFeatureProvider
     {
-        sealed class State { public string Permission; public byte[] Bytes; public readonly HashSet<Action<byte[]>> Subscribers = new HashSet<Action<byte[]>>(); }
+        sealed class State { public string Permission; public byte[] Bytes; public UiFeatureDelivery Delivery; public readonly HashSet<Action<byte[]>> Subscribers = new HashSet<Action<byte[]>>(); }
         sealed class Operation { public string Permission; public Func<byte[], CancellationToken, Task<byte[]>> Invoke; }
         sealed class Subscription : IDisposable
         {
@@ -34,7 +36,7 @@ namespace PortableUi
         public IEnumerable<string> StateNames => states.Keys;
         public IEnumerable<string> RequestNames => requests.Keys;
         protected UiFeatureProvider(UiFeatureDefinition definition) { Definition = definition ?? throw new ArgumentNullException(nameof(definition)); }
-        protected void AddState(string name, string permission, byte[] initial) { Ensure(); states.Add(name, new State { Permission = permission, Bytes = initial ?? throw new ArgumentNullException(nameof(initial)) }); }
+        protected void AddState(string name, string permission, byte[] initial, UiFeatureDelivery delivery = UiFeatureDelivery.Latest) { Ensure(); if (delivery != UiFeatureDelivery.Latest && delivery != UiFeatureDelivery.Ordered) throw new ArgumentOutOfRangeException(nameof(delivery)); states.Add(name, new State { Permission = permission, Bytes = initial ?? throw new ArgumentNullException(nameof(initial)), Delivery = delivery }); }
         protected void AddRequest(string name, string permission, Func<byte[], CancellationToken, Task<byte[]>> invoke) { Ensure(); requests.Add(name, new Operation { Permission = permission, Invoke = invoke }); }
         protected void Publish(string name, byte[] payload)
         {
@@ -44,6 +46,7 @@ namespace PortableUi
         }
         void Ensure() { if (disposed) throw new ObjectDisposedException(nameof(UiFeatureProvider)); }
         public string StatePermission(string name) { Ensure(); return states.TryGetValue(name, out var state) ? state.Permission : throw new ArgumentException("Unknown feature state"); }
+        public UiFeatureDelivery StateDelivery(string name) { Ensure(); return states.TryGetValue(name, out var state) ? state.Delivery : throw new ArgumentException("Unknown feature state"); }
         public string RequestPermission(string name) { Ensure(); return requests.TryGetValue(name, out var request) ? request.Permission : throw new ArgumentException("Unknown feature request"); }
         public IDisposable Subscribe(string name, Action<byte[]> receive)
         {
