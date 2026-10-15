@@ -23,6 +23,9 @@ namespace PortableUi.Package
         byte[] metadata;
         uint lastCall;
         bool disposed, retired;
+        public int PendingStateCount => dirty.Count;
+        public long PublishedStates { get; private set; }
+        public event Action StatePublished;
         public UiFeatureSession(UiFeatureSelection selection, uint epoch)
         {
             this.selection = selection ?? throw new ArgumentNullException(nameof(selection));
@@ -46,7 +49,7 @@ namespace PortableUi.Package
                         if (!selection.Allows(entry.Key, provider.StatePermission(name))) continue;
                         member = checked((ushort)(member + 1)); states.Add(name, member);
                         uint key = (uint)id << 16 | member;
-                        subscriptions.Add(provider.Subscribe(name, bytes => { if (!disposed && !retired) dirty[key] = bytes; }));
+                        subscriptions.Add(provider.Subscribe(name, bytes => { if (!disposed && !retired) { dirty[key] = bytes; StatePublished?.Invoke(); } }));
                     }
                     member = 0;
                     foreach (string name in provider.RequestNames.OrderBy(n => n, StringComparer.Ordinal))
@@ -103,7 +106,7 @@ namespace PortableUi.Package
             {
                 var frame = new byte[8 + pair.Value.Length]; Write32(frame, 0, epoch); Write32(frame, 4, pair.Key);
                 Buffer.BlockCopy(pair.Value, 0, frame, 8, pair.Value.Length);
-                if (!publish(StateTopic, frame)) return; dirty.Remove(pair.Key);
+                if (!publish(StateTopic, frame)) return; dirty.Remove(pair.Key); PublishedStates++;
             }
             foreach (var pair in pending.ToArray())
             {
