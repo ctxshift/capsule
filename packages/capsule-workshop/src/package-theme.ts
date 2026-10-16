@@ -38,4 +38,5 @@ export async function validatePackageTheme(
   JSON.parse((await read(theme.font.metrics, 'data')).toString());
   for (const asset of theme.assets)
     await read(asset.path, 'image', asset.image ?? asset.key);
+  return theme;
 }

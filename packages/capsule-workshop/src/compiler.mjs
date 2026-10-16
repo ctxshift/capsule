@@ -7,6 +7,7 @@ import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
 import { capsuleEntry, capsuleSourceRoot, reactTypes } from './sdk-paths.mjs';
 import { scriptChunks } from './script-chunks.mjs';
 import { validatePackageTheme } from './package-theme.ts';
+import { validateThemeReferences } from './theme-references.mjs';
 import { featureRequirements } from './feature-requirements.mjs';
 const packageRoot = resolve(import.meta.dirname, '..');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -289,6 +290,7 @@ export function compiler({
           })
           .join('\n'),
       );
+    return program;
   }
   async function compile() {
     await owned();
@@ -297,7 +299,7 @@ export function compiler({
     const stage = output + `.stage-${process.pid}-${current}`,
       backup = output + `.previous-${process.pid}-${current}`;
     try {
-      typecheck();
+      const program = typecheck();
       const sourceManifest = manifest
         ? JSON.parse(await fs.readFile(manifest, 'utf8'))
         : null;
@@ -419,7 +421,8 @@ export function compiler({
             : {}),
         }),
       );
-      await validatePackageTheme(stage, themeLimits);
+      const theme = await validatePackageTheme(stage, themeLimits);
+      validateThemeReferences(program, theme, root);
       if (beforePublish) await beforePublish();
       if (before !== (await fingerprint())) {
         await clean(stage);
