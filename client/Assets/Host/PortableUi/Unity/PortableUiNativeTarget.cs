@@ -20,6 +20,7 @@ namespace PortableUi.Unity
         Dictionary<ulong, NativeUiWidget> currentWidgets = new Dictionary<ulong, NativeUiWidget>();
         bool active;
         bool disposed;
+        bool retainedPresentation;
         ulong focusedWindow;
         GameObject returnFocus;
         static PortableUiNativeTarget keyboardOwner;
@@ -73,6 +74,16 @@ namespace PortableUi.Unity
             foreach(var surface in layer.GetComponentsInChildren<PortableUiSurfaceView>(true))surface.Cancel();
         }
 
+        // Retain the accepted render tree across a host handoff without accepting
+        // further events or snapshots. The caller retains this target's lifetime.
+        public void RetainPresentation(RectTransform parent)
+        {
+            if (disposed || !parent) throw new InvalidOperationException("A live presentation is required.");
+            SuspendInput();
+            retainedPresentation = true;
+            layer.SetParent(parent, false);
+        }
+
         public bool TryGetNode(ulong handle, out UiNode node)
         {
             if (currentSnapshot != null)
@@ -96,6 +107,7 @@ namespace PortableUi.Unity
         {
             error = null;
             if (disposed) { error = "Native target disposed."; return false; }
+            if (retainedPresentation) { error = "Native target presentation retained."; return false; }
             if (proposed == null || !UiPresentation.Validate(proposed,out error)) return false;
             foreach (var node in proposed.Nodes)
                 if (node.WorldAnchor != null && (world == null ||
