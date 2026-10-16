@@ -57,11 +57,7 @@ export function compiler({
   maxDeclarations = 30,
   themeLimits,
 }) {
-  if (
-    !Number.isInteger(maxDeclarations) ||
-    maxDeclarations < 1 ||
-    maxDeclarations > 64
-  )
+  if (!Number.isSafeInteger(maxDeclarations) || maxDeclarations < 1)
     throw Error('Host manifest profile bounds');
   source = resolve(source);
   output = resolve(output);
