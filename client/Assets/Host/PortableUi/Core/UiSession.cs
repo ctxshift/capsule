@@ -218,7 +218,7 @@ namespace PortableUi
                 if (asset ? theme.AllowsAsset(key) : theme.AllowsStyle(key)) return UiResult.Ok;
             }
             catch (Exception error) { return new UiResult(UiError.ForbiddenThemeKey, error.Message); }
-            return new UiResult(UiError.ForbiddenThemeKey, "Theme key rejected.");
+            return new UiResult(UiError.ForbiddenThemeKey, $"Theme {(asset ? "asset" : "style")} key rejected: {key}.");
         }
 
         static UiResult CheckRect(UiRect rect)
