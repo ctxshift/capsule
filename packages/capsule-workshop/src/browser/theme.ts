@@ -57,6 +57,11 @@ export function createBrowserTheme(
           );
     svg.style.filter = `brightness(${definition(node.asset).brightness ?? 1})`;
     svg.style.opacity = String(definition(node.asset).opacity ?? 1);
+    if (recipe.spinDurationMs) {
+      svg.style.animation =
+        'capsule-image-spin ' + recipe.spinDurationMs + 'ms linear infinite';
+      svg.classList.add('capsule-image-spin');
+    }
     if (previous) previous.svg.replaceWith(svg);
     else element.append(svg);
     renderedImages.set(element, { key: node.asset, svg });
@@ -71,6 +76,8 @@ export function createBrowserTheme(
     c = theme.components,
     f = theme.focus;
   const css = `
+  @keyframes capsule-image-spin { to { transform:rotate(360deg); } }
+  @media(prefers-reduced-motion:reduce) { .capsule-image-spin { animation:none!important; } }
   @font-face {font-family:PortableThemeFont;src:local('${theme.font.family}');}
   html,body {margin:0;width:1440px;height:900px;color:${color(b.foreground)};font:${theme.font.sampleSize}px PortableThemeFont;background:transparent;}
   * {box-sizing:border-box;} button,input,select {font:inherit;color:inherit;} button {border:0;cursor:pointer;}

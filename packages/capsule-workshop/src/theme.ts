@@ -15,6 +15,8 @@ export interface ThemeAsset {
   brightness?: number;
   opacity?: number;
   rotation?: 0 | 90 | 180 | 270;
+  /** Renderer-local clockwise revolution duration; zero disables animation. */
+  spinDurationMs?: number;
   /** Fill the image rectangle without preserving aspect ratio; defaults to false. */
   stretch?: boolean;
   /** Source pixels sampled after the left border for top/bottom rails. */
@@ -300,6 +302,13 @@ export function parseTheme(
   }
   const images = new Map<string, string>();
   for (const asset of theme.assets) {
+    if (
+      !Number.isInteger(asset.spinDurationMs ?? 0) ||
+      (asset.spinDurationMs ?? 0) < 0 ||
+      ((asset.spinDurationMs ?? 0) > 0 &&
+        (asset.spinDurationMs! < 500 || asset.spinDurationMs! > 60000))
+    )
+      throw Error('Theme image spin duration bounds');
     if (
       ![0, 90, 180, 270].includes(asset.rotation ?? 0) ||
       asset.rotation === null
