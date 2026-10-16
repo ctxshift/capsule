@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using PortableUi.Package;
 using TMPro;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace PortableUi.Unity
  { public Func<NativeUiWidget,Image> Frame,Rule; public Func<NativeUiWidget,RectTransform> Header; public Action<RectTransform,float,float,Color> Shadow; public Action<RectTransform,float,Color,Color,Color> SurfaceShadow; }
  public sealed class PortableUiControlSkin : IDisposable
  {
+ readonly Dictionary<string,TMP_FontAsset> variantFonts = new Dictionary<string,TMP_FontAsset>();
+ TMP_FontAsset TextFont(string key) { var family=theme.TextFontFamily(key); if(family==theme.String("font","family"))return font; if(variantFonts.TryGetValue(family,out var found))return found; var created=TMP_FontAsset.CreateFontAsset(family,"Regular",90); if(!created)throw new InvalidOperationException("Required addon font is unavailable: "+family); variantFonts.Add(family,created);return created; }
  readonly UiControlTheme theme; readonly TMP_FontAsset font; readonly UiWindowParts parts; readonly Assets art; Material buttonSoftLight;
  readonly System.Collections.Generic.Dictionary<string,Material> selectedButtonMaterials = new System.Collections.Generic.Dictionary<string,Material>();
  sealed class Assets {readonly Func<string,Sprite> resolve;public Assets(Func<string,Sprite> r){resolve=r;}public bool TryGet(string key,out Sprite sprite){sprite=resolve(key);if(!sprite)throw new InvalidOperationException("Missing theme sprite: "+key);return true;}}
@@ -245,9 +248,9 @@ namespace PortableUi.Unity
                 var closeFeedback=close.GetComponent<PortableUiControlFeedback>()??close.gameObject.AddComponent<PortableUiControlFeedback>();
                 closeFeedback.Configure(closeHover,null,FocusFrame(close.rectTransform),C("button","hover"));
             }
- else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;label.font=font;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=(theme.TextBold(key)?FontStyles.Bold:FontStyles.Normal)|(theme.TextSmallCaps(key)?FontStyles.SmallCaps:FontStyles.Normal);label.characterSpacing=theme.TextLetterSpacing(key)/(size/100);label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=font.faceInfo.lineHeight*size/font.faceInfo.pointSize*font.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
+ else if(node.Kind==UiNodeKind.Text && (string.IsNullOrEmpty(node.StyleKey)||HasText(node.StyleKey))){string key=string.IsNullOrEmpty(node.StyleKey)?theme.String("components","buttonLabel"):node.StyleKey;var label=widget.Label;var textFont=TextFont(key);label.font=textFont;float size=theme.TextNumber(key,"size"),line=theme.TextNumber(key,"lineHeight");label.fontSize=size;label.fontStyle=(theme.TextBold(key)?FontStyles.Bold:FontStyles.Normal)|(theme.TextSmallCaps(key)?FontStyles.SmallCaps:FontStyles.Normal)|(theme.TextItalic(key)?FontStyles.Italic:FontStyles.Normal);label.characterSpacing=theme.TextLetterSpacing(key)/(size/100);label.enableAutoSizing=false;var rgba=theme.TextColor(key);label.color=new Color32(rgba[0],rgba[1],rgba[2],rgba[3]);bool wrap=theme.TextWrap(key);label.textWrappingMode=wrap?TextWrappingModes.Normal:TextWrappingModes.NoWrap;float natural=textFont.faceInfo.lineHeight*size/textFont.faceInfo.pointSize*textFont.faceInfo.scale;float leading=line-natural;label.lineSpacing=wrap?leading/(size/100):0;label.margin=new Vector4(0,leading/2,0,leading/2);label.alignment=TextAlignmentOptions.TopLeft;} else return false; return true; }
  bool HasText(string key){foreach(string candidate in theme.TextKeys)if(candidate==key)return true;return false;}
- public void Dispose(){foreach(var material in selectedButtonMaterials.Values){if(Application.isPlaying)UnityEngine.Object.Destroy(material);else UnityEngine.Object.DestroyImmediate(material);}selectedButtonMaterials.Clear();if(buttonSoftLight){if(Application.isPlaying)UnityEngine.Object.Destroy(buttonSoftLight);else UnityEngine.Object.DestroyImmediate(buttonSoftLight);buttonSoftLight=null;}}
+ public void Dispose(){foreach(var asset in variantFonts.Values){foreach(var atlas in asset.atlasTextures)if(atlas)UnityEngine.Object.Destroy(atlas);if(asset.material)UnityEngine.Object.Destroy(asset.material);UnityEngine.Object.Destroy(asset);}variantFonts.Clear();foreach(var material in selectedButtonMaterials.Values){if(Application.isPlaying)UnityEngine.Object.Destroy(material);else UnityEngine.Object.DestroyImmediate(material);}selectedButtonMaterials.Clear();if(buttonSoftLight){if(Application.isPlaying)UnityEngine.Object.Destroy(buttonSoftLight);else UnityEngine.Object.DestroyImmediate(buttonSoftLight);buttonSoftLight=null;}}
         void ApplySurfaceRules(RectTransform root, string style)
         {
             // Host decorations do not participate in guest layout or input.

@@ -44,7 +44,7 @@ namespace PortableUi
                 if (node.Kind == UiNodeKind.Viewport && (!surfaces.Allows(node.AssetKey) || ++surfaceCount > surfaces.MaxLeases))
                 { error = "Live surface admission or quota invalid."; return false; }
                 if (r.X < -8192 * 64 || r.X > 8192 * 64 || r.Y < -8192 * 64 || r.Y > 8192 * 64 ||
-                    r.Width < 1 || r.Width > 4096 * 64 || r.Height < 1 || r.Height > 4096 * 64 ||
+                    r.Width < (layout ? 0 : 1) || r.Width > 4096 * 64 || r.Height < (layout ? 0 : 1) || r.Height > 4096 * 64 ||
                     (long)r.X + r.Width > 8192 * 64 || (long)r.Y + r.Height > 8192 * 64 ||
                     node.Kind < UiNodeKind.Window || node.Kind > UiNodeKind.TextInput ||
                     (node.Kind == UiNodeKind.TextInput && !node.TextInput.Accepts(node.Text)) ||
@@ -52,7 +52,7 @@ namespace PortableUi
                     ((ushort)node.Events & ~UiInputPayload.AllowedEvents) != 0 ||
                     System.Text.Encoding.UTF8.GetByteCount(node.Text ?? "") > 512 ||
                     !theme.AllowsStyle(node.StyleKey) || (node.Kind != UiNodeKind.Viewport && !theme.AllowsAsset(node.AssetKey)))
-                { error = "Snapshot property or theme invalid."; return false; }
+                { error = $"Snapshot property or theme invalid: kind={node.Kind}, style={node.StyleKey}, asset={node.AssetKey}, rect={r.X},{r.Y},{r.Width},{r.Height}, styleAllowed={theme.AllowsStyle(node.StyleKey)}, assetAllowed={theme.AllowsAsset(node.AssetKey)}."; return false; }
             }
             return true;
         }

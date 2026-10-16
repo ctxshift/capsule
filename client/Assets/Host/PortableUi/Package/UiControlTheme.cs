@@ -214,6 +214,8 @@ namespace PortableUi.Package
         public bool TextWrap(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(bool)item["wrap"];throw new ArgumentException("Unknown text style."); }
         public bool TextSmallCaps(string key) {foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(bool?)item["smallCaps"]??false;return false;}
         public float TextLetterSpacing(string key) {foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(float?)item["letterSpacing"]??0;return 0;}
+        public string TextFontFamily(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(string)item["fontFamily"]??String("font","family");return String("font","family"); }
+        public bool TextItalic(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(string)item["fontStyle"]=="italic";return false; }
         public bool TextBold(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key)return(int?)item["weight"]==700;return false; }
         public byte[] TextColor(string key) { foreach(var item in (JArray)value["text"])if((string)item["key"]==key){var c=(JArray)item["color"];return new[]{(byte)c[0],(byte)c[1],(byte)c[2],(byte)c[3]};}throw new ArgumentException("Unknown text style."); }
         public float AssetNumber(string key,string property) {foreach(var item in (JArray)value["assets"])if((string)item["key"]==key)return(float)item[property];throw new ArgumentException("Unknown theme asset.");}
