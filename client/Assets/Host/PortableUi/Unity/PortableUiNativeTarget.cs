@@ -480,6 +480,10 @@ namespace PortableUi.Unity
                 if (node.Kind == UiNodeKind.Window && currentWidgets[node.Handle].Rect.gameObject.activeInHierarchy) top = node.Handle;
             var selected = EventSystem.current.currentSelectedGameObject;
             if (top == focusedWindow && selected && !selected.transform.IsChildOf(layer)) return;
+            // A nonmodal window must not reclaim focus from chat on every edit.
+            if (top == focusedWindow && selected && selected.activeInHierarchy &&
+                selected.TryGetComponent<Selectable>(out var currentControl) &&
+                currentControl.IsActive() && currentControl.IsInteractable()) return;
             if (top == focusedWindow && (top == 0 || selected && selected.activeInHierarchy &&
                 selected.transform.IsChildOf(currentWidgets[top].Rect) && selected.TryGetComponent<Selectable>(out var selectable) && selectable.IsActive() && selectable.IsInteractable())) return;
             if (focusedWindow == 0 && top != 0) returnFocus = selected;
