@@ -436,6 +436,14 @@ export class DomTarget {
       this.theme.update?.(element, node);
       this.elements.set(node.id, element);
       element.dataset.style = node.style;
+      if (node.kind === 8 && node.events & 1)
+        element.setAttribute('role', 'button');
+      else if (node.kind === 8) element.removeAttribute('role');
+      if (
+        (node.kind === 10 || (node.kind === 8 && node.events & 1)) &&
+        node.text
+      )
+        element.setAttribute('aria-label', node.text);
       if (node.kind === 8 || node.kind === 9)
         element.tabIndex = node.events & 32 ? 0 : -1;
       element.style.pointerEvents =

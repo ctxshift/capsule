@@ -130,7 +130,12 @@ export function createBrowserTheme(
           rule.style.backgroundColor = color(variant?.ruleColor ?? w.ruleColor);
         }
       }
-      if (node.kind === 8 || node.kind === 9) {
+      if (
+        node.kind === 8 ||
+        node.kind === 9 ||
+        (node.kind === 14 &&
+          theme.surfaces?.some((surface) => surface.key === node.style))
+      ) {
         const surface = theme.surfaces?.find(
           (surface) => surface.key === node.style,
         );
