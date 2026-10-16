@@ -94,6 +94,8 @@ export interface UiTheme {
     size: number;
     lineHeight: number;
     weight?: 400 | 700;
+    fontFamily?: string;
+    fontStyle?: 'normal' | 'italic';
     smallCaps?: boolean;
     letterSpacing?: number;
     ruleInset?: number;
@@ -388,6 +390,10 @@ export function parseTheme(
       text.lineHeight < text.size ||
       text.lineHeight > 256 ||
       typeof text.wrap !== 'boolean' ||
+      (text.fontFamily !== undefined &&
+        !/^[a-zA-Z][a-zA-Z0-9 -]{0,63}$/.test(text.fontFamily)) ||
+      (text.fontStyle !== undefined &&
+        !['normal', 'italic'].includes(text.fontStyle)) ||
       (text.weight !== undefined &&
         text.weight !== 400 &&
         text.weight !== 700) ||
