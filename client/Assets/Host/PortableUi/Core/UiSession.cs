@@ -155,10 +155,8 @@ namespace PortableUi
                     if (current.Layout == null) return new UiResult(UiError.InvalidCommand, "Layout mode is fixed at creation.");
                     next[handle] = current.With(layout: command.Layout); break;
                 case UiOpcode.SetText:
-                    if (current.Kind != UiNodeKind.Text && current.Kind != UiNodeKind.Window &&
-                        current.Kind != UiNodeKind.Range && current.Kind != UiNodeKind.Select &&
-                        current.Kind != UiNodeKind.Slot && current.Kind != UiNodeKind.TextInput)
-                        return new UiResult(UiError.InvalidCommand, "Node has no text.");
+                    // Every node accepts text at creation, including container accessibility titles.
+                    // Reconciliation must allow those same fields to change without recreating nodes.
                     next[handle] = current.With(text: command.Text); break;
                 case UiOpcode.SetStyle:
                     var allowedStyle = CheckTheme(command.Style, false);
