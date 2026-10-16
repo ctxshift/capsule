@@ -22,7 +22,7 @@ namespace PortableUi.Package
         public UiPackageLimits(int maxTotalBytes, int maxDecodedImageBytes, int maxImageDimension, int maxDeclarations, int maxEncodedImageBytes)
         {
             if (maxTotalBytes < 1 || maxDecodedImageBytes < 4 ||
-                maxImageDimension < 1 || maxImageDimension > 32768 || maxDeclarations<1 || maxDeclarations>64 || maxEncodedImageBytes < 1 || maxEncodedImageBytes > 32 * 1024 * 1024)
+                maxImageDimension < 1 || maxImageDimension > 32768 || maxDeclarations<1 || maxEncodedImageBytes < 1 || maxEncodedImageBytes > 32 * 1024 * 1024)
                 throw new ArgumentOutOfRangeException(nameof(maxTotalBytes), "Asset budgets must be positive and dimensions bounded.");
             MaxTotalBytes = maxTotalBytes;
             MaxDecodedImageBytes = maxDecodedImageBytes;

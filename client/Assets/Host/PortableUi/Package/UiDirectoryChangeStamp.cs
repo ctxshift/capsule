@@ -22,11 +22,11 @@ namespace PortableUi.Package
                 while (pending.Count > 0)
                 {
                     string current = pending.Pop();
-                    if (++directories > limits.MaxDeclarations + 2) throw new IOException("Package directory count quota exceeded.");
+                    if (++directories > (long)limits.MaxDeclarations + 2) throw new IOException("Package directory count quota exceeded.");
                     if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0) throw new IOException("Package contains a reparse point.");
                     foreach (string child in Directory.EnumerateFileSystemEntries(current))
                     {
-                        if (++count > limits.MaxDeclarations * 2 + 4) throw new IOException("Package entry count quota exceeded.");
+                        if (++count > (long)limits.MaxDeclarations * 2 + 4) throw new IOException("Package entry count quota exceeded.");
                         var info = new FileInfo(child);
                         if ((info.Attributes & FileAttributes.ReparsePoint) != 0) throw new IOException("Package contains a reparse point.");
                         string relative = child.Substring(root.Length);

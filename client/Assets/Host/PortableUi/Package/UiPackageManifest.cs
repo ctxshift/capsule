@@ -40,7 +40,7 @@ namespace PortableUi.Package
         public static bool TryParse(byte[] bytes, int maxAssets, out UiPackageManifest manifest, out string error)
         {
             manifest = null; error = null;
-            if(maxAssets<1 || maxAssets>64) { error="Host manifest profile bounds.";return false; }
+            if(maxAssets<1) { error="Host manifest profile bounds.";return false; }
             if (bytes == null || bytes.Length == 0 || bytes.Length > MaxManifestBytes)
             { error = "Manifest must be 1..16384 bytes."; return false; }
             string source;
