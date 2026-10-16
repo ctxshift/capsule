@@ -16,6 +16,8 @@ namespace PortableUi.Unity
         AnimationClip idle;
         string key;
         Action<Camera> configureCamera;
+        float initialYaw = 180;
+        bool portraitFraming;
         readonly List<Lease> leases = new List<Lease>();
         static readonly ProfilerMarker AnimationMarker = new ProfilerMarker("Capsule.Character.Animation");
         ulong revision;
@@ -34,12 +36,14 @@ namespace PortableUi.Unity
             Prepare(surfaceKey,idleClip);
             SetOwner(visualSource);
         }
-        public void Prepare(string surfaceKey, AnimationClip idleClip, Action<Camera> cameraConfiguration = null)
+        public void Prepare(string surfaceKey, AnimationClip idleClip, Action<Camera> cameraConfiguration = null,
+            float startingYaw = 180, bool portrait = false)
         {
             if(string.IsNullOrEmpty(surfaceKey) || !idleClip)
                 throw new ArgumentException("A surface key and idle clip are required.");
             if(leases.Count!=0)throw new InvalidOperationException("Retire live leases before rebinding the character owner.");
             Clear(); key=surfaceKey; idle=idleClip; configureCamera=cameraConfiguration;
+            initialYaw=startingYaw; portraitFraming=portrait;
         }
         // Preserve the UI's texture leases while replacing or removing an owner.
         public void SetOwner(Transform visualSource)
@@ -90,6 +94,7 @@ namespace PortableUi.Unity
             AnimationClipPlayable animation;
             AnimationClip playing;
             Bounds bounds;
+            float portraitHeight;
             bool visible, disposed, dragging;
             Vector2 lastPoint;
             public float Yaw { get; private set; } = 180;
@@ -99,6 +104,7 @@ namespace PortableUi.Unity
             public Lease(AnimatedCharacterSurface owner)
             {
                 this.owner=owner;
+                Yaw=owner.initialYaw;
                 index=Array.FindIndex(occupied,value=>!value);
                 if(index<0)throw new InvalidOperationException("Preview stage quota reached.");
                 occupied[index]=true;
@@ -174,12 +180,14 @@ namespace PortableUi.Unity
                 foreach(var renderer in rig.GetComponentsInChildren<Renderer>())
                 { ++RenderPartCount; if(first){bounds=renderer.bounds; first=false;}else bounds.Encapsulate(renderer.bounds); }
                 if(first)throw new InvalidOperationException("Visual source has no renderable geometry.");
+                if(portraitHeight==0)portraitHeight=Mathf.Max(.5f,bounds.extents.y);
                 Frame(); camera.enabled=visible;
             }
             T Own<T>(T value) where T:UnityEngine.Object {owned.Add(value);return value;}
             public void ReplaceOwner()
             {
-                dragging=false; Yaw=180;
+                dragging=false; Yaw=owner.initialYaw;
+                portraitHeight=0;
                 Refresh();
                 if(texture && !owner.source)ClearTexture();
             }
@@ -217,11 +225,14 @@ namespace PortableUi.Unity
             void Frame()
             {
                 var center=bounds.center;
+                if(owner.portraitFraming)center.y=bounds.min.y+portraitHeight;
                 var direction=Quaternion.Euler(0,Yaw,0)*Vector3.forward;
                 camera.transform.position=center+direction*5;
                 camera.transform.LookAt(center);
                 float aspect=texture?(float)texture.width/texture.height:1;
-                camera.orthographicSize=Mathf.Max(.5f,bounds.extents.y,bounds.extents.magnitude/Mathf.Max(.1f,aspect)) * 1.12f;
+                camera.orthographicSize=owner.portraitFraming
+                    ? portraitHeight*1.18f
+                    : Mathf.Max(.5f,bounds.extents.y,bounds.extents.magnitude/Mathf.Max(.1f,aspect)) * 1.12f;
             }
             public void SetVisible(bool value)
             {
