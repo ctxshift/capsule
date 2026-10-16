@@ -56,9 +56,17 @@ export class DomTarget {
     );
   }
   private key = (event: KeyboardEvent) => {
-    const root = [...this.nodes.values()].find(
-      (node) => !node.parent && node.events & 128,
-    );
+    const focused = this.stage.ownerDocument
+      .activeElement as HTMLElement | null;
+    const focusedNode = focused?.dataset.handle
+      ? this.nodes.get(BigInt(focused.dataset.handle))
+      : undefined;
+    const root =
+      focusedNode && focusedNode.events & 128
+        ? focusedNode
+        : [...this.nodes.values()].find(
+            (node) => !node.parent && node.events & 128,
+          );
     if (!root) return;
     const front = [...this.nodes.values()]
       .filter((node) => node.kind === 1)
@@ -79,6 +87,8 @@ export class DomTarget {
     } else if (
       [
         'Escape',
+        'ArrowLeft',
+        'ArrowRight',
         'ArrowUp',
         'ArrowDown',
         'Home',
@@ -110,6 +120,8 @@ export class DomTarget {
           (
             {
               Escape: 1,
+              ArrowLeft: 5,
+              ArrowRight: 6,
               ArrowUp: 7,
               ArrowDown: 8,
               Home: 12,
