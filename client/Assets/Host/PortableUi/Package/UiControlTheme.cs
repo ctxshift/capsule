@@ -194,6 +194,8 @@ namespace PortableUi.Package
             {blur=(float)shadow["blur"];var rgba=(JArray)shadow["color"];color=new[]{(byte)rgba[0],(byte)rgba[1],(byte)rgba[2],(byte)rgba[3]};return true;}
             blur=0;color=null;return false;
         }
+        public int ImageSpinDuration(string key)
+        {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return(int?)asset["spinDurationMs"]??0;return 0;}
         public int ImageRotation(string key)
         {foreach(var asset in (JArray)value["assets"])if((string)asset["key"]==key)return(int?)asset["rotation"]??0;return 0;}
         public bool ImageStretch(string key)
@@ -228,6 +230,7 @@ namespace PortableUi.Package
                 float brightness=(float?)item["brightness"]??1;
                 float opacity=(float?)item["opacity"]??1;
                 if(float.IsNaN(opacity)||float.IsInfinity(opacity)||opacity<0||opacity>1)throw new ArgumentException("Theme image opacity bounds.");
+                if(item["spinDurationMs"]!=null && (item["spinDurationMs"].Type!=JTokenType.Integer || (int)item["spinDurationMs"]<0 || ((int)item["spinDurationMs"]>0 && ((int)item["spinDurationMs"]<500 || (int)item["spinDurationMs"]>60000))))throw new ArgumentException("Theme image spin duration bounds.");
                 if(item["rotation"]!=null && (item["rotation"].Type!=JTokenType.Integer || Array.IndexOf(new[]{0,90,180,270},(int)item["rotation"])<0))throw new ArgumentException("Theme image rotation bounds.");
                 if(item["stretch"]!=null && item["stretch"].Type!=JTokenType.Boolean)throw new ArgumentException("Theme image stretch must be boolean.");
                 if(item["tileSize"]!=null)

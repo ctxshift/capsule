@@ -26,9 +26,10 @@ namespace PortableUi.Unity
                 root.pivot=new Vector2(.5f,.5f);
                 root.anchoredPosition+=new Vector2(root.sizeDelta.x*.5f,-root.sizeDelta.y*.5f);
                 int degrees=theme.ImageRotation(node.AssetKey);
+                int spin=theme.ImageSpinDuration(node.AssetKey);
                 var rotation=widget.Image.GetComponent<PortableUiImageRotation>();
-                if(degrees!=0 && !rotation)rotation=widget.Image.gameObject.AddComponent<PortableUiImageRotation>();
-                if(rotation)rotation.SetRotation(degrees);
+                if((degrees!=0 || spin!=0) && !rotation)rotation=widget.Image.gameObject.AddComponent<PortableUiImageRotation>();
+                if(rotation){rotation.SetRotation(degrees);rotation.SetSpinDuration(spin);}
                 bool alphaAware=theme.ImageAlphaAware(node.AssetKey);
                 var sampling=widget.Image.GetComponent<PortableUiAlphaAwareImage>();
                 if(alphaAware&&!sampling)sampling=widget.Image.gameObject.AddComponent<PortableUiAlphaAwareImage>();

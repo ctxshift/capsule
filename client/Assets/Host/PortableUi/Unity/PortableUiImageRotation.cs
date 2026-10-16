@@ -9,6 +9,15 @@ namespace PortableUi.Unity
     public sealed class PortableUiImageRotation : BaseMeshEffect
     {
         int degrees;
+        int spinDurationMs;
+        public void SetSpinDuration(int value)
+        {
+            if(value<0 || (value>0 && (value<500 || value>60000)))throw new ArgumentOutOfRangeException(nameof(value));
+            if(spinDurationMs==value)return;
+            spinDurationMs=value;
+            if(graphic)graphic.SetVerticesDirty();
+        }
+        void Update(){if(spinDurationMs>0 && graphic)graphic.SetVerticesDirty();}
         public void SetRotation(int value)
         {
             if(value!=0 && value!=90 && value!=180 && value!=270)throw new ArgumentOutOfRangeException(nameof(value));
@@ -17,9 +26,24 @@ namespace PortableUi.Unity
         }
         public override void ModifyMesh(VertexHelper mesh)
         {
-            if(!IsActive() || degrees==0 || mesh.currentVertCount==0)return;
+            if(!IsActive() || (degrees==0 && spinDurationMs==0) || mesh.currentVertCount==0)return;
             var image=graphic as Image;
             if(!image || image.type!=Image.Type.Simple)return;
+            if(spinDurationMs>0)
+            {
+                float angle=-(degrees+(float)((Time.unscaledTimeAsDouble*1000.0/spinDurationMs)%1.0)*360f)*Mathf.Deg2Rad;
+                float cos=Mathf.Cos(angle),sin=Mathf.Sin(angle);
+                var center=image.rectTransform.rect.center;
+                var spinningVertex=new UIVertex();
+                for(int i=0;i<mesh.currentVertCount;i++)
+                {
+                    mesh.PopulateUIVertex(ref spinningVertex,i);
+                    float x=spinningVertex.position.x-center.x,y=spinningVertex.position.y-center.y;
+                    spinningVertex.position=new Vector3(center.x+x*cos-y*sin,center.y+x*sin+y*cos,spinningVertex.position.z);
+                    mesh.SetUIVertex(spinningVertex,i);
+                }
+                return;
+            }
             var min=new Vector2(float.PositiveInfinity,float.PositiveInfinity);
             var max=new Vector2(float.NegativeInfinity,float.NegativeInfinity);
             var vertex=new UIVertex();
