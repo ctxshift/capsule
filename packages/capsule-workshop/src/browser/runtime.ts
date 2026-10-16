@@ -18,6 +18,7 @@ interface GuestRealm extends Window {
       payload: Uint8Array,
     ): void;
   };
+  __portableSetViewport(width: number, height: number): void;
   portableUiUpdate(): void;
   portableUiDispose(): void;
   __portableNextDelayV1(): number;
@@ -25,6 +26,8 @@ interface GuestRealm extends Window {
 
 export class BrowserGeneration {
   private retired = false;
+  private resizeObserver: ResizeObserver | null = null;
+  private stage: HTMLDivElement;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private queue: Uint8Array[] = [];
   private reserved = 0n;
@@ -45,8 +48,7 @@ export class BrowserGeneration {
   ) {
     this.frame = document.createElement('iframe');
     this.frame.title = 'Native-compatible addon';
-    this.frame.style.cssText =
-      'width:1440px;height:900px;border:0;display:none';
+    this.frame.style.cssText = 'width:100%;height:100%;border:0;display:none';
     document.querySelector('#stage-host')!.append(this.frame);
     this.realm = this.frame.contentWindow as GuestRealm;
     // The SDK reports newly scheduled work, including Promise continuations that
@@ -66,9 +68,10 @@ export class BrowserGeneration {
     style.textContent = theme.css;
     doc.head.append(style);
     const stage = doc.createElement('div');
+    this.stage = stage;
     stage.id = 'stage';
     stage.style.cssText =
-      'width:1440px;height:900px;position:relative;overflow:hidden';
+      'width:100%;height:100%;position:relative;overflow:hidden';
     doc.body.append(stage);
     this.target = new DomTarget(
       stage,
@@ -140,10 +143,30 @@ export class BrowserGeneration {
           return image.decode();
         }),
       );
+      generation.realm.Function(sdk + '\n//# sourceURL=portable-ui-sdk.js')();
+      const host = document.querySelector<HTMLElement>('#stage-host')!;
+      const resize = () => {
+        if (
+          generation.retired ||
+          host.clientWidth <= 0 ||
+          host.clientHeight <= 0
+        )
+          return;
+        generation.stage.style.width = host.clientWidth + 'px';
+        generation.stage.style.height = host.clientHeight + 'px';
+        generation.realm.__portableSetViewport(
+          host.clientWidth,
+          host.clientHeight,
+        );
+        generation.enqueue(new Uint8Array());
+      };
+      resize();
       generation.realm.Function(
-        sdk + '\n' + bundle + '\n//# sourceURL=portable-ui-addon.js',
+        bundle + '\n//# sourceURL=portable-ui-addon.js',
       )();
       generation.realm.portableUiUpdate();
+      generation.resizeObserver = new ResizeObserver(resize);
+      generation.resizeObserver.observe(host);
       return generation;
     } catch (error) {
       try {
@@ -207,6 +230,7 @@ export class BrowserGeneration {
   dispose() {
     if (this.retired) return;
     this.retired = true;
+    this.resizeObserver?.disconnect();
     if (this.timer) clearTimeout(this.timer);
     this.queue = [];
     this.stagedRequests = [];
