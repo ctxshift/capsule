@@ -20,7 +20,7 @@ namespace PortableUi
     public static class UiHostBridgeContract
     {
         public const int MaxCallsPerInvocation = 64;
-        public const int ExtendedCallsPerInvocation = 256;
+        public const int ExtendedCallsPerInvocation = 2048;
         public const int MaxSubmitBytes = 65536;
         public const int EventCapacity = 272;
         public const int TextEventCapacity = 16 + UiTextEdit.MaxPayloadBytes;

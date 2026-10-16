@@ -7,7 +7,7 @@ namespace PortableUi
     public sealed class UiSession
     {
         public const int MaxNodes = 1024;
-        public const int DefaultLayoutNodes = 128, ExtendedLayoutNodes = 256;
+        public const int DefaultLayoutNodes = 128, ExtendedLayoutNodes = MaxNodes;
         public int LayoutNodeLimit { get; }
         public const int MaxRoots = 16;
         public const int MaxEvents = 128;
