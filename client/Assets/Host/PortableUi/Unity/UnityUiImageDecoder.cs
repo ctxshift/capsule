@@ -19,7 +19,7 @@ namespace PortableUi.Unity
                     texture.width != expected.Width || texture.height != expected.Height)
                     throw new InvalidOperationException("Image decoder rejected data or changed dimensions.");
                 sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
-                    new Vector2(0.5f, 0.5f), 100f);
+                    new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
                 return new UnityUiDecodedImage(texture, sprite,
                     (long)texture.width * texture.height * 4);
             }
