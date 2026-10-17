@@ -1,0 +1,39 @@
+{
+  "name": "@capsule/react-tools",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {
+    "react": "18.3.1",
+    "react-reconciler": "0.29.2",
+    "scheduler": "0.23.2",
+    "@capsule/react": "workspace:*",
+    "@capsule/workshop": "workspace:*",
+    "@capsule/rpg-features": "workspace:*",
+    "@capsule/mmo-features": "workspace:*"
+  },
+  "devDependencies": {
+    "@jridgewell/trace-mapping": "0.3.31",
+    "@types/node": "25.0.3",
+    "@types/react": "18.3.27",
+    "@types/react-reconciler": "0.28.9",
+    "esbuild": "0.25.12",
+    "playwright-core": "1.55.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "4.0.18",
+    "yoga-layout": "3.2.1",
+    "@capsule/skill-system-features": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.tools.json && tsc -p browser/tsconfig.json && tsc -p ../../addons/host-ui/tsconfig.json",
+    "check": "bun run typecheck && bun run --cwd ../.. check:js",
+    "build": "bun scripts/build.mjs --output ../../.local/react-host.js",
+    "build:yoga": "bun scripts/build.mjs --output ../../.local/react-yoga-host.js",
+    "dev": "bun scripts/workshop.ts",
+    "test": "vitest run",
+    "profile": "bun scripts/profile.mjs",
+    "proof:windows": "bun scripts/window-player-proof.mjs",
+    "capture:reference": "bun scripts/capture-reference.ts",
+    "dev:native": "bun scripts/dev.mjs"
+  }
+}
