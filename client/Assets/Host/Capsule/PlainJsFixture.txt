@@ -1,4 +1,4 @@
-// tools/portable-ui-quickjs/fixture.ts
+// tools/capsule-quickjs/fixture.ts
 var HealthObservation = 1;
 var UseFixtureSlot = 1;
 var windowHandle = 0n;

@@ -6,5 +6,5 @@
   "platform": "Windows x86_64",
   "sourceSha256": "D0AB40EBFA8679D256D8DEEB6A97A2562AA98D925226BDC421D394D91FB98602",
   "dllSha256": "7E7815F2304D6402F79CDC720880ED835DC162416FAB1DB28F3F147C3366EA43",
-  "recipe": "C++20, O2, no RTTI, exceptions enabled; tools/portable-ui-yoga/build.ps1"
+  "recipe": "C++20, O2, no RTTI, exceptions enabled; tools/capsule-yoga/build.ps1"
 }
