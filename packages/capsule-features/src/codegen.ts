@@ -33,6 +33,7 @@ export function descriptor(feature: Feature) {
 export function generateCSharp(
   namespace: string,
   contracts: Record<string, Feature>,
+  sharedSchemas: readonly Schema[] = [],
 ): string {
   namespace.split('.').forEach(identifier);
   const records = new Map<string, Extract<Schema, { kind: 'record' }>>();
@@ -55,6 +56,7 @@ export function generateCSharp(
       visit(request.output);
     });
   }
+  sharedSchemas.forEach(visit);
   const type = (schema: Schema): string =>
     schema.kind === 'bool'
       ? 'bool'

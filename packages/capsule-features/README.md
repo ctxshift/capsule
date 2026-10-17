@@ -8,6 +8,12 @@ request/result operations with separate permissions. `s` defines explicit wire
 types; `Value<typeof schema>` supplies readonly TypeScript types. `codec(schema)`
 provides the compatible JavaScript codec, including QuickJS without TextEncoder.
 `generateCSharp` emits strongly typed provider interfaces, records and codecs.
+Its optional third argument is a list of shared schemas. For example,
+`generateCSharp('Game.Contracts', {}, [conditionSchema])` emits records and codecs
+without a feature provider, activation requirement or runtime dependency. Reused
+record names must have identical definitions across shared schemas and features.
+Standalone data formats own their versioning; adding a shared schema does not
+change unrelated feature fingerprints.
 
 Strings use strict UTF-8 prefixed by a uint32 byte count; arrays use a uint32 element
 count; integers are little endian. Field order is definition order. Booleans are one
