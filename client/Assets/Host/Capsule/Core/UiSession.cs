@@ -341,7 +341,7 @@ namespace Capsule
             IUiActionAdapter adapter)
         {
             if (adapter == null) throw new ArgumentNullException(nameof(adapter));
-            if (capability == 0 || copiedPayload == null || copiedPayload.Length > MaxEventPayloadBytes)
+            if (capability == 0 || copiedPayload == null || copiedPayload.Length > UiHostBridgeContract.MaxPayloadBytes)
                 return new UiResult(UiError.InvalidCommand, "Invalid action envelope.");
             var live = CheckLive(handle, nodes, out var node);
             if (!live.Success) return live;

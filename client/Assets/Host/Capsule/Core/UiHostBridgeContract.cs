@@ -27,7 +27,8 @@ namespace Capsule
         public const int ObservationCapacity = 264;
         // Carrier linear-memory capacity, not a per-feature or community topic quota.
         public const int MaxObservationBytes = 4 * 1024 * 1024;
-        public const int MaxPayloadBytes = 256;
+        // Linear-memory safety ceiling; generated feature codecs enforce member-specific bounds.
+        public const int MaxPayloadBytes = 4194304;
     }
 
     // Actual managed callback work, including failures, but excluding the C bridge's

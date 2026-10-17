@@ -19,7 +19,7 @@ namespace Capsule.Wasmtime
     {
         public const ulong AddonExecutionFuel = 200000000;
         readonly ulong executionFuel;
-        public const string QuickJsSha256 = "AEF934D6361DF6AA6BECBD9A80DD49643CA161F1D22DB0567DF2CB065477EEA9";
+        public const string QuickJsSha256 = "0C5DFA49D0797B3599057D7B1428FA9C42E75542CC09F163CBE69D9DBCCFA5B7";
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
         static readonly HostCallback Callback = Dispatch;
@@ -241,7 +241,7 @@ namespace Capsule.Wasmtime
                 if (!grant.AllowsAction((ushort)b)) return (int)UiHostResult.Rejected;
                 if (actions == null) return (int)UiHostResult.Unavailable;
                 var bytes = new byte[(int)d];
-                Marshal.Copy(Address(memory, size, c, bytes.Length, 256), bytes, 0, bytes.Length); copiedRead += bytes.Length;
+                Marshal.Copy(Address(memory, size, c, bytes.Length, UiHostBridgeContract.MaxPayloadBytes), bytes, 0, bytes.Length); copiedRead += bytes.Length;
                 // Only explicit host read grants permit requests without a live node.
                 // The host adapter still enforces member permission and activation identity.
                 if (a == 0 && grant.AllowsReadOnlyAction((ushort)b))

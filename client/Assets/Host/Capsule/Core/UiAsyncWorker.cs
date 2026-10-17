@@ -141,7 +141,7 @@ namespace Capsule
             }
             public bool TryRequest(ushort capability, ulong handle, byte[] payload)
             {
-                if (Candidate || Disposing || payload == null || payload.Length > UiSession.MaxEventPayloadBytes || Actions.Count >= 16) return false;
+                if (Candidate || Disposing || payload == null || payload.Length > UiHostBridgeContract.MaxPayloadBytes || Actions.Count >= 16) return false;
                 Actions.Add(new UiAsyncAction(capability, handle, payload));
                 return true;
             }

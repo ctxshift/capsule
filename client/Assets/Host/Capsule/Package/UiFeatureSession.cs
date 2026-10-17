@@ -132,7 +132,7 @@ namespace Capsule.Package
         }
         public void Dispatch(byte[] frame)
         {
-            if (disposed || retired || overflow || !selection.IsCurrent || frame == null || frame.Length < 12 || frame.Length > 256 || Read32(frame, 0) != epoch) return;
+            if (disposed || retired || overflow || !selection.IsCurrent || frame == null || frame.Length < 12 || frame.Length > UiHostBridgeContract.MaxPayloadBytes || Read32(frame, 0) != epoch) return;
             uint call = Read32(frame, 4), key = Read32(frame, 8);
             if (call == 0 || call <= lastCall) return;
             if (pending.Count >= 64) throw new InvalidOperationException("Feature request backpressure exceeded");
