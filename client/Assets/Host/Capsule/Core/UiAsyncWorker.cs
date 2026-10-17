@@ -424,6 +424,7 @@ namespace Capsule
                 if (input?.Kind == Kind.Observation) activeExchange.Observation = input;
                 else if (input?.Kind == Kind.Event)
                 {
+                    if (active.Session.IsObsoleteEvent(input.Handle, input.Event)) return;
                     var result = active.Session.QueueEvent(input.Handle, input.Event, input.Payload);
                     if (!result.Success) error = result.Detail;
                 }

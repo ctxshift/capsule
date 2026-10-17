@@ -295,6 +295,13 @@ namespace Capsule
             return UiResult.Ok;
         }
 
+        // Native input may refer to the last presented snapshot while the worker
+        // has already committed its successor. Only previously consumed handles
+        // from this generation qualify; foreign and merely reserved handles do not.
+        internal bool IsObsoleteEvent(ulong handle, UiEventMask kind) =>
+            CheckIdentity(handle).Success && (ushort)handle <= nextSequence && !reserved.Contains(handle) &&
+            (!nodes.TryGetValue(handle, out var node) || !EffectivelyVisible(node) || (node.Events & kind) == 0);
+
         // The guest adapter pulls events after native commit; never invoke guest code here.
         public bool TryPeekEvent(out UiEvent result)
         {
