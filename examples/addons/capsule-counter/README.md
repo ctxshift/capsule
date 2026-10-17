@@ -10,7 +10,7 @@ From the repository root, install with `bun install --frozen-lockfile`, then run
 To compile a native-compatible development package, run:
 
 ```powershell
-bun tools/capsule-react/scripts/dev.mjs --source examples/addons/capsule-counter/src/main.tsx --project-root examples/addons/capsule-counter --manifest examples/addons/capsule-counter/addon.json --output .local/capsule-counter --once
+bun tools/host-ui/scripts/dev.mjs --source examples/addons/capsule-counter/src/main.tsx --project-root examples/addons/capsule-counter --manifest examples/addons/capsule-counter/addon.json --output .local/capsule-counter --once
 ```
 
 Generated JavaScript is tooling output; edit the TSX source. The integration test

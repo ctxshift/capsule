@@ -1,8 +1,10 @@
 import { test, expect } from 'vitest';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { resolve, join } from 'node:path';
-import { compiler } from '../scripts/dev.mjs';
+import { join } from 'node:path';
+import { compiler } from '@capsule/workshop/compiler';
 import { featureRequirements } from '../../../packages/capsule-workshop/src/feature-requirements.mjs';
+
+import { localRoot } from '../scripts/paths.mjs';
 
 const requirement = {
   name: '@example/inventory',
@@ -29,7 +31,7 @@ test('strict versioned feature requirement metadata', () => {
     expect(() => featureRequirements(value)).toThrow();
 });
 test('compiler retains requirements and preserves last good on invalid requirements', async () => {
-  const root = await mkdtemp(resolve('.local/feature-manifest-'));
+  const root = await mkdtemp(join(localRoot, 'feature-manifest-'));
   try {
     const source = join(root, 'source');
     await mkdir(source);

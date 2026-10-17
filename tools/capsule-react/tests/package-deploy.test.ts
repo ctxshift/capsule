@@ -9,10 +9,9 @@ import {
   symlink,
 } from 'node:fs/promises';
 import { join } from 'node:path';
-import { compiler } from '../scripts/dev.mjs';
+import { compiler } from '@capsule/workshop/compiler';
 import { deployPackage } from '@capsule/workshop/deploy';
 import { repositoryPath, localRoot } from '../scripts/paths.mjs';
-import { hostThemeLimits } from '../src/theme';
 
 test('shared compiler rejects invalid themes before publication and deployment preserves the Player', async () => {
   const root = await mkdtemp(join(localRoot, 'package-deploy-'));
@@ -47,11 +46,11 @@ test('shared compiler rejects invalid themes before publication and deployment p
     data = join(root, 'Player_Data');
   await writeFile(player, 'unchanged executable');
   await mkdir(data);
-  const first = await deployPackage(output, player, 'demo', hostThemeLimits);
+  const first = await deployPackage(output, player, 'demo');
   const target = join(data, 'StreamingAssets/demo');
   await writeFile(join(target, 'obsolete.js'), 'stale');
   await writeFile(join(data, 'StreamingAssets/unrelated.txt'), 'preserved');
-  const second = await deployPackage(output, player, 'demo', hostThemeLimits);
+  const second = await deployPackage(output, player, 'demo');
   expect(second).toEqual(first);
   expect(await readdir(target)).not.toContain('obsolete.js');
   expect(await readFile(player, 'utf8')).toBe('unchanged executable');
@@ -59,17 +58,13 @@ test('shared compiler rejects invalid themes before publication and deployment p
     await readFile(join(data, 'StreamingAssets/unrelated.txt'), 'utf8'),
   ).toBe('preserved');
   await writeFile(join(output, 'theme.json'), JSON.stringify(bad));
-  await expect(
-    deployPackage(output, player, 'demo', hostThemeLimits),
-  ).rejects.toThrow();
+  await expect(deployPackage(output, player, 'demo')).rejects.toThrow();
   expect(await readFile(join(target, 'theme.json'), 'utf8')).toBe(good);
   await writeFile(join(output, 'theme.json'), good);
-  await expect(
-    deployPackage(output, player, '../escape', hostThemeLimits),
-  ).rejects.toThrow();
+  await expect(deployPackage(output, player, '../escape')).rejects.toThrow();
   const link = join(data, 'StreamingAssets/linked');
   await symlink(target, link, 'junction');
-  await expect(
-    deployPackage(output, player, 'linked', hostThemeLimits),
-  ).rejects.toThrow(/links/);
+  await expect(deployPackage(output, player, 'linked')).rejects.toThrow(
+    /links/,
+  );
 });

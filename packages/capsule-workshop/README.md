@@ -20,7 +20,7 @@ Wasm security or fuel-budget test.
 
 `../capsule-react` provides the addon-facing TSX API. `examples/portable-demo-game`
 shows a fictional host with its own assets, mock observations and actions;
-`tools/capsule-react/scripts/workshop.ts` supplies Host's repository paths
+`tools/host-ui/scripts/workshop.ts` supplies Host's repository paths
 and native Player launch guidance. Those integrations are outside this package.
 
 Source exports are for this private workspace stage; TypeScript tooling consumers

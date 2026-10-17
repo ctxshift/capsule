@@ -42,6 +42,9 @@ class ElementStub {
   setAttribute(key: string, value: string) {
     this.attributes.set(key, value);
   }
+  removeAttribute(key: string) {
+    this.attributes.delete(key);
+  }
   append(...elements: ElementStub[]) {
     for (const element of elements) {
       element.remove();

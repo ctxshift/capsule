@@ -1,1 +1,18 @@
-{"extends": "../../browser/tsconfig.json", "include": ["./**/*.ts"], "exclude": []}
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client",
+      "react"
+    ]
+  },
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": []
+}
