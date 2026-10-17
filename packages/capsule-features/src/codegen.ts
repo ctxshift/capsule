@@ -124,11 +124,11 @@ ${Object.entries(feature.requests)
 }
 public static class ${name}Contract {
 public const string Name = ${JSON.stringify(feature.name)}, Version = ${JSON.stringify(feature.version)}, Fingerprint = ${JSON.stringify(descriptor(feature).fingerprint)};
-public static readonly PortableUi.UiFeatureDefinition Definition = new PortableUi.UiFeatureDefinition(Name, Version, Fingerprint,
-new PortableUi.UiFeatureDependency[] { ${Object.entries(feature.dependencies)
+public static readonly Capsule.UiFeatureDefinition Definition = new Capsule.UiFeatureDefinition(Name, Version, Fingerprint,
+new Capsule.UiFeatureDependency[] { ${Object.entries(feature.dependencies)
         .map(
           ([dependency, range]) =>
-            `new PortableUi.UiFeatureDependency(${JSON.stringify(dependency)}, ${JSON.stringify(range)})`,
+            `new Capsule.UiFeatureDependency(${JSON.stringify(dependency)}, ${JSON.stringify(range)})`,
         )
         .join(', ')} },
 new string[] { ${[...new Set([...Object.values(feature.states), ...Object.values(feature.requests)].map((member) => member.permission))].map((permission) => JSON.stringify(permission)).join(', ')} });
@@ -146,7 +146,7 @@ public static ${name}Binding Bind(I${name}Provider provider) => new ${name}Bindi
       ([
         name,
         feature,
-      ]) => `public sealed class ${name}Binding : PortableUi.UiFeatureProvider {
+      ]) => `public sealed class ${name}Binding : Capsule.UiFeatureProvider {
 readonly I${name}Provider provider;
 public ${name}Binding(I${name}Provider provider) : base(${name}Contract.Definition) {
 this.provider = provider ?? throw new ArgumentNullException(nameof(provider));
@@ -154,9 +154,7 @@ ${Object.entries(feature.states)
   .map(([key, state]) => {
     rootRecord(state.schema);
     const delivery =
-      state.delivery === 'ordered'
-        ? ', PortableUi.UiFeatureDelivery.Ordered'
-        : '';
+      state.delivery === 'ordered' ? ', Capsule.UiFeatureDelivery.Ordered' : '';
     return `AddState(${JSON.stringify(key)}, ${JSON.stringify(state.permission)}, FeatureCodec.Encode(provider.Get${key}())${delivery});\nprovider.${key}Changed += On${key};`;
   })
   .join('\n')}

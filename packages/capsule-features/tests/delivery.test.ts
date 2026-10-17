@@ -23,11 +23,11 @@ it('makes ordered delivery part of identity and generated native binding', () =>
     descriptor(contract('latest')).fingerprint,
   );
   expect(generateCSharp('Example', { Sequence: ordered })).toContain(
-    'PortableUi.UiFeatureDelivery.Ordered',
+    'Capsule.UiFeatureDelivery.Ordered',
   );
   expect(
     generateCSharp('Example', { Sequence: contract('latest') }),
-  ).not.toContain('PortableUi.UiFeatureDelivery.Ordered');
+  ).not.toContain('Capsule.UiFeatureDelivery.Ordered');
 });
 
 it('rejects unsupported delivery before generation', () => {
