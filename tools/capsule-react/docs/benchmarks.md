@@ -13,18 +13,19 @@ builder, not standalone modules, so standalone TypeScript checks would be false.
 The builder fails explicitly if its shared-backend boundary is missing. `hello.ts`
 is the minimal engine-entry diagnostic used by existing standalone .NET harnesses.
 React/reconciler/scheduler license texts remain under `licenses/`. No experimental
-frontend is selected by `dev`; unused alternate-framework tooling is removed.
+frontend is selected by the Host workshop; unused alternate-framework tooling is removed.
 
 From the repository root:
 
 ```powershell
-bun run --cwd tools/capsule-react build --frontend bailout --output .local/react-bailout-optimized-sdk.js
-bun run --cwd tools/capsule-react build --frontend hello --output .local/hello-engine.js
-bun run --cwd tools/capsule-react dev:native --source addons/host-ui/dev/hud.tsx --output .local/new-comparison-addon --once
+bun tools/capsule-react/scripts/build.mjs --frontend bailout --output .local/react-bailout-optimized-sdk.js
+bun tools/capsule-react/scripts/build.mjs --frontend hello --output .local/hello-engine.js
+bun run --cwd tools/host-ui dev:native --source addons/host-ui/dev/hud.tsx --output .local/new-comparison-addon --once
 ```
 
-SDK and development source/output paths are repository-relative, including when
-using `--cwd`; absolute paths also work.
+Host development source/output paths are repository-relative. Direct SDK build
+output is relative to its current working directory; package scripts supply the
+repository output path explicitly. Absolute output paths also work.
 
 The .NET harnesses remain the measurement owners. Their existing `--compare`,
 `--functional`, `--hello`, `--guards`, and Yoga modes can be called directly;

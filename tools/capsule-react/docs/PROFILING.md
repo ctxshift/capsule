@@ -1,4 +1,7 @@
-# React/Yoga conversion measurements
+# Historical React/Yoga conversion measurements
+
+These dated measurements preserve the original experiment. Use [current tools](../../README.md)
+and [Host iteration](../../host-ui/README.md) for current commands and policy.
 
 The 2026-10-12 Windows spike keeps the existing 20,000,000 fuel/update,
 200,000,000 SDK initialization, QuickJS 4 MiB heap/128 KiB stack, Wasm 8 MiB,
@@ -30,7 +33,7 @@ Append `-mixed` to each variant for 128 inputs comprising 16 repetitions of
 System open/focus, Settings open, brightness, selection, System focus, Log Out
 dialog, Escape and Settings close. Alternate brightness extremes and select
 values. This checks fresh callbacks, keyed window order and close/reopen state.
-`tests/optimization-parity.test.ts` compares approved/current SDKs and fresh TSX bundle
+`tools/host-ui/tests/optimization-parity.test.ts` compares approved/current SDKs and fresh TSX bundle
 paths, requiring byte-identical packets and handles for startup and all 128 mixed
 inputs. Renderer tests additionally retain Unicode, mixed/fixed layout and quota
 coverage; approved SDK wire goldens remain unchanged.
