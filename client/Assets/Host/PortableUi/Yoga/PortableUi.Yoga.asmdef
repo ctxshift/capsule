@@ -1,6 +1,0 @@
-{
-  "name": "PortableUi.Yoga",
-  "rootNamespace": "PortableUi.Yoga",
-  "references": ["PortableUi.Core"],
-  "autoReferenced": true
-}

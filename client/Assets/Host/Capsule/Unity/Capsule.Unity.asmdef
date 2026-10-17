@@ -1,0 +1,6 @@
+{
+  "name": "Capsule.Unity",
+  "rootNamespace": "Capsule.Unity",
+  "references": ["Capsule.Core", "Capsule.Yoga", "Capsule.Package", "Unity.ugui", "Unity.TextMeshPro", "Unity.InputSystem"],
+  "autoReferenced": true
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Capsule.Yoga",
+  "rootNamespace": "Capsule.Yoga",
+  "references": ["Capsule.Core"],
+  "autoReferenced": true
+}

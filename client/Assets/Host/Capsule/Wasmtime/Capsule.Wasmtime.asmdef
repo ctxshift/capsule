@@ -1,0 +1,1 @@
+{"name":"Capsule.Wasmtime","rootNamespace":"Capsule.Wasmtime","references":["Capsule.Core","Capsule.Package"],"autoReferenced":true}

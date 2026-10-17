@@ -1,0 +1,11 @@
+{
+  "name": "Capsule.Core",
+  "rootNamespace": "Capsule",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true,
+  "overrideReferences": true,
+  "precompiledReferences": [],
+  "defineConstraints": [],
+  "versionDefines": []
+}

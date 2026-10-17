@@ -1,0 +1,9 @@
+{
+  "name": "Capsule.Package",
+  "rootNamespace": "Capsule.Package",
+  "references": ["Capsule.Core"],
+  "overrideReferences": true,
+  "precompiledReferences": ["Newtonsoft.Json.dll"],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}
