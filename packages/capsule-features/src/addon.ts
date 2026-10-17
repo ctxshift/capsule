@@ -137,7 +137,7 @@ export function createAddonFeatures(
             return Promise.reject(
               new FeatureError('denied', 'Live UI action required'),
             );
-          if (bytes.length > 244)
+          if (bytes.length > 4194304 - 12)
             return Promise.reject(
               new FeatureError(
                 'unavailable',
