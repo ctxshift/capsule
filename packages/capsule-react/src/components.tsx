@@ -185,6 +185,10 @@ export function createComponents(theme: ComponentTheme) {
         paddingBottom={theme.windowBottom}
         onFocus={onFocus}
         onClose={onClose}
+        onKey={(event) => {
+          if (event.key === 'Escape' && event.down && !event.repeat)
+            onClose(event);
+        }}
       >
         <Box
           position="absolute"
