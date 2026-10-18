@@ -52,11 +52,20 @@ namespace Capsule.Unity
             if (commanded != node.Text || revision != options.Revision || !options.Accepts(accepted))
             {
                 bool initial = commanded == null;
-                commanded = node.Text; revision = options.Revision; accepted = node.Text;
-                SetTextWithoutNotify(accepted);
-                anchor = focus = accepted.Length;
-                selectionStringAnchorPosition = anchor; selectionStringFocusPosition = focus;
-                programmaticPending = !initial;
+                // While editing, an addon snapshot can echo an earlier draft after
+                // newer native characters were accepted. Only a new revision may
+                // replace that local draft before focus leaves the field.
+                bool nativeDraftOwnsRevision = !initial && isFocused &&
+                    revision == options.Revision && options.Accepts(accepted);
+                commanded = node.Text; revision = options.Revision;
+                if (!nativeDraftOwnsRevision)
+                {
+                    accepted = node.Text;
+                    SetTextWithoutNotify(accepted);
+                    anchor = focus = accepted.Length;
+                    selectionStringAnchorPosition = anchor; selectionStringFocusPosition = focus;
+                    programmaticPending = !initial;
+                }
             }
         }
 
