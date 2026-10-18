@@ -11,6 +11,8 @@ namespace Capsule.Unity
         {
             internal Transform Transform;
             internal Func<bool> Permitted;
+            internal Func<float> SurfaceRadius;
+            internal Func<Vector3, Vector3?> SurfacePoint;
             readonly CapsuleWorldRegistry registry;
             internal Attachment(CapsuleWorldRegistry registry){this.registry=registry;}
             public bool TryResolve(UiWorldAnchor anchor,out Vector3 point)
@@ -61,10 +63,15 @@ namespace Capsule.Unity
         }
         static string Key(string entity,string attachment)=>entity+"/"+attachment;
         public void GrantAttachment(string entity,string attachment,Transform transform,Func<bool> permitted)
+            => GrantAttachment(entity,attachment,transform,permitted,null,null);
+        public void GrantAttachment(string entity,string attachment,Transform transform,Func<bool> permitted,
+            Func<float> surfaceRadius,Func<Vector3,Vector3?> surfacePoint)
         {
             if(disposed || !transform || permitted==null || !new UiWorldAnchor(entity,attachment).Valid || grants.Count>=64)
                 throw new ArgumentException("Invalid or excessive world grant.");
-            grants.Add(Key(entity,attachment),new Attachment(this){Transform=transform,Permitted=permitted});
+            if ((surfaceRadius==null)!=(surfacePoint==null)) throw new ArgumentException("Incomplete surface grant.");
+            grants.Add(Key(entity,attachment),new Attachment(this){Transform=transform,Permitted=permitted,
+                SurfaceRadius=surfaceRadius,SurfacePoint=surfacePoint});
         }
         public void Revoke(string entity,string attachment)
         { var key=Key(entity,attachment);if(grants.TryGetValue(key,out var grant)){grant.Transform=null;grants.Remove(key);} }

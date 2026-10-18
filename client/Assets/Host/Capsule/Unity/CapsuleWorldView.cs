@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Capsule.Unity
 {
@@ -16,6 +17,8 @@ namespace Capsule.Unity
         double started, latest;
         uint revision;
         bool hasEffect, retired, expired;
+        CapsuleGroundProjection ground;
+        Image groundImage;
         public bool Shown {get;private set;}
         public void Apply(UiNode value,CapsuleWorldRegistry registry,double now)
         {
@@ -23,7 +26,7 @@ namespace Capsule.Unity
             if(!group)group=gameObject.GetComponent<CanvasGroup>();
             if(!group)group=gameObject.AddComponent<CanvasGroup>();
             if(node==null || world!=registry || node.WorldAnchor?.Entity!=value.WorldAnchor?.Entity || node.WorldAnchor?.Attachment!=value.WorldAnchor?.Attachment)
-            {retired=false;attachment=value.WorldAnchor==null?null:registry?.Acquire(value.Handle,value.WorldAnchor);}
+            {retired=false;attachment=value.WorldAnchor==null?null:registry?.Acquire(value.Handle,value.WorldAnchor);ground?.Hide();}
             now=Monotonic(now);
             if(value.Effect!=null && (!hasEffect || revision!=value.Effect.Revision))
             {started=now;revision=value.Effect.Revision;expired=false;}
@@ -58,6 +61,34 @@ namespace Capsule.Unity
                 {retired=true;visible=false;}
                 else
                 {
+                    if(attachment.SurfacePoint!=null)
+                    {
+                        var groundCamera=world.Camera;
+                        visible=groundCamera && groundCamera.isActiveAndEnabled && gameObject.activeInHierarchy;
+                        if(visible)
+                        {
+                            float distance=Vector3.Distance(groundCamera.transform.position,point);
+                            visible=distance>=anchor.Near/64f && distance<=anchor.Far/64f;
+                            var projected=groundCamera.WorldToViewportPoint(point);
+                            visible &= projected.z>=groundCamera.nearClipPlane && projected.z<=groundCamera.farClipPlane &&
+                                projected.x>=0 && projected.x<=1 && projected.y>=0 && projected.y<=1;
+                            if(visible && anchor.Occlusion)
+                            {try{visible=world.Visibility!=null && world.Visibility(point);}catch{visible=false;}}
+                            for(var parent=transform.parent;visible && parent;parent=parent.parent)
+                                if(parent.TryGetComponent<CanvasGroup>(out var ancestor))
+                                {alpha*=ancestor.alpha;visible=alpha>0;}
+                        }
+                        if(ground==null)ground=new CapsuleGroundProjection();
+                        if(!groundImage)
+                            foreach(Transform child in transform)
+                                if(child.TryGetComponent<Image>(out var candidate) && candidate.sprite)
+                                {groundImage=candidate;break;}
+                        ground.Present(attachment,point,groundImage,visible,alpha);
+                        group.alpha=0;
+                        group.blocksRaycasts=group.interactable=false;
+                        Shown=ground.Shown;
+                        return;
+                    }
                     var camera=world.Camera;
                     visible=camera && camera.isActiveAndEnabled;
                     if(visible)
@@ -83,9 +114,12 @@ namespace Capsule.Unity
                 visible=world.TryPlace(anchor,node.Handle,position,new Vector2(node.Rect.Width,node.Rect.Height)*(scale/64f),((RectTransform)rect.parent).rect.size,out position);
             rect.anchoredPosition=position;rect.localScale=Vector3.one*scale;
             group.alpha=visible?alpha:0;group.blocksRaycasts=group.interactable=visible && alpha>0;
+            ground?.Hide();
             Shown=visible && alpha>0;
             if(!Shown && EventSystem.current && EventSystem.current.currentSelectedGameObject &&
                 EventSystem.current.currentSelectedGameObject.transform.IsChildOf(transform))EventSystem.current.SetSelectedGameObject(null);
         }
+        void OnDisable()=>ground?.Hide();
+        void OnDestroy()=>ground?.Dispose();
     }
 }
