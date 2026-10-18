@@ -31,6 +31,8 @@ namespace Capsule.Unity
         public long CommitCount { get; private set; }
         // A surrounding game shell can own Escape while retaining native widget keys.
         public bool ExternalEscapeRouting {get;set;}
+        // A game may reserve Tab for world targeting instead of widget traversal.
+        public bool ExternalTabRouting {get;set;}
         internal bool SurfaceInputActive => active && !disposed;
 
         public bool TryDesignPoint(Vector2 screen, Camera camera, out Vector2 point)
@@ -419,6 +421,12 @@ namespace Capsule.Unity
                 if (popup && popup.IsExpanded) return; // Native popup owns keys/cancel.
             }
             if (selected && !selected.transform.IsChildOf(layer)) return;
+            if (selected && selected.TryGetComponent<CapsuleTextInput>(out var textInput))
+            {
+                if (key == UiInputKey.Enter) textInput.RouteSubmitKey();
+                else if (key == UiInputKey.Escape) textInput.RouteCancelKey();
+                return;
+            }
             if (selected && (selected.GetComponent<TMP_InputField>() || selected.GetComponent<InputField>())) return;
             if (selected && selected.TryGetComponent<TMP_Dropdown>(out var select) &&
                 (key == UiInputKey.Up || key == UiInputKey.Down || key == UiInputKey.Left || key == UiInputKey.Right))

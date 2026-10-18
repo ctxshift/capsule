@@ -15,9 +15,11 @@ namespace Capsule.Unity
         string commanded, accepted = "", composition = "";
         uint revision;
         int anchor, focus, compositionFrame = -2, submitFrame = -2;
-        bool entered, programmaticPending, enterHeld;
+        bool entered, programmaticPending, enterHeld, openingEnterHeld;
         readonly Event nativeEvent = new Event();
         static int consumedFrame = -1;
+        // The surrounding screen may finish editing on submit (chat) or keep focus (forms).
+        public bool BlurOnSubmit { get; set; }
         public static bool OwnsKeyboard
         {
             get
@@ -98,6 +100,9 @@ namespace Capsule.Unity
         protected override void LateUpdate()
         {
             base.LateUpdate();
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard != null && (keyboard.enterKey.wasReleasedThisFrame || keyboard.numpadEnterKey.wasReleasedThisFrame))
+            { openingEnterHeld = false; enterHeld = false; }
             if (programmaticPending) { programmaticPending = false; Emit(UiTextEditPhase.Change, false); }
             if (!isFocused) return;
             ObserveComposition(); AcceptDraft();
@@ -112,7 +117,7 @@ namespace Capsule.Unity
             bool enter = data.keyCode == KeyCode.Return || data.keyCode == KeyCode.KeypadEnter;
             if (data.rawType == EventType.KeyUp)
             {
-                if (enter) enterHeld = false;
+                if (enter) { enterHeld = false; openingEnterHeld = false; }
                 return true;
             }
             ObserveComposition();
@@ -132,7 +137,8 @@ namespace Capsule.Unity
         }
         public override void OnUpdateSelected(BaseEventData eventData)
         {
-            if (!isFocused || !IsInteractable()) return;
+            if (!IsInteractable()) return;
+            if (!isFocused) { base.OnUpdateSelected(eventData); return; }
             while (Event.PopEvent(nativeEvent))
             {
                 if (nativeEvent.rawType == EventType.KeyDown || nativeEvent.rawType == EventType.KeyUp) ProcessNativeEvent(nativeEvent);
@@ -142,8 +148,14 @@ namespace Capsule.Unity
         }
         void SubmitDraft()
         {
-            if (!isFocused || readOnly || composition.Length != 0 || compositionFrame == Time.frameCount || submitFrame == Time.frameCount) return;
+            if (openingEnterHeld || !isFocused || readOnly || composition.Length != 0 || compositionFrame == Time.frameCount || submitFrame == Time.frameCount) return;
             AcceptDraft(); submitFrame = Time.frameCount; Emit(UiTextEditPhase.Submit);
+            if (BlurOnSubmit)
+            {
+                if (EventSystem.current && EventSystem.current.currentSelectedGameObject == gameObject)
+                    EventSystem.current.SetSelectedGameObject(null);
+                else DeactivateInputField();
+            }
         }
         void CancelDraft()
         {
@@ -152,6 +164,14 @@ namespace Capsule.Unity
             if (EventSystem.current && EventSystem.current.currentSelectedGameObject == gameObject) EventSystem.current.SetSelectedGameObject(null);
             else DeactivateInputField();
         }
+        // The Enter that opened a field belongs to focus, not to its first submission.
+        public void SuppressOpeningEnter()
+        {
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            openingEnterHeld = keyboard != null && (keyboard.enterKey.isPressed || keyboard.numpadEnterKey.isPressed);
+        }
+        internal void RouteSubmitKey() { ObserveComposition(); SubmitDraft(); }
+        internal void RouteCancelKey() => CancelDraft();
         public override void OnSubmit(BaseEventData data)
         {
             ObserveComposition();

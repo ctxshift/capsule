@@ -17,8 +17,9 @@ namespace Capsule.Unity
             byte modifiers = (byte)((keyboard.shiftKey.isPressed ? 1 : 0) |
                 (keyboard.ctrlKey.isPressed ? 2 : 0) | (keyboard.altKey.isPressed ? 4 : 0) |
                 (keyboard.leftMetaKey.isPressed || keyboard.rightMetaKey.isPressed ? 8 : 0));
-            if(!target.ExternalEscapeRouting)Send(keyboard.escapeKey, UiInputKey.Escape, modifiers);
-            Send(keyboard.tabKey, UiInputKey.Tab, modifiers);
+            if(!target.ExternalEscapeRouting || CapsuleTextInput.OwnsKeyboard)
+                Send(keyboard.escapeKey, UiInputKey.Escape, modifiers);
+            if(!target.ExternalTabRouting)Send(keyboard.tabKey, UiInputKey.Tab, modifiers);
             Send(keyboard.enterKey, UiInputKey.Enter, modifiers);
             Send(keyboard.spaceKey, UiInputKey.Space, modifiers);
             Send(keyboard.leftArrowKey, UiInputKey.Left, modifiers);
