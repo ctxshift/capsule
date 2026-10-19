@@ -13,6 +13,7 @@ namespace Capsule.Unity
             internal Func<bool> Permitted;
             internal Func<float> SurfaceRadius;
             internal Func<Vector3, Vector3?> SurfacePoint;
+            internal Func<Vector3?> AnchorPoint;
             readonly CapsuleWorldRegistry registry;
             internal Attachment(CapsuleWorldRegistry registry){this.registry=registry;}
             public bool TryResolve(UiWorldAnchor anchor,out Vector3 point)
@@ -21,7 +22,11 @@ namespace Capsule.Unity
                 if(registry.disposed || !Transform)return false;
                 try { if(!Permitted()){Transform=null;return false;} }
                 catch { Transform=null;return false; }
-                point=Transform.position+new Vector3(anchor.X,anchor.Y,anchor.Z)/64f;
+                Vector3? origin;
+                try { origin=AnchorPoint==null ? Transform.position : AnchorPoint(); }
+                catch { return false; }
+                if (!origin.HasValue) return false;
+                point=origin.Value+new Vector3(anchor.X,anchor.Y,anchor.Z)/64f;
                 return float.IsFinite(point.x)&&float.IsFinite(point.y)&&float.IsFinite(point.z);
             }
         }
@@ -63,15 +68,21 @@ namespace Capsule.Unity
         }
         static string Key(string entity,string attachment)=>entity+"/"+attachment;
         public void GrantAttachment(string entity,string attachment,Transform transform,Func<bool> permitted)
-            => GrantAttachment(entity,attachment,transform,permitted,null,null);
+            => GrantAttachment(entity,attachment,transform,permitted,null,null,null);
         public void GrantAttachment(string entity,string attachment,Transform transform,Func<bool> permitted,
             Func<float> surfaceRadius,Func<Vector3,Vector3?> surfacePoint)
+            => GrantAttachment(entity,attachment,transform,permitted,surfaceRadius,surfacePoint,null);
+        public void GrantAttachment(string entity,string attachment,Transform transform,Func<bool> permitted,
+            Func<Vector3?> anchorPoint)
+            => GrantAttachment(entity,attachment,transform,permitted,null,null,anchorPoint);
+        void GrantAttachment(string entity,string attachment,Transform transform,Func<bool> permitted,
+            Func<float> surfaceRadius,Func<Vector3,Vector3?> surfacePoint,Func<Vector3?> anchorPoint)
         {
             if(disposed || !transform || permitted==null || !new UiWorldAnchor(entity,attachment).Valid || grants.Count>=64)
                 throw new ArgumentException("Invalid or excessive world grant.");
             if ((surfaceRadius==null)!=(surfacePoint==null)) throw new ArgumentException("Incomplete surface grant.");
             grants.Add(Key(entity,attachment),new Attachment(this){Transform=transform,Permitted=permitted,
-                SurfaceRadius=surfaceRadius,SurfacePoint=surfacePoint});
+                SurfaceRadius=surfaceRadius,SurfacePoint=surfacePoint,AnchorPoint=anchorPoint});
         }
         public void Revoke(string entity,string attachment)
         { var key=Key(entity,attachment);if(grants.TryGetValue(key,out var grant)){grant.Transform=null;grants.Remove(key);} }
