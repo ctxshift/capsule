@@ -1,0 +1,38 @@
+[tools]
+bun = "1.3.6"
+node = "25.6.1"
+"github:ctxshift/bees" = "0.4.0"
+
+[tasks.install]
+description = "Install the frozen authoring workspace dependencies"
+run = "bun install --frozen-lockfile"
+
+[tasks.typecheck]
+description = "Typecheck all authoring, example and feature workspaces"
+run = "bun run typecheck"
+
+[tasks.test]
+description = "Run feature and authoring tests"
+run = "bun run test"
+
+[tasks.js-check]
+description = "Lint and check formatting of TypeScript and JavaScript"
+run = "bun run check:js"
+
+[tasks.js-format]
+description = "Format authored TypeScript, JavaScript and package metadata"
+run = "bun run format"
+
+[tasks.check]
+description = "Check workspace types, source quality, contracts and native imports"
+depends = ["typecheck", "js-check"]
+run = "node tools/verify-native-import.mjs"
+
+[tasks.build-sdk]
+description = "Build the React host SDK without installing it into an engine"
+run = "bun run build:sdk"
+
+[tasks.dev]
+description = "Run the neutral React UI workshop and browser preview"
+raw = true
+run = "bun run dev:demo"

@@ -20,7 +20,8 @@
     "dev:demo": "bun examples/portable-demo-game/scripts/dev.ts --sdk .local/authoring-sdk.js",
     "lint": "eslint packages/capsule-features packages/capsule-react packages/capsule-workshop tools/capsule-react examples --max-warnings 0",
     "format:check": "prettier --check \"packages/capsule-{features,react,workshop}/**/*.{ts,tsx,mjs,json}\" \"tools/capsule-react/**/*.{ts,tsx,mjs,json}\" \"examples/**/*.{ts,tsx,mjs,json}\" package.json eslint.config.mjs .prettierrc.json",
-    "check:js": "bun run lint && bun run format:check"
+    "check:js": "bun run lint && bun run format:check",
+    "format": "prettier --write \"packages/capsule-{features,react,workshop}/**/*.{ts,tsx,mjs,json}\" \"tools/capsule-react/**/*.{ts,tsx,mjs,json}\" \"examples/**/*.{ts,tsx,mjs,json}\" package.json eslint.config.mjs .prettierrc.json"
   },
   "devDependencies": {
     "@eslint/js": "9",
