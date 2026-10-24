@@ -261,7 +261,12 @@ export function buildRelease({ repository, revision = 'HEAD', output }) {
       '-Revision',
       resolved,
     ],
-    { cwd: snapshot, log: join(logs, 'managed-build.log'), timeout: 300_000 },
+    {
+      cwd: snapshot,
+      log: join(logs, 'managed-build.log'),
+      timeout: 300_000,
+      env: { NUGET_PACKAGES: join(work, 'managed-cache') },
+    },
   );
   const runtimeStage = join(work, 'runtime-bundle');
   for (const [source, target] of [
@@ -307,9 +312,9 @@ export function buildRelease({ repository, revision = 'HEAD', output }) {
       join(runtimeStage, 'licenses', notice),
     );
   copy(join(snapshot, 'LICENSE'), join(runtimeStage, 'LICENSE'));
-  copy(
-    join(snapshot, 'docs/release-native.md'),
+  writeFileSync(
     join(runtimeStage, 'README.md'),
+    '# Capsule runtime bundle\n\nSee docs/release-native.md for direct DLL installation and docs/releases.md for compatibility, upgrades and rollback. This bundle is not an engine adapter.\n',
   );
   const bundleStage = join(work, 'unity-bundle');
   for (const entry of upm)
@@ -319,10 +324,13 @@ export function buildRelease({ repository, revision = 'HEAD', output }) {
         join(bundleStage, 'Packages', entry.name, file),
       );
   copy(join(snapshot, 'LICENSE'), join(bundleStage, 'LICENSE'));
-  copy(join(snapshot, 'docs/unity-setup.md'), join(bundleStage, 'SETUP.md'));
+  for (const stage of [runtimeStage, bundleStage]) {
+    copy(join(snapshot, 'docs'), join(stage, 'docs'));
+    copy(join(snapshot, 'THIRD-PARTY.md'), join(stage, 'THIRD-PARTY.md'));
+  }
   writeFileSync(
     join(bundleStage, 'README.md'),
-    '# Capsule Unity bundle\n\nClose the target Editor before changing packages. Copy the contents of Packages/ into your project Packages/ directory, preserving existing unrelated packages. All eight Capsule packages must come from this bundle. Open Unity and follow SETUP.md. Do not install alongside older copied Capsule assemblies.\n\nThe Capsule setup window is planned; this candidate uses explicit package installation. Godot and Unreal adapters are not included.\n',
+    '# Capsule Unity bundle\n\nClose the target Editor before changing packages. Copy the contents of Packages/ into your project Packages/ directory, preserving existing unrelated packages. All eight Capsule packages must come from this bundle. Open Unity and follow docs/unity-setup.md. Do not install alongside older copied Capsule assemblies.\n\nThe Capsule setup window is planned; this candidate uses explicit package installation. Godot and Unreal adapters are not included.\n',
   );
   json(join(bundleStage, 'bundle-manifest.json'), {
     version: release.version,

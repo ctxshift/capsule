@@ -39,6 +39,7 @@ bun install --frozen-lockfile
 bun run test:release
 bun run release:build --output .local/candidate-a
 bun run release:verify --artifacts .local/candidate-a
+bun run release:reproduce --output .local/reproduction
 ```
 
 Output directories must be fresh. The builder exports one immutable Git revision
@@ -77,7 +78,9 @@ archive omits it; Yoga 3.2.1 uses the retained upstream Yoga notice for that ver
 
 Build twice from the same source and compare every output file, including locks,
 notices, manifests and archives. Run the frozen packed consumer and direct DLL
-checks. Run the [fresh Unity consumer gate](release-upm.md) through `agent-unity`;
+checks. `release:reproduce` performs those steps in two external snapshots with
+fresh Bun and managed dependency caches, then records a relative-path inventory
+in `reproducibility.json`. Run the [fresh Unity consumer gate](release-upm.md) through `agent-unity`;
 portable verification alone does not approve an engine release. The current helper
 discovery mismatch blocks that gate and must be resolved before promotion.
 

@@ -166,7 +166,15 @@ export function zipBundle(stage, output, prefix = 'CapsuleUnity/') {
     tree,
   ]);
   writeFileSync(output, bytes);
-  return { sha256: sha256(bytes), files: files(stage) };
+  const inventory = files(stage);
+  return {
+    sha256: sha256(bytes),
+    files: inventory,
+    payload: inventory.map((path) => ({
+      path,
+      sha256: sha256(readFileSync(join(stage, path))),
+    })),
+  };
 }
 export function ensureFresh(path) {
   if (existsSync(path))

@@ -21,6 +21,27 @@ $($refs -join "`n")
 </ItemGroup></Project>
 "@ | Set-Content -LiteralPath (Join-Path $consumer 'Consumer.csproj') -Encoding utf8NoBOM
 Get-ChildItem -LiteralPath (Join-Path $repo 'tools/capsule-native-tests') -Filter '*.cs' -File | Copy-Item -Destination $consumer
+@'
+using System;
+using Rpg.Features;
+using Mmo.Features;
+using SkillSystem.Features;
+
+internal static class PackedFeatureProof
+{
+    [System.Runtime.CompilerServices.ModuleInitializer]
+    internal static void Run()
+    {
+        var quest = new TQuestPrerequisites(1, "root", new[] { new TQuestConditionNode("root", "always", "", Array.Empty<string>()) });
+        if (RpgFeatureCodec.DecodeQuestPrerequisites(RpgFeatureCodec.Encode(quest)).root != "root") throw new Exception("Packed RPG codec failed");
+        var chat = new TChatSend(1, 2, "party", "hello", "");
+        if (MmoFeatureCodec.DecodeChatSend(MmoFeatureCodec.Encode(chat)).text != "hello") throw new Exception("Packed MMO codec failed");
+        var training = new TTrainingIntent(1, 2, 3, "navigation-2", false);
+        if (SkillSystemFeatureCodec.DecodeTrainingIntent(SkillSystemFeatureCodec.Encode(training)).offer != "navigation-2") throw new Exception("Packed skill codec failed");
+        Console.WriteLine("PASS direct DLL RPG/MMO/skill codec roundtrips");
+    }
+}
+'@ | Set-Content -LiteralPath (Join-Path $consumer 'PackedFeatureProof.cs') -Encoding utf8NoBOM
 '<configuration><packageSources><clear /></packageSources></configuration>' | Set-Content -LiteralPath (Join-Path $scratch 'NuGet.Config') -Encoding utf8NoBOM
 & dotnet restore (Join-Path $consumer 'Consumer.csproj') --configfile (Join-Path $scratch 'NuGet.Config') --packages (Join-Path $scratch 'empty-cache') --nologo *> (Join-Path $logs 'verify-restore.log')
 if ($LASTEXITCODE -ne 0) { throw 'DLL consumer restore failed; see retained log.' }

@@ -204,6 +204,15 @@ export function verifyBundles(root, manifest, work) {
     if (JSON.stringify(files(unpacked)) !== JSON.stringify(entry.files))
       throw Error('Bundle inventory mismatch');
     if (
+      entry.payload.length !== entry.files.length ||
+      JSON.stringify(entry.payload.map((item) => item.path)) !==
+        JSON.stringify(entry.files)
+    )
+      throw Error('Bundle payload inventory mismatch');
+    for (const item of entry.payload)
+      if (sha256(readFileSync(join(unpacked, item.path))) !== item.sha256)
+        throw Error('Bundle payload hash mismatch');
+    if (
       entry.revision !== manifest.revision ||
       entry.version !== manifest.version
     )

@@ -1,0 +1,52 @@
+name: Release candidate
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  portable-candidate:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac
+        with:
+          version: 2026.10.8
+          cache: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: |
+            10.0.401
+            9.0.308
+      - name: Check source and release guards
+        shell: pwsh
+        run: |
+          bun install --frozen-lockfile
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          mise run check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          bun run test:release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Reproduce and verify portable candidate
+        shell: pwsh
+        run: bun run release:reproduce --output .local/reproduction
+      - name: Retain candidate assets and evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: capsule-candidate-${{ github.sha }}
+          include-hidden-files: true
+          path: |
+            .local/reproduction/a/
+            .local/reproduction/reproducibility.json
+            .local/release/*.log
+            .local/release-native/*.log
+          if-no-files-found: warn
+          retention-days: 14

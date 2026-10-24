@@ -33,7 +33,8 @@
     "test:tools": "node --test tools/tests/verify-native-import.test.mjs tools/tests/feature-consumer.test.mjs",
     "test:release": "node --test tools/release/tests/*.test.mjs",
     "release:build": "node tools/release/build.mjs",
-    "release:verify": "node tools/release/verify.mjs"
+    "release:verify": "node tools/release/verify.mjs",
+    "release:reproduce": "node tools/release/reproduce.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9",

@@ -52,3 +52,7 @@ run = "bun run release:build"
 [tasks.release-verify]
 description = "Verify packed npm and direct DLL consumers; pass --artifacts"
 run = "bun run release:verify"
+
+[tasks.release-reproduce]
+description = "Build twice and compare complete candidates; pass --output"
+run = "bun run release:reproduce"

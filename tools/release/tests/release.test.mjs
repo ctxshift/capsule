@@ -23,6 +23,27 @@ import {
 } from '../lib.mjs';
 import { checkArtifacts } from '../verify.mjs';
 import { release } from '../config.mjs';
+import { compareCandidates } from '../reproduce.mjs';
+
+test('candidate comparison rejects changed and additional files', () => {
+  const root = mkdtempSync(join(tmpdir(), 'capsule-comparison-'));
+  try {
+    const a = join(root, 'a'),
+      b = join(root, 'b');
+    mkdirSync(a);
+    mkdirSync(b);
+    writeFileSync(join(a, 'asset.zip'), 'same');
+    writeFileSync(join(b, 'asset.zip'), 'same');
+    assert.equal(compareCandidates(a, b).length, 1);
+    writeFileSync(join(b, 'asset.zip'), 'different');
+    assert.throws(() => compareCandidates(a, b), /asset.zip/);
+    writeFileSync(join(b, 'asset.zip'), 'same');
+    writeFileSync(join(b, 'unexpected.txt'), 'extra');
+    assert.throws(() => compareCandidates(a, b), /unexpected.txt/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test('release manifests reject workspace, floating, local and source-only metadata', () => {
   const good = {
