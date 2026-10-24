@@ -1,1 +1,1 @@
-export * from '@capsule/workshop/browser';
+export * from '@capsule-sdk/workshop/browser';

@@ -2,8 +2,8 @@ import { expect, test } from 'vitest';
 import { build } from 'esbuild';
 import { chromium } from 'playwright-core';
 import { fileURLToPath } from 'node:url';
-import type { DomTarget } from '@capsule/workshop/dom';
-import type { UiNode } from '@capsule/workshop/packet';
+import type { DomTarget } from '@capsule-sdk/workshop/dom';
+import type { UiNode } from '@capsule-sdk/workshop/packet';
 import {
   SimulatedWorld,
   EffectClock,

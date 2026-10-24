@@ -1,5 +1,5 @@
 import { ItemKind } from './items';
-import { defineFeature, s } from '@capsule/features';
+import { defineFeature, s } from '@capsule-sdk/features';
 export const BagItem = s.record('BagItem', {
   token: s.u32,
   quantity: s.u32,

@@ -1,5 +1,5 @@
-import { ItemKind } from '@capsule/rpg-features/items';
-import { defineFeature, s, type Value } from '@capsule/features';
+import { ItemKind } from '@capsule-sdk/rpg-features/items';
+import { defineFeature, s, type Value } from '@capsule-sdk/features';
 export const TradeItem = s.record('TradeItem', {
   id: s.text(24),
   kind: ItemKind,

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { descriptor, generateCSharp } from '@capsule/features/codegen';
+import { descriptor, generateCSharp } from '@capsule-sdk/features/codegen';
 import { inventory, items, inventoryCodec } from '../src/contracts';
 
 it('keeps the example descriptors current', () => {

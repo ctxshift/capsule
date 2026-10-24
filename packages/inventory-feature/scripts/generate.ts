@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { descriptor, generateCSharp } from '@capsule/features/codegen';
+import { descriptor, generateCSharp } from '@capsule-sdk/features/codegen';
 import { items, inventory } from '../src/contracts';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const files = new Map([

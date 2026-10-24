@@ -8,13 +8,13 @@ import {
 } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { descriptor, generateCSharp } from '@capsule/features/codegen';
-import { contracts as rpg } from '@capsule/rpg-features/contracts';
-import { contracts as mmo } from '@capsule/mmo-features/contracts';
-import { contracts as skills } from '@capsule/skill-system-features/contracts';
-import { items, inventory } from '@capsule-example/inventory';
-import { compiler } from '@capsule/workshop/compiler';
-import { buildSdk } from '@capsule/react-tools/sdk';
+import { descriptor, generateCSharp } from '@capsule-sdk/features/codegen';
+import { contracts as rpg } from '@capsule-sdk/rpg-features/contracts';
+import { contracts as mmo } from '@capsule-sdk/mmo-features/contracts';
+import { contracts as skills } from '@capsule-sdk/skill-system-features/contracts';
+import { items, inventory } from '@capsule-sdk/example-inventory';
+import { compiler } from '@capsule-sdk/workshop/compiler';
+import { buildSdk } from '@capsule-sdk/react-tools/sdk';
 
 const definitions = [
   ...Object.values(rpg),
@@ -37,7 +37,8 @@ await buildSdk({ output: sdk });
 const fixture = dirname(
   await realpath(
     fileURLToPath(
-      import.meta.resolve('@capsule/react-tools/fixtures/native/addon.json'),
+      import.meta
+        .resolve('@capsule-sdk/react-tools/fixtures/native/addon.json'),
     ),
   ),
 );

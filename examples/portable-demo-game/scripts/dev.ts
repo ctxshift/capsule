@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { startWorkshop } from '@capsule/workshop';
+import { startWorkshop } from '@capsule-sdk/workshop';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const args = process.argv.slice(2);

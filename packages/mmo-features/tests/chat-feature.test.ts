@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
-import { chat, unavailableChat } from '@capsule/mmo-features/chat';
-import { createChatMock } from '@capsule/mmo-features/chat-mock';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
+import { chat, unavailableChat } from '@capsule-sdk/mmo-features/chat';
+import { createChatMock } from '@capsule-sdk/mmo-features/chat-mock';
 test('chat feature preserves long messages, session guards and acknowledgements without local echo', async () => {
   const mock = createChatMock({
     ...unavailableChat,

@@ -1,6 +1,6 @@
-import { BrowserGeneration } from '@capsule/workshop/browser';
-import { createBrowserTheme } from '@capsule/workshop/browser-theme';
-import { parseTheme, type FontMetrics } from '@capsule/workshop/theme';
+import { BrowserGeneration } from '@capsule-sdk/workshop/browser';
+import { createBrowserTheme } from '@capsule-sdk/workshop/browser-theme';
+import { parseTheme, type FontMetrics } from '@capsule-sdk/workshop/theme';
 import { StarshipGame } from './mock-game';
 
 const status = document.querySelector<HTMLOutputElement>('#status')!;

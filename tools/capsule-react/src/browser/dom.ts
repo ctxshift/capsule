@@ -1,1 +1,1 @@
-export * from '@capsule/workshop/dom';
+export * from '@capsule-sdk/workshop/dom';

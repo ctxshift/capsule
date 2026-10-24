@@ -1,6 +1,6 @@
-import { codec } from '@capsule/features/codec';
-import type { ProviderTransport } from '@capsule/features/runtime';
-import type { Value } from '@capsule/features';
+import { codec } from '@capsule-sdk/features/codec';
+import type { ProviderTransport } from '@capsule-sdk/features/runtime';
+import type { Value } from '@capsule-sdk/features';
 import { BagState, EquipBagItem, BagEquipResult } from './bag';
 import { EquipmentState, UnequipItem, UnequipResult } from './equipment';
 import { unavailableBag as UNAVAILABLE_INVENTORY_BAG } from './bag';

@@ -1,4 +1,4 @@
-import { defineFeature, s, type Value } from '@capsule/features';
+import { defineFeature, s, type Value } from '@capsule-sdk/features';
 
 export const CombatSlot = s.record('CombatSlot', {
   action: s.text(128),

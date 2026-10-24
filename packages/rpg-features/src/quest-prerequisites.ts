@@ -1,5 +1,5 @@
-import { s, type Value } from '@capsule/features';
-import { codec } from '@capsule/features/codec';
+import { s, type Value } from '@capsule-sdk/features';
+import { codec } from '@capsule-sdk/features/codec';
 
 // A flat expression graph supports shared subexpressions and native codegen
 // without recursive wire types. These are per-expression bounds, not catalog limits.

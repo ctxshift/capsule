@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { codec } from '@capsule/features/codec';
+import { codec } from '@capsule-sdk/features/codec';
 import { createDialogueMock } from '../src/dialogue-mock';
 import { DialogueIntent, DialogueResult } from '../src/dialogue';
 test('dialogue mock respects review and enabled actions', async () => {

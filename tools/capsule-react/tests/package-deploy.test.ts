@@ -9,8 +9,8 @@ import {
   symlink,
 } from 'node:fs/promises';
 import { join } from 'node:path';
-import { compiler } from '@capsule/workshop/compiler';
-import { deployPackage } from '@capsule/workshop/deploy';
+import { compiler } from '@capsule-sdk/workshop/compiler';
+import { deployPackage } from '@capsule-sdk/workshop/deploy';
 import { repositoryPath, localRoot } from '../scripts/paths.mjs';
 
 test('shared compiler rejects invalid themes before publication and deployment preserves the Player', async () => {

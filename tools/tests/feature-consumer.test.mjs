@@ -69,19 +69,19 @@ test(
         join(consumer, 'main.ts'),
         `
 import assert from 'node:assert/strict';
-import { descriptor, generateCSharp } from '@capsule/features/codegen';
-import { contracts as rpg } from '@capsule/rpg-features/contracts';
-import { contracts as mmo } from '@capsule/mmo-features/contracts';
-import { contracts as skills } from '@capsule/skill-system-features/contracts';
-import { items, inventory } from '@capsule-example/inventory';
+import { descriptor, generateCSharp } from '@capsule-sdk/features/codegen';
+import { contracts as rpg } from '@capsule-sdk/rpg-features/contracts';
+import { contracts as mmo } from '@capsule-sdk/mmo-features/contracts';
+import { contracts as skills } from '@capsule-sdk/skill-system-features/contracts';
+import { items, inventory } from '@capsule-sdk/example-inventory';
 import React from 'react';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { chat } from '@capsule/mmo-features/chat';
-import { createChatMock } from '@capsule/mmo-features/chat-mock';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { chat } from '@capsule-sdk/mmo-features/chat';
+import { createChatMock } from '@capsule-sdk/mmo-features/chat-mock';
 const definitions = [...Object.values(rpg), ...Object.values(mmo), ...Object.values(skills), items, inventory];
 assert.equal(definitions.length, 16);
 for (const feature of definitions) assert.match(descriptor(feature).fingerprint, /^[a-f0-9]{64}$/);
-assert(import.meta.resolve('@capsule-example/inventory/view').endsWith('view.tsx'));
+assert(import.meta.resolve('@capsule-sdk/example-inventory/view').endsWith('view.tsx'));
 assert.equal(React.version, '18.3.1');
 assert(generateCSharp('Consumer.Contracts', rpg).includes('namespace Consumer.Contracts'));
 const registry = new FeatureRegistry();

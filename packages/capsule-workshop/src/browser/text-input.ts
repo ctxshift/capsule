@@ -3,7 +3,7 @@ import {
   validateTextInput,
   type TextEdit,
   type TextInputOptions,
-} from '@capsule/react/text-edit';
+} from '@capsule-sdk/react/text-edit';
 import type { UiNode } from './packet';
 
 export function bindTextInput(

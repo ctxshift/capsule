@@ -33,8 +33,8 @@ bun run dev:demo
 ```
 
 The last command starts the neutral Aster browser preview and watched workshop.
-It does not start an engine host. UI projects use public `@capsule/react`,
-`@capsule/features` and `@capsule/workshop` exports. The compiler CLI accepts
+It does not start an engine host. UI projects use public `@capsule-sdk/react`,
+`@capsule-sdk/features` and `@capsule-sdk/workshop` exports. The compiler CLI accepts
 explicit source/project/manifest/output paths; see the
 [counter example](examples/addons/capsule-counter/README.md).
 Packed authoring and engine candidates use the [release workflow](docs/releases.md).

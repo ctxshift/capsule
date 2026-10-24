@@ -1,13 +1,13 @@
 import {
   validateTextInput,
   type TextInputOptions,
-} from '@capsule/react/text-edit';
+} from '@capsule-sdk/react/text-edit';
 import {
   anchorValues,
   effectValues,
   type WorldAnchorOptions,
   type PresentationEffectOptions,
-} from '@capsule/react/presentation';
+} from '@capsule-sdk/react/presentation';
 export interface UiNode {
   worldAnchor?: WorldAnchorOptions;
   effect?: PresentationEffectOptions;

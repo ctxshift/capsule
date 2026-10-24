@@ -41,7 +41,7 @@ export function validateThemeReferences(program, theme, root) {
     for (const statement of file.statements) {
       if (
         !ts.isImportDeclaration(statement) ||
-        !['@capsule/react', '@portable-ui/react'].includes(
+        !['@capsule-sdk/react', '@portable-ui/react'].includes(
           statement.moduleSpecifier.text,
         )
       )

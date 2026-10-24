@@ -170,27 +170,32 @@ export function compiler({
   const shim = {
     name: 'host-imports',
     setup(builder) {
-      builder.onResolve({ filter: /^@capsule\/react(?:\/.*)?$/ }, (args) => {
-        const entries = {
-          '@capsule/react': capsuleEntry,
-          '@capsule/react/panel': resolve(capsuleSourceRoot, 'panel.tsx'),
-          '@capsule/react/scroll-list': resolve(
-            capsuleSourceRoot,
-            'scroll-list.tsx',
-          ),
-          '@capsule/react/components': resolve(
-            capsuleSourceRoot,
-            'components.tsx',
-          ),
-          '@capsule/react/window-state': resolve(
-            capsuleSourceRoot,
-            'window-state.ts',
-          ),
-        };
-        return entries[args.path]
-          ? { path: entries[args.path] }
-          : { errors: [{ text: 'Unknown Capsule SDK export: ' + args.path }] };
-      });
+      builder.onResolve(
+        { filter: /^@capsule-sdk\/react(?:\/.*)?$/ },
+        (args) => {
+          const entries = {
+            '@capsule-sdk/react': capsuleEntry,
+            '@capsule-sdk/react/panel': resolve(capsuleSourceRoot, 'panel.tsx'),
+            '@capsule-sdk/react/scroll-list': resolve(
+              capsuleSourceRoot,
+              'scroll-list.tsx',
+            ),
+            '@capsule-sdk/react/components': resolve(
+              capsuleSourceRoot,
+              'components.tsx',
+            ),
+            '@capsule-sdk/react/window-state': resolve(
+              capsuleSourceRoot,
+              'window-state.ts',
+            ),
+          };
+          return entries[args.path]
+            ? { path: entries[args.path] }
+            : {
+                errors: [{ text: 'Unknown Capsule SDK export: ' + args.path }],
+              };
+        },
+      );
       builder.onResolve(
         { filter: /^(react|@portable-ui\/react)$/ },
         (args) => ({ path: args.path, namespace: 'host' }),
@@ -266,15 +271,15 @@ export function compiler({
         typeRoots: [dirname(dirname(reactTypes))],
         paths: {
           react: [reactTypes],
-          '@capsule/react': [capsuleEntry],
-          '@capsule/react/panel': [resolve(capsuleSourceRoot, 'panel.tsx')],
-          '@capsule/react/scroll-list': [
+          '@capsule-sdk/react': [capsuleEntry],
+          '@capsule-sdk/react/panel': [resolve(capsuleSourceRoot, 'panel.tsx')],
+          '@capsule-sdk/react/scroll-list': [
             resolve(capsuleSourceRoot, 'scroll-list.tsx'),
           ],
-          '@capsule/react/components': [
+          '@capsule-sdk/react/components': [
             resolve(capsuleSourceRoot, 'components.tsx'),
           ],
-          '@capsule/react/window-state': [
+          '@capsule-sdk/react/window-state': [
             resolve(capsuleSourceRoot, 'window-state.ts'),
           ],
         },

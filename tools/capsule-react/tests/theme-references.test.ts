@@ -30,7 +30,7 @@ function check(source: string) {
 test('rejects missing style with source location and component alias', () => {
   expect(
     check(
-      `import { Box as Panel } from '@capsule/react'; const v=<Panel style="design-slider-control"/>;`,
+      `import { Box as Panel } from '@capsule-sdk/react'; const v=<Panel style="design-slider-control"/>;`,
     ),
   ).toThrow(
     /main.tsx:1:.*Undeclared theme style "design-slider-control" on Panel/,
@@ -39,19 +39,19 @@ test('rejects missing style with source location and component alias', () => {
 test('checks both conditional branches and namespace image imports', () => {
   expect(
     check(
-      `import * as UI from '@capsule/react'; const v=<UI.Image asset={true ? 'crystal' : 'missing'}/>;`,
+      `import * as UI from '@capsule-sdk/react'; const v=<UI.Image asset={true ? 'crystal' : 'missing'}/>;`,
     ),
   ).toThrow('Undeclared theme asset "missing"');
 });
 test('accepts theme component defaults and finite literal union keys', () => {
   expect(
     check(
-      `import { Box, Button } from '@capsule/react'; declare const key: 'panel' | 'label'; const v=<><Box style={key}/><Button style="game-button"/></>;`,
+      `import { Box, Button } from '@capsule-sdk/react'; declare const key: 'panel' | 'label'; const v=<><Box style={key}/><Button style="game-button"/></>;`,
     ),
   ).not.toThrow();
   expect(
     check(
-      `import { Box } from '@capsule/react'; declare const key: 'panel' | 'missing'; const v=<Box style={key}/>;`,
+      `import { Box } from '@capsule-sdk/react'; declare const key: 'panel' | 'missing'; const v=<Box style={key}/>;`,
     ),
   ).toThrow('Undeclared theme style "missing"');
 });
@@ -63,7 +63,7 @@ test('does not interpret custom component props or arbitrary runtime strings as 
   ).not.toThrow();
   expect(
     check(
-      `import { Box } from '@capsule/react'; declare const runtime: string; const v=<Box style={runtime}/>;`,
+      `import { Box } from '@capsule-sdk/react'; declare const runtime: string; const v=<Box style={runtime}/>;`,
     ),
   ).not.toThrow();
 });

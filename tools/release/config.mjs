@@ -1,5 +1,6 @@
 export const release = {
   version: '0.1.0',
+  npmScope: '@capsule-sdk',
   repository: 'https://github.com/ctxshift/capsule',
   tools: { node: '25.6.1', bun: '1.3.6', dotnet: '10.0.401' },
   runtime: {

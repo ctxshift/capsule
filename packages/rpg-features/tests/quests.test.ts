@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { codec } from '@capsule/features/codec';
+import { codec } from '@capsule-sdk/features/codec';
 import { QuestState, unavailableQuests, quests } from '../src/quests';
 import { createQuestMock } from '../src/quests-mock';
 

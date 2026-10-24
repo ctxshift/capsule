@@ -1,1 +1,1 @@
-export * from '@capsule/workshop/raster';
+export * from '@capsule-sdk/workshop/raster';

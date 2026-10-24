@@ -4,8 +4,14 @@ import React, {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { Box, Image, Text, Button, type PointerEvent } from '@capsule/react';
-import type { FeatureConnection } from '@capsule/features/runtime';
+import {
+  Box,
+  Image,
+  Text,
+  Button,
+  type PointerEvent,
+} from '@capsule-sdk/react';
+import type { FeatureConnection } from '@capsule-sdk/features/runtime';
 import { inventory, items } from './contracts';
 
 export type InventoryConnection = FeatureConnection<typeof inventory>;

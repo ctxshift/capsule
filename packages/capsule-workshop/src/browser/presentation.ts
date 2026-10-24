@@ -1,7 +1,7 @@
 import type {
   WorldAnchorOptions,
   PresentationEffectOptions,
-} from '@capsule/react/presentation';
+} from '@capsule-sdk/react/presentation';
 import type { UiNode } from './packet';
 
 export interface WorldProjection {

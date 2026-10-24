@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Text, render } from '@capsule/react';
+import { Box, Button, Text, render } from '@capsule-sdk/react';
 
 function Counter() {
   const [count, setCount] = useState(0);

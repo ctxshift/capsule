@@ -1,4 +1,4 @@
-import { defineFeature, s, type Value } from '@capsule/features';
+import { defineFeature, s, type Value } from '@capsule-sdk/features';
 export const ChatMessage = s.record('ChatMessage', {
   id: s.text(24),
   channel: s.text(16),

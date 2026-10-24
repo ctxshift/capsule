@@ -120,8 +120,7 @@ export function verifyArchives(root, manifest, work) {
       checkExport(pkg.exports);
       for (const [name, version] of Object.entries(pkg.dependencies ?? {})) {
         if (
-          (name.startsWith('@capsule/') ||
-            name.startsWith('@capsule-example/')) &&
+          name.startsWith(release.npmScope + '/') &&
           npmNames.get(name) !== version
         )
           throw Error('Unresolved npm package closure');

@@ -8,8 +8,8 @@
     "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.browser.json && tsc -p tsconfig.tools.json"
   },
   "dependencies": {
-    "@capsule/react": "workspace:*",
-    "@capsule/workshop": "workspace:*",
+    "@capsule-sdk/react": "workspace:*",
+    "@capsule-sdk/workshop": "workspace:*",
     "react": "18.3.1"
   },
   "devDependencies": {

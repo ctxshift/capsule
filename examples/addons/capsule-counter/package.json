@@ -1,9 +1,9 @@
 {
-  "name": "@capsule-examples/counter",
+  "name": "@capsule-sdk/example-counter",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@capsule/react": "workspace:*",
+    "@capsule-sdk/react": "workspace:*",
     "react": "18.3.1"
   },
   "devDependencies": {

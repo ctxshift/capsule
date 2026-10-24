@@ -1,6 +1,6 @@
-import { codec } from '@capsule/features/codec';
-import type { Value } from '@capsule/features';
-import type { ProviderTransport } from '@capsule/features/runtime';
+import { codec } from '@capsule-sdk/features/codec';
+import type { Value } from '@capsule-sdk/features';
+import type { ProviderTransport } from '@capsule-sdk/features/runtime';
 import { DialogueState, DialogueIntent, DialogueResult } from './dialogue';
 export function createDialogueMock(
   initial: Value<typeof DialogueState> = {

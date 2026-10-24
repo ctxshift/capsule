@@ -3,8 +3,8 @@ import {
   FeatureRegistry,
   matchesVersion,
   type ProviderTransport,
-} from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
+} from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
 import {
   inventory,
   items,

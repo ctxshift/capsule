@@ -1,5 +1,5 @@
 import { ItemKind } from './items';
-import { defineFeature, s, type Value } from '@capsule/features';
+import { defineFeature, s, type Value } from '@capsule-sdk/features';
 export const MerchantOffer = s.record('MerchantOffer', {
   id: s.text(16),
   kind: ItemKind,

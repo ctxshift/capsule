@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Text, render, useObservation } from '@capsule/react';
+import { Box, Button, Text, render, useObservation } from '@capsule-sdk/react';
 
 function decodeCharge(bytes: Uint8Array): number {
   if (bytes.length !== 2) throw Error('Invalid reactor observation');

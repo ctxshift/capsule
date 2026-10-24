@@ -1,13 +1,13 @@
 # Capsule React SDK
 
-`@capsule/react` is the versioned, game-independent authoring package. It has no
+`@capsule-sdk/react` is the versioned, game-independent authoring package. It has no
 game theme, artwork or gameplay dependencies. This is an unpublished workspace package;
 it is not yet published to a registry.
 
-- `@capsule/react`: declarative primitives, render and observation hooks.
-- `@capsule/react/components`: theme-driven composed controls.
-- `@capsule/react/window-state`: bounded window placement/state helpers.
-- `@capsule/react/scroll-list`: controlled fixed-row scrolling and keyboard offset helpers.
+- `@capsule-sdk/react`: declarative primitives, render and observation hooks.
+- `@capsule-sdk/react/components`: theme-driven composed controls.
+- `@capsule-sdk/react/window-state`: bounded window placement/state helpers.
+- `@capsule-sdk/react/scroll-list`: controlled fixed-row scrolling and keyboard offset helpers.
 
 `ScrollList` takes row IDs, a row renderer, viewport/row dimensions, an offset and
 callbacks. It mounts only visible rows, preserves keyed rows while they remain

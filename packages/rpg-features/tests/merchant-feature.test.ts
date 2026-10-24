@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
-import { merchant, closedMerchant } from '@capsule/rpg-features/merchant';
-import { createMerchantMock } from '@capsule/rpg-features/merchant-mock';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
+import { merchant, closedMerchant } from '@capsule-sdk/rpg-features/merchant';
+import { createMerchantMock } from '@capsule-sdk/rpg-features/merchant-mock';
 test('merchant requests carry observation identity without calculating local prices', async () => {
   const calls: number[][] = [];
   const mock = createMerchantMock(

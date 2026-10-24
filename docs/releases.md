@@ -22,6 +22,13 @@ still restore through their existing build-time package references. Engine users
 receive the required libraries inside their bundle. Godot and Unreal plugins are
 future work; a runtime ZIP is not a substitute for an adapter.
 
+The owned npm namespace is `@capsule-sdk`: `features`, `react`, `react-tools`,
+`workshop`, `rpg-features`, `mmo-features` and `skill-system-features` use that scope.
+The neutral example package is `@capsule-sdk/example-inventory`. Its runtime
+feature IDs remain `@capsule-example/items` and `@capsule-example/inventory`;
+these protocol identifiers are not npm package addresses. Native assembly names,
+UPM package names, feature fingerprints and wire formats remain unchanged.
+
 The CLI should support project initialization, starting the development server
 and scaffolding addons/components/features. Editor setup should reuse these
 implementations. Installing the CLI is not a prerequisite for adding an engine

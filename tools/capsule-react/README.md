@@ -1,7 +1,7 @@
 # Capsule React SDK tools
 
 Build and test the reusable native React renderer. The public compiler and browser
-renderer belong to [@capsule/workshop](../../packages/capsule-workshop/README.md).
+renderer belong to [@capsule-sdk/workshop](../../packages/capsule-workshop/README.md).
 See [UI development](../../docs/ui-development.md) for the running-game workflow
 and the remaining engine demonstration gate.
 

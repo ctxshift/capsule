@@ -1,5 +1,5 @@
-import { s, type Value } from '@capsule/features';
-import { codec } from '@capsule/features/codec';
+import { s, type Value } from '@capsule-sdk/features';
+import { codec } from '@capsule-sdk/features/codec';
 import {
   QuestPrerequisites,
   compileQuestPrerequisites,

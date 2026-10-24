@@ -20,8 +20,8 @@ import { availablePort } from './available-port';
 test('fictional host previews and reloads outside the source checkout', async () => {
   const root = await mkdtemp(join(tmpdir(), 'capsule-workshop-'));
   const packages = new Map([
-    ['@capsule/react', 'packages/capsule-react'],
-    ['@capsule/workshop', 'packages/capsule-workshop'],
+    ['@capsule-sdk/react', 'packages/capsule-react'],
+    ['@capsule-sdk/workshop', 'packages/capsule-workshop'],
     ['portable-demo-game', 'examples/portable-demo-game'],
   ]);
   try {
@@ -49,10 +49,12 @@ test('fictional host previews and reloads outside the source checkout', async ()
         await symlink(target, link, 'junction');
       }
     }
-    await mkdir(join(root, 'node_modules', '@capsule'), { recursive: true });
+    await mkdir(join(root, 'node_modules', '@capsule-sdk'), {
+      recursive: true,
+    });
     await symlink(
       join(root, 'capsule-workshop'),
-      join(root, 'node_modules', '@capsule', 'workshop'),
+      join(root, 'node_modules', '@capsule-sdk', 'workshop'),
       'junction',
     );
     // The fixture receives the same generic runtime artifact a host would ship.
@@ -60,7 +62,7 @@ test('fictional host previews and reloads outside the source checkout', async ()
     await writeFile(
       join(root, 'verify.ts'),
       `
-import {startWorkshop} from '@capsule/workshop';
+import {startWorkshop} from '@capsule-sdk/workshop';
 import {readFile,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {resolve} from 'node:path';

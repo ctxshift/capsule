@@ -1,4 +1,4 @@
-import { defineFeature, s, type Value } from '@capsule/features';
+import { defineFeature, s, type Value } from '@capsule-sdk/features';
 
 export const SkillRequirement = s.record('SkillRequirement', {
   id: s.text(128),

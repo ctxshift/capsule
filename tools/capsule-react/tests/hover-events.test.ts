@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 import { createContext, runInContext } from 'node:vm';
 import { expect, test } from 'vitest';
-import { applyPacket, input, type UiNode } from '@capsule/workshop/packet';
+import { applyPacket, input, type UiNode } from '@capsule-sdk/workshop/packet';
 import { repositoryPath } from '../scripts/paths.mjs';
 
 test('hover changes preserve legacy enter-only callbacks and validate leave payloads', async () => {

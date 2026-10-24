@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "policy": "Extraction preserves package/feature identities, descriptor bytes, canonical native content and native GUIDs. Integration-owned behavior and source history are excluded.",
+  "policy": "Extraction preserves feature identities, descriptor bytes, canonical native content and native GUIDs. npm package names use the owned distribution namespace. Integration-owned behavior and source history are excluded.",
   "packages": [
     {
-      "name": "@capsule/rpg-features",
+      "name": "@capsule-sdk/rpg-features",
       "version": "0.1.0",
       "descriptors": "packages/rpg-features/generated/features.json",
       "descriptorSha256": "52a2ffde1ce7bca3809cecf295dbc715b0cb3d57120f161b595c7e245fdedd1f",
@@ -67,7 +67,7 @@
       "generatedMetaCanonicalSha256": "86673475abc748d14a6b80eefc855346a0105ea21818d4a66da9d50a135a475b"
     },
     {
-      "name": "@capsule/mmo-features",
+      "name": "@capsule-sdk/mmo-features",
       "version": "0.1.0",
       "descriptors": "packages/mmo-features/generated/features.json",
       "descriptorSha256": "e40bb222a4db03398918731b701f7295b4c1ec9499cf60b48abc2408d255a2bf",
@@ -91,7 +91,7 @@
       "generatedMetaCanonicalSha256": "846f44dadb4342110637b833bb115e053d430e069d1941bd949a32f2b57c6f3e"
     },
     {
-      "name": "@capsule/skill-system-features",
+      "name": "@capsule-sdk/skill-system-features",
       "version": "0.1.0",
       "descriptors": "packages/skill-system-features/generated/features.json",
       "descriptorSha256": "589ff0e235488d24f135b3add6c13cd62b807026cf076fea5db6322a530437c6",
@@ -123,10 +123,17 @@
     "name": "@capsule-example/inventory",
     "nativeSource": "packages/inventory-feature/generated/InventoryFeature.Generated.cs",
     "descriptorSha256": "89bf44cf1a3ca774af22cd90ec04ed128a676d3544f156565dca2c0a9864e838",
-    "canonicalNativeSha256": "bdda93a6ca389cd87123509a8c00f8dcec775e7b189e288daa0ce4bb0b478023"
+    "canonicalNativeSha256": "bdda93a6ca389cd87123509a8c00f8dcec775e7b189e288daa0ce4bb0b478023",
+    "npmPackage": "@capsule-sdk/example-inventory"
   },
   "sharedQuestSchema": {
     "path": "packages/rpg-features/generated/quest-prerequisites.json",
     "sha256": "b98b6bea910c053459297cc99803e46cf994d9c9c838924905a7113a13a99ae2"
+  },
+  "npmNamespaceMigration": {
+    "previousScope": "@capsule",
+    "scope": "@capsule-sdk",
+    "examplePackage": "@capsule-sdk/example-inventory",
+    "featureIdentities": "unchanged"
   }
 }

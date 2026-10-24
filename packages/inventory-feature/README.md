@@ -1,5 +1,8 @@
 # Example inventory feature
 
+Install/import the npm package as `@capsule-sdk/example-inventory`. The runtime
+feature names below are protocol identities, independent of the npm namespace.
+
 This example defines two versioned contracts:
 `@capsule-example/items@1.0.0` describes items, and
 `@capsule-example/inventory@1.2.5` publishes inventory state and accepts

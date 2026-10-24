@@ -1,7 +1,7 @@
 import { createContext, runInContext } from 'node:vm';
 import { expect, test } from 'vitest';
 import { scriptChunks } from '../../../packages/capsule-workshop/src/script-chunks.mjs';
-import { compiler } from '@capsule/workshop/compiler';
+import { compiler } from '@capsule-sdk/workshop/compiler';
 import { mkdtemp, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';

@@ -35,10 +35,10 @@ test('SDK builds with identical output outside the game checkout', async () => {
     }
     // Reuse installed dependencies only; no host paths/configuration are copied.
     await mkdir(join(isolated, 'node_modules'));
-    await mkdir(join(isolated, 'node_modules', '@capsule'));
+    await mkdir(join(isolated, 'node_modules', '@capsule-sdk'));
     await symlink(
-      dirname(dirname(require.resolve('@capsule/react'))),
-      join(isolated, 'node_modules', '@capsule', 'react'),
+      dirname(dirname(require.resolve('@capsule-sdk/react'))),
+      join(isolated, 'node_modules', '@capsule-sdk', 'react'),
       'junction',
     );
     for (const name of ['esbuild', 'react', 'react-reconciler', 'scheduler']) {

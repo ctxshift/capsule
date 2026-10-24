@@ -1,5 +1,5 @@
-import { defineFeature, s, type Value } from '@capsule/features';
-import { codec } from '@capsule/features/codec';
+import { defineFeature, s, type Value } from '@capsule-sdk/features';
+import { codec } from '@capsule-sdk/features/codec';
 
 export const Item = s.record('Item', {
   id: s.text(128),

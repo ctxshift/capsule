@@ -1,3 +1,3 @@
 declare module '@portable-ui/react' {
-  export * from '@capsule/react';
+  export * from '@capsule-sdk/react';
 }

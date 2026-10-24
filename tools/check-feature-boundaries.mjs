@@ -3,9 +3,13 @@ import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 for (const [name, namespace, allowed] of [
-  ['rpg-features', 'rpg', ['@capsule/features']],
-  ['skill-system-features', 'skill-system', ['@capsule/features']],
-  ['mmo-features', 'mmo', ['@capsule/features', '@capsule/rpg-features']],
+  ['rpg-features', 'rpg', ['@capsule-sdk/features']],
+  ['skill-system-features', 'skill-system', ['@capsule-sdk/features']],
+  [
+    'mmo-features',
+    'mmo',
+    ['@capsule-sdk/features', '@capsule-sdk/rpg-features'],
+  ],
 ]) {
   const base = resolve(root, 'packages', name),
     source = resolve(base, 'src'),

@@ -1,5 +1,5 @@
 import { ItemKind } from './items';
-import { defineFeature, s } from '@capsule/features';
+import { defineFeature, s } from '@capsule-sdk/features';
 export const EquippedItem = s.record('EquippedItem', {
   slot: s.text(16),
   kind: ItemKind,

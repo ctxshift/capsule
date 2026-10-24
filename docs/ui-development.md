@@ -38,7 +38,7 @@ bun run dev:demo
 ```
 
 The neutral Aster example supplies a React UI, browser preview and workshop
-configuration. `startWorkshop` from `@capsule/workshop` takes explicit source,
+configuration. `startWorkshop` from `@capsule-sdk/workshop` takes explicit source,
 output, addon/browser roots, theme and SDK paths; `watchRoots` adds linked source
 dependencies. The browser preview is useful for authoring, but does not prove
 that an engine host consumes a changed publication.

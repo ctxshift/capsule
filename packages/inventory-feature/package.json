@@ -1,5 +1,5 @@
 {
-  "name": "@capsule-example/inventory",
+  "name": "@capsule-sdk/example-inventory",
   "version": "1.2.5",
   "private": true,
   "type": "module",
@@ -15,8 +15,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@capsule/features": "workspace:*",
-    "@capsule/react": "workspace:*"
+    "@capsule-sdk/features": "workspace:*",
+    "@capsule-sdk/react": "workspace:*"
   },
   "peerDependencies": {
     "react": "18.3.1"

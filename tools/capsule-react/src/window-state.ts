@@ -1,1 +1,1 @@
-export * from '@capsule/react/window-state';
+export * from '@capsule-sdk/react/window-state';

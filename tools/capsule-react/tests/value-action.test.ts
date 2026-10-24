@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 import { createContext, runInContext } from 'node:vm';
 import { expect, test } from 'vitest';
-import { applyPacket, input, type UiNode } from '@capsule/workshop/packet';
+import { applyPacket, input, type UiNode } from '@capsule-sdk/workshop/packet';
 import { repositoryPath } from '../scripts/paths.mjs';
 
 test('range and select value callbacks carry the original control request handle', async () => {

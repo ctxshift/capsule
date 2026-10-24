@@ -1,6 +1,6 @@
-import { observe, requestReadOnly } from '@capsule/react';
-import { createAddonFeatures } from '@capsule/features/addon';
-import { defineFeature, s } from '@capsule/features';
+import { observe, requestReadOnly } from '@capsule-sdk/react';
+import { createAddonFeatures } from '@capsule-sdk/features/addon';
+import { defineFeature, s } from '@capsule-sdk/features';
 
 const feature = defineFeature({
   name: '@example/recovery',

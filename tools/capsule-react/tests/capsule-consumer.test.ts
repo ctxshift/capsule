@@ -2,7 +2,7 @@ import { test, expect } from 'vitest';
 import { mkdtemp, mkdir, readFile, writeFile, cp } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
-import { compiler } from '@capsule/workshop/compiler';
+import { compiler } from '@capsule-sdk/workshop/compiler';
 import { buildSdk } from '../scripts/build.mjs';
 import { repositoryPath, localRoot } from '../scripts/paths.mjs';
 import { applyPacket, type UiNode } from '../src/browser/packet';

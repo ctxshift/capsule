@@ -44,6 +44,6 @@
     "globals": "17.13.0",
     "prettier": "3.9.10",
     "typescript-eslint": "8.71.2",
-    "@capsule/workshop": "workspace:*"
+    "@capsule-sdk/workshop": "workspace:*"
   }
 }

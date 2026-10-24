@@ -1,12 +1,12 @@
 import { expect, test } from 'vitest';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
-import { bag } from '@capsule/rpg-features/bag';
-import { equipment } from '@capsule/rpg-features/equipment';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
+import { bag } from '@capsule-sdk/rpg-features/bag';
+import { equipment } from '@capsule-sdk/rpg-features/equipment';
 import {
   createBagMock,
   createEquipmentMock,
-} from '@capsule/rpg-features/equipment-mock';
+} from '@capsule-sdk/rpg-features/equipment-mock';
 import { unavailableBag as UNAVAILABLE_INVENTORY_BAG } from '../src/bag';
 import { unavailableEquipment as UNAVAILABLE_CHARACTER } from '../src/equipment';
 test('bag and equipment fixtures require current owner state and do not mutate on acceptance', async () => {

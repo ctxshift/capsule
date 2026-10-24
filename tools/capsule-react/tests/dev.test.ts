@@ -1,5 +1,5 @@
 import { test } from 'vitest';
-import { compiler } from '@capsule/workshop/compiler';
+import { compiler } from '@capsule-sdk/workshop/compiler';
 import * as fs from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 test('owned atomic TSX publication and shared-root hot reload', async () => {
@@ -11,7 +11,7 @@ test('owned atomic TSX publication and shared-root hot reload', async () => {
   const source = join(root, 'source', 'app.tsx'),
     output = join(root, 'published');
   const valid =
-    "import React from 'react';import {Box,Text,render} from '@capsule/react';render(<Box width={100} height={100}><Text width={100} height={20}>A</Text></Box>);";
+    "import React from 'react';import {Box,Text,render} from '@capsule-sdk/react';render(<Box width={100} height={100}><Text width={100} height={20}>A</Text></Box>);";
   const check = (condition: unknown, name: string) => {
     if (!condition) throw Error(name);
   };

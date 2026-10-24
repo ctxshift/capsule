@@ -38,6 +38,8 @@ export function packNpm(source, output, work, revision) {
   for (const plan of release.npm) {
     const original = readJson(join(source, plan.path, 'package.json'));
     validateSource(original);
+    if (!original.name.startsWith(release.npmScope + '/'))
+      throw Error('Package is outside the owned npm scope');
     const stage = join(work, original.name.replaceAll(/[@/]/g, '-'));
     mkdirSync(stage, { recursive: true });
     for (const file of plan.files)
@@ -48,6 +50,10 @@ export function packNpm(source, output, work, revision) {
       version: original.version,
       ...(original.type ? { type: original.type } : {}),
       license: 'Apache-2.0',
+      publishConfig: {
+        access: 'public',
+        registry: 'https://registry.npmjs.org/',
+      },
       repository: {
         type: 'git',
         url: release.repository + '.git',

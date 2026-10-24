@@ -5,43 +5,43 @@
     "": {
       "name": "capsule-release-consumer",
       "dependencies": {
-        "@capsule-example/inventory": "file:../npm/capsule-example-inventory-1.2.5.tgz",
-        "@capsule/features": "file:../npm/capsule-features-0.1.0.tgz",
-        "@capsule/mmo-features": "file:../npm/capsule-mmo-features-0.1.0.tgz",
-        "@capsule/react": "file:../npm/capsule-react-0.1.0.tgz",
-        "@capsule/react-tools": "file:../npm/capsule-react-tools-0.1.0.tgz",
-        "@capsule/rpg-features": "file:../npm/capsule-rpg-features-0.1.0.tgz",
-        "@capsule/skill-system-features": "file:../npm/capsule-skill-system-features-0.1.0.tgz",
-        "@capsule/workshop": "file:../npm/capsule-workshop-0.1.0.tgz",
+        "@capsule-sdk/example-inventory": "file:../npm/capsule-sdk-example-inventory-1.2.5.tgz",
+        "@capsule-sdk/features": "file:../npm/capsule-sdk-features-0.1.0.tgz",
+        "@capsule-sdk/mmo-features": "file:../npm/capsule-sdk-mmo-features-0.1.0.tgz",
+        "@capsule-sdk/react": "file:../npm/capsule-sdk-react-0.1.0.tgz",
+        "@capsule-sdk/react-tools": "file:../npm/capsule-sdk-react-tools-0.1.0.tgz",
+        "@capsule-sdk/rpg-features": "file:../npm/capsule-sdk-rpg-features-0.1.0.tgz",
+        "@capsule-sdk/skill-system-features": "file:../npm/capsule-sdk-skill-system-features-0.1.0.tgz",
+        "@capsule-sdk/workshop": "file:../npm/capsule-sdk-workshop-0.1.0.tgz",
       },
     },
   },
   "overrides": {
-    "@capsule-example/inventory": "file:../npm/capsule-example-inventory-1.2.5.tgz",
-    "@capsule/features": "file:../npm/capsule-features-0.1.0.tgz",
-    "@capsule/mmo-features": "file:../npm/capsule-mmo-features-0.1.0.tgz",
-    "@capsule/react": "file:../npm/capsule-react-0.1.0.tgz",
-    "@capsule/react-tools": "file:../npm/capsule-react-tools-0.1.0.tgz",
-    "@capsule/rpg-features": "file:../npm/capsule-rpg-features-0.1.0.tgz",
-    "@capsule/skill-system-features": "file:../npm/capsule-skill-system-features-0.1.0.tgz",
-    "@capsule/workshop": "file:../npm/capsule-workshop-0.1.0.tgz",
+    "@capsule-sdk/example-inventory": "file:../npm/capsule-sdk-example-inventory-1.2.5.tgz",
+    "@capsule-sdk/features": "file:../npm/capsule-sdk-features-0.1.0.tgz",
+    "@capsule-sdk/mmo-features": "file:../npm/capsule-sdk-mmo-features-0.1.0.tgz",
+    "@capsule-sdk/react": "file:../npm/capsule-sdk-react-0.1.0.tgz",
+    "@capsule-sdk/react-tools": "file:../npm/capsule-sdk-react-tools-0.1.0.tgz",
+    "@capsule-sdk/rpg-features": "file:../npm/capsule-sdk-rpg-features-0.1.0.tgz",
+    "@capsule-sdk/skill-system-features": "file:../npm/capsule-sdk-skill-system-features-0.1.0.tgz",
+    "@capsule-sdk/workshop": "file:../npm/capsule-sdk-workshop-0.1.0.tgz",
   },
   "packages": {
-    "@capsule-example/inventory": ["@capsule-example/inventory@../npm/capsule-example-inventory-1.2.5.tgz", { "dependencies": { "@capsule/features": "0.1.0", "@capsule/react": "0.1.0" }, "peerDependencies": { "react": "18.3.1" } }],
+    "@capsule-sdk/example-inventory": ["@capsule-sdk/example-inventory@../npm/capsule-sdk-example-inventory-1.2.5.tgz", { "dependencies": { "@capsule-sdk/features": "0.1.0", "@capsule-sdk/react": "0.1.0" }, "peerDependencies": { "react": "18.3.1" } }],
 
-    "@capsule/features": ["@capsule/features@../npm/capsule-features-0.1.0.tgz", { "dependencies": { "@types/node": "25.0.3" } }],
+    "@capsule-sdk/features": ["@capsule-sdk/features@../npm/capsule-sdk-features-0.1.0.tgz", { "dependencies": { "@types/node": "25.0.3" } }],
 
-    "@capsule/mmo-features": ["@capsule/mmo-features@../npm/capsule-mmo-features-0.1.0.tgz", { "dependencies": { "@capsule/features": "0.1.0", "@capsule/rpg-features": "0.1.0" } }],
+    "@capsule-sdk/mmo-features": ["@capsule-sdk/mmo-features@../npm/capsule-sdk-mmo-features-0.1.0.tgz", { "dependencies": { "@capsule-sdk/features": "0.1.0", "@capsule-sdk/rpg-features": "0.1.0" } }],
 
-    "@capsule/react": ["@capsule/react@../npm/capsule-react-0.1.0.tgz", { "dependencies": { "@types/react": "18.3.27" }, "peerDependencies": { "react": "18.3.1" } }],
+    "@capsule-sdk/react": ["@capsule-sdk/react@../npm/capsule-sdk-react-0.1.0.tgz", { "dependencies": { "@types/react": "18.3.27" }, "peerDependencies": { "react": "18.3.1" } }],
 
-    "@capsule/react-tools": ["@capsule/react-tools@../npm/capsule-react-tools-0.1.0.tgz", { "dependencies": { "@capsule/features": "0.1.0", "@capsule/react": "0.1.0", "@capsule/workshop": "0.1.0", "esbuild": "0.25.12", "react": "18.3.1", "react-reconciler": "0.29.2", "scheduler": "0.23.2" } }],
+    "@capsule-sdk/react-tools": ["@capsule-sdk/react-tools@../npm/capsule-sdk-react-tools-0.1.0.tgz", { "dependencies": { "@capsule-sdk/features": "0.1.0", "@capsule-sdk/react": "0.1.0", "@capsule-sdk/workshop": "0.1.0", "esbuild": "0.25.12", "react": "18.3.1", "react-reconciler": "0.29.2", "scheduler": "0.23.2" } }],
 
-    "@capsule/rpg-features": ["@capsule/rpg-features@../npm/capsule-rpg-features-0.1.0.tgz", { "dependencies": { "@capsule/features": "0.1.0" } }],
+    "@capsule-sdk/rpg-features": ["@capsule-sdk/rpg-features@../npm/capsule-sdk-rpg-features-0.1.0.tgz", { "dependencies": { "@capsule-sdk/features": "0.1.0" } }],
 
-    "@capsule/skill-system-features": ["@capsule/skill-system-features@../npm/capsule-skill-system-features-0.1.0.tgz", { "dependencies": { "@capsule/features": "0.1.0" } }],
+    "@capsule-sdk/skill-system-features": ["@capsule-sdk/skill-system-features@../npm/capsule-sdk-skill-system-features-0.1.0.tgz", { "dependencies": { "@capsule-sdk/features": "0.1.0" } }],
 
-    "@capsule/workshop": ["@capsule/workshop@../npm/capsule-workshop-0.1.0.tgz", { "dependencies": { "@capsule/react": "0.1.0", "@jridgewell/trace-mapping": "0.3.31", "@types/node": "25.0.3", "@types/react": "18.3.27", "esbuild": "0.25.12", "typescript": "5.9.3", "vite": "7.3.1", "yoga-layout": "3.2.1" }, "peerDependencies": { "react": "18.3.1" } }],
+    "@capsule-sdk/workshop": ["@capsule-sdk/workshop@../npm/capsule-sdk-workshop-0.1.0.tgz", { "dependencies": { "@capsule-sdk/react": "0.1.0", "@jridgewell/trace-mapping": "0.3.31", "@types/node": "25.0.3", "@types/react": "18.3.27", "esbuild": "0.25.12", "typescript": "5.9.3", "vite": "7.3.1", "yoga-layout": "3.2.1" }, "peerDependencies": { "react": "18.3.1" } }],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.12", "", { "os": "aix", "cpu": "ppc64" }, "sha512-Hhmwd6CInZ3dwpuGTF8fJG6yoWmsToE+vYgD4nytZVxcu1ulHpUQRAB1UJ8+N1Am3Mz4+xOByoQoSZf4D+CpkA=="],
 

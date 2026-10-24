@@ -1,4 +1,4 @@
-import type { ComponentTheme } from '@capsule/react/components';
+import type { ComponentTheme } from '@capsule-sdk/react/components';
 
 export type Rgba = [number, number, number, number];
 export interface ThemeAsset {

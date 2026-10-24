@@ -1,7 +1,7 @@
 import { test, expect } from 'vitest';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { compiler } from '@capsule/workshop/compiler';
+import { compiler } from '@capsule-sdk/workshop/compiler';
 import { featureRequirements } from '../../../packages/capsule-workshop/src/feature-requirements.mjs';
 
 import { localRoot } from '../scripts/paths.mjs';
@@ -37,7 +37,7 @@ test('compiler retains requirements and preserves last good on invalid requireme
     await mkdir(source);
     await writeFile(
       join(source, 'app.tsx'),
-      "import React from 'react';import {Box,render} from '@capsule/react';render(<Box width={10} height={10}/>);",
+      "import React from 'react';import {Box,render} from '@capsule-sdk/react';render(<Box width={10} height={10}/>);",
     );
     const manifest = {
       schemaVersion: 1,

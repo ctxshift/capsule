@@ -4,7 +4,7 @@ import {
   encodeTextEdit,
   decodeTextEdit,
   type TextEdit,
-} from '@capsule/react/text-edit';
+} from '@capsule-sdk/react/text-edit';
 const vectors = JSON.parse(
   readFileSync(
     new URL(

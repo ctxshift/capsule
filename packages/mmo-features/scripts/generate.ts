@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { descriptor, generateCSharp } from '@capsule/features/codegen';
+import { descriptor, generateCSharp } from '@capsule-sdk/features/codegen';
 import { contracts } from '../src/contracts';
 const root = new URL('../', import.meta.url);
 mkdirSync(new URL('generated/', root), { recursive: true });

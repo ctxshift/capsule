@@ -1,4 +1,4 @@
-import type { ProviderTransport } from '@capsule/features/runtime';
+import type { ProviderTransport } from '@capsule-sdk/features/runtime';
 import {
   inventoryCodec,
   itemCodec,

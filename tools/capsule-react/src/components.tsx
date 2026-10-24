@@ -1,1 +1,1 @@
-export * from '@capsule/react/components';
+export * from '@capsule-sdk/react/components';

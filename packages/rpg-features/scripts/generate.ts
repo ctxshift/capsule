@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { descriptor, generateCSharp } from '@capsule/features/codegen';
+import { descriptor, generateCSharp } from '@capsule-sdk/features/codegen';
 import { contracts } from '../src/contracts';
 import { QuestPrerequisites } from '../src/quest-prerequisites';
 import { QuestDefinition, QuestBinding, QuestFact } from '../src/quest-catalog';

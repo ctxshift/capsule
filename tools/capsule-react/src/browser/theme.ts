@@ -1,1 +1,1 @@
-export * from '@capsule/workshop/browser-theme';
+export * from '@capsule-sdk/workshop/browser-theme';

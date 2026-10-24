@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 import { resolve } from 'node:path';
-import { compiler } from '@capsule/workshop/compiler';
+import { compiler } from '@capsule-sdk/workshop/compiler';
 
 const { values } = parseArgs({
   options: {

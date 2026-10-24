@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
-import { loot, closedLoot } from '@capsule/rpg-features/loot';
-import { createLootMock } from '@capsule/rpg-features/loot-mock';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
+import { loot, closedLoot } from '@capsule-sdk/rpg-features/loot';
+import { createLootMock } from '@capsule-sdk/rpg-features/loot-mock';
 
 test('loot forwards current intent once and waits for authoritative state', async () => {
   const actions: number[] = [];

@@ -25,6 +25,16 @@ import { checkArtifacts } from '../verify.mjs';
 import { release } from '../config.mjs';
 import { compareCandidates } from '../reproduce.mjs';
 
+test('release npm packages belong to the selected distribution scope', () => {
+  const root = resolve(import.meta.dirname, '../../..');
+  for (const plan of release.npm) {
+    const manifest = JSON.parse(
+      readFileSync(join(root, plan.path, 'package.json'), 'utf8'),
+    );
+    assert(manifest.name.startsWith(release.npmScope + '/'));
+  }
+});
+
 test('candidate comparison rejects changed and additional files', () => {
   const root = mkdtempSync(join(tmpdir(), 'capsule-comparison-'));
   try {

@@ -2,8 +2,11 @@
 import './scheduler';
 import React from 'react';
 import Reconciler from 'react-reconciler';
-import { anchorValues, effectValues } from '@capsule/react/presentation';
-import { decodeTextEdit, validateTextInput } from '@capsule/react/text-edit';
+import { anchorValues, effectValues } from '@capsule-sdk/react/presentation';
+import {
+  decodeTextEdit,
+  validateTextInput,
+} from '@capsule-sdk/react/text-edit';
 import { pump, clearTasks } from './scheduler';
 const native = (globalThis as any).portableUi;
 type Node = { type: string; props: any; children: Node[]; handle: bigint };

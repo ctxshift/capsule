@@ -6,10 +6,10 @@ platform. Games implement providers and retain authority over outcomes.
 
 | Package | Responsibility | Runtime dependencies |
 | --- | --- | --- |
-| `@capsule/rpg-features` | HUD units, nameplates, dialogue, bag/equipment, loot, merchants, quests, status effects, combat | Capsule features |
-| `@capsule/mmo-features` | Chat and trading | Capsule features and RPG item schemas |
-| `@capsule/skill-system-features` | Skills/perks, progression and training | Capsule features |
-| `@capsule-example/inventory` | Neutral inventory contracts, mock and sample view | Capsule features, React API and React peer |
+| `@capsule-sdk/rpg-features` | HUD units, nameplates, dialogue, bag/equipment, loot, merchants, quests, status effects, combat | Capsule features |
+| `@capsule-sdk/mmo-features` | Chat and trading | Capsule features and RPG item schemas |
+| `@capsule-sdk/skill-system-features` | Skills/perks, progression and training | Capsule features |
+| `@capsule-sdk/example-inventory` | Neutral inventory contracts, mock and sample view | Capsule features, React API and React peer |
 
 The inventory package is an example, not a platform runtime dependency. MMO
 imports RPG item schemas without requiring a phantom item-catalog provider. RPG

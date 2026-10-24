@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
-import { createBrowserTheme } from '@capsule/workshop/browser-theme';
-import { DomTarget } from '@capsule/workshop/dom';
-import { image, tiledImage } from '@capsule/workshop/raster';
-import type { UiNode } from '@capsule/workshop/packet';
-import { parseTheme, type FontMetrics } from '@capsule/workshop/theme';
+import { createBrowserTheme } from '@capsule-sdk/workshop/browser-theme';
+import { DomTarget } from '@capsule-sdk/workshop/dom';
+import { image, tiledImage } from '@capsule-sdk/workshop/raster';
+import type { UiNode } from '@capsule-sdk/workshop/packet';
+import { parseTheme, type FontMetrics } from '@capsule-sdk/workshop/theme';
 import { repositoryPath } from '../scripts/paths.mjs';
 
 // Only the DOM surface used by Image nodes; no browser or image decoder required.

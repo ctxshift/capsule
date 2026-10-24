@@ -1,5 +1,5 @@
 {
-  "name": "@capsule/mmo-features",
+  "name": "@capsule-sdk/mmo-features",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -16,8 +16,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@capsule/features": "workspace:*",
-    "@capsule/rpg-features": "workspace:*"
+    "@capsule-sdk/features": "workspace:*",
+    "@capsule-sdk/rpg-features": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "25.0.3",

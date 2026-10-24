@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
-import { trade, closedTrade } from '@capsule/mmo-features/trade';
-import { createTradeMock } from '@capsule/mmo-features/trade-mock';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
+import { trade, closedTrade } from '@capsule-sdk/mmo-features/trade';
+import { createTradeMock } from '@capsule-sdk/mmo-features/trade-mock';
 test('trade acceptance is an intent; revision replacement and retirement invalidate old gestures', async () => {
   const calls: number[] = [];
   const mock = createTradeMock(

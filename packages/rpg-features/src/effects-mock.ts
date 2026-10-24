@@ -1,5 +1,5 @@
-import { codec } from '@capsule/features/codec';
-import type { ProviderTransport } from '@capsule/features/runtime';
+import { codec } from '@capsule-sdk/features/codec';
+import type { ProviderTransport } from '@capsule-sdk/features/runtime';
 import {
   EffectsState,
   unavailableEffects,

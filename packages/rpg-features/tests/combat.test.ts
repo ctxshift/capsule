@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { codec } from '@capsule/features/codec';
+import { codec } from '@capsule-sdk/features/codec';
 import {
   CombatState,
   ActivateCombat,

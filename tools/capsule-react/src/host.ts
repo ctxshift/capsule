@@ -3,8 +3,11 @@ import React from 'react';
 import Reconciler from 'react-reconciler';
 import { pump, clearTasks, nextDelay, wakeHost } from './scheduler';
 import { installNativeBridge } from './native-bridge';
-import { anchorValues, effectValues } from '@capsule/react/presentation';
-import { decodeTextEdit, validateTextInput } from '@capsule/react/text-edit';
+import { anchorValues, effectValues } from '@capsule-sdk/react/presentation';
+import {
+  decodeTextEdit,
+  validateTextInput,
+} from '@capsule-sdk/react/text-edit';
 // Private bounded scheduler hooks; addon declarations expose no browser timers.
 declare global {
   function setTimeout(callback: () => void, delay?: number): number;

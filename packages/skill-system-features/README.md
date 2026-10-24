@@ -1,8 +1,8 @@
 # Skill system features
 
 Engine- and game-independent TypeScript contracts for skill/perk progress and
-training offers. Import from `@capsule/skill-system-features/progression` or
-`@capsule/skill-system-features/training`. Each feature is independently admitted;
+training offers. Import from `@capsule-sdk/skill-system-features/progression` or
+`@capsule-sdk/skill-system-features/training`. Each feature is independently admitted;
 a game can publish progression without implementing trainers.
 
 Games own stable skill, perk, resource, requirement and offer IDs. They supply

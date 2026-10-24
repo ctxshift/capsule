@@ -1,8 +1,8 @@
 import { expect, test } from 'vitest';
-import { FeatureRegistry } from '@capsule/features/runtime';
-import { descriptor } from '@capsule/features/codegen';
-import { bag } from '@capsule/rpg-features/bag';
-import { createBagMock } from '@capsule/rpg-features/equipment-mock';
+import { FeatureRegistry } from '@capsule-sdk/features/runtime';
+import { descriptor } from '@capsule-sdk/features/codegen';
+import { bag } from '@capsule-sdk/rpg-features/bag';
+import { createBagMock } from '@capsule-sdk/rpg-features/equipment-mock';
 import { chat } from '../src/chat';
 import { createChatMock } from '../src/chat-mock';
 test('same bag consumer works with independent game catalogs and no MMO provider', async () => {

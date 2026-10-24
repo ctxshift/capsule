@@ -1,4 +1,4 @@
-import type { BrowserGame } from '@capsule/workshop/browser';
+import type { BrowserGame } from '@capsule-sdk/workshop/browser';
 
 export class StarshipGame implements BrowserGame {
   private charge = 35;
