@@ -1,0 +1,747 @@
+{
+  "schemaVersion": 1,
+  "origin": "Host",
+  "originRevision": "48795a9682086b67a39c3a5adf7720632108d9cd",
+  "importedHistoryCommits": 64,
+  "historyScope": "Exact reviewed current paths for the 121 authoring files; no broad game directories or former mixed tool trees. Original authorship retained through filtered history as a second parent. Earlier renamed paths remain in the origin repository.",
+  "files": [
+    {
+      "source": "examples/addons/capsule-counter/README.md",
+      "target": "examples/addons/capsule-counter/README.md",
+      "sourceSha256": "860ed16b51a2ba2287f94a9b0d36cfcf8f1f04960391dd4be60210b22eaece94",
+      "candidateSha256": "a2f6c986abea3dd0c2d74412087757419354beb869202aee7b43a4465ebee659"
+    },
+    {
+      "source": "examples/addons/capsule-counter/addon.json",
+      "target": "examples/addons/capsule-counter/addon.json",
+      "sourceSha256": "e3ebe36dbd904e345eb487233f7a02f4e6faa38425ea78f3e75f817974e4bea4",
+      "candidateSha256": "56d26a45a30fefa398a3f5386b188f2d214d5de63647cb2fcfc4963c25246806"
+    },
+    {
+      "source": "examples/addons/capsule-counter/package.json",
+      "target": "examples/addons/capsule-counter/package.json",
+      "sourceSha256": "2ca6342939e440e521e9ac7eb6ea08a41dd795e2120e5cdb3f2c5dd8dee4ce08",
+      "candidateSha256": "8eeb159d070b68ff5fcddde52f58670cf1885f6cd340435d71bbb3a765f87e61"
+    },
+    {
+      "source": "examples/addons/capsule-counter/src/main.tsx",
+      "target": "examples/addons/capsule-counter/src/main.tsx",
+      "sourceSha256": "c3f9d2937eb0ef106a807f1361909f9b915b17ff564deeee658d73c97a11f38c",
+      "candidateSha256": "c3f9d2937eb0ef106a807f1361909f9b915b17ff564deeee658d73c97a11f38c"
+    },
+    {
+      "source": "examples/addons/capsule-counter/tsconfig.json",
+      "target": "examples/addons/capsule-counter/tsconfig.json",
+      "sourceSha256": "ddfd2a3998e3d2391dd7233a661b0279104af80e685fa3a83ffe8b679028d8ac",
+      "candidateSha256": "344891f2ad20e6e95770623a54dacccb111353d4d1c0b38ad07741114a4e70ac"
+    },
+    {
+      "source": "examples/portable-demo-game/README.md",
+      "target": "examples/portable-demo-game/README.md",
+      "sourceSha256": "6e786a521b9056c75caf1f8b51b453db9a4c2e64fb9f6a4135da590e47db0bef",
+      "candidateSha256": "6e786a521b9056c75caf1f8b51b453db9a4c2e64fb9f6a4135da590e47db0bef"
+    },
+    {
+      "source": "examples/portable-demo-game/addon.json",
+      "target": "examples/portable-demo-game/addon.json",
+      "sourceSha256": "8bdf0dc0a82d8b52d9b6209fdd69b9e8b3b637476f9ba1aa5d42e6cea83edb2d",
+      "candidateSha256": "8bdf0dc0a82d8b52d9b6209fdd69b9e8b3b637476f9ba1aa5d42e6cea83edb2d"
+    },
+    {
+      "source": "examples/portable-demo-game/assets/data/font-metrics.json",
+      "target": "examples/portable-demo-game/assets/data/font-metrics.json",
+      "sourceSha256": "0b9319eabad1b7df879d3031d3be0e61ff21eaa4367d6ae568ed55653c161849",
+      "candidateSha256": "0b9319eabad1b7df879d3031d3be0e61ff21eaa4367d6ae568ed55653c161849"
+    },
+    {
+      "source": "examples/portable-demo-game/assets/images/neutral.png",
+      "target": "examples/portable-demo-game/assets/images/neutral.png",
+      "sourceSha256": "8ec7689e62d45a17c2f2d464f2b02bf1c732c478a5a3d44e65f53f30af5aa6f0",
+      "candidateSha256": "8ec7689e62d45a17c2f2d464f2b02bf1c732c478a5a3d44e65f53f30af5aa6f0"
+    },
+    {
+      "source": "examples/portable-demo-game/browser/index.html",
+      "target": "examples/portable-demo-game/browser/index.html",
+      "sourceSha256": "e322ad6575abf5f6753c15010ee2a131392fdb4d39121588300a0084e776de51",
+      "candidateSha256": "e322ad6575abf5f6753c15010ee2a131392fdb4d39121588300a0084e776de51"
+    },
+    {
+      "source": "examples/portable-demo-game/browser/main.ts",
+      "target": "examples/portable-demo-game/browser/main.ts",
+      "sourceSha256": "8dfbd47be3bb9cdfe90d2aed2f2246e923852497937c47e86e11bee37e457e69",
+      "candidateSha256": "8dfbd47be3bb9cdfe90d2aed2f2246e923852497937c47e86e11bee37e457e69"
+    },
+    {
+      "source": "examples/portable-demo-game/browser/mock-game.ts",
+      "target": "examples/portable-demo-game/browser/mock-game.ts",
+      "sourceSha256": "65dd016df930a8072879372758222242c8f927790498992267c4c6af817004c7",
+      "candidateSha256": "65dd016df930a8072879372758222242c8f927790498992267c4c6af817004c7"
+    },
+    {
+      "source": "examples/portable-demo-game/package.json",
+      "target": "examples/portable-demo-game/package.json",
+      "sourceSha256": "ce77152d1f712e7e815b93db898713f3d90d1b88b7095a0b85b41f528290da07",
+      "candidateSha256": "ce77152d1f712e7e815b93db898713f3d90d1b88b7095a0b85b41f528290da07"
+    },
+    {
+      "source": "examples/portable-demo-game/scripts/dev.ts",
+      "target": "examples/portable-demo-game/scripts/dev.ts",
+      "sourceSha256": "3aae6b6181d9e292742e3b207bea078ec3e9b86f4253ce9724ad55647e1213fe",
+      "candidateSha256": "3aae6b6181d9e292742e3b207bea078ec3e9b86f4253ce9724ad55647e1213fe"
+    },
+    {
+      "source": "examples/portable-demo-game/src/main.tsx",
+      "target": "examples/portable-demo-game/src/main.tsx",
+      "sourceSha256": "2ef0c6da43ae429fd80042b5a256400c4ed40ff1dcbb14718ae1482661cdd2b3",
+      "candidateSha256": "2ef0c6da43ae429fd80042b5a256400c4ed40ff1dcbb14718ae1482661cdd2b3"
+    },
+    {
+      "source": "examples/portable-demo-game/theme.json",
+      "target": "examples/portable-demo-game/theme.json",
+      "sourceSha256": "7be2341ecdb859c2195fb8f5214b6ea24bd2feabd7d0ab2bcadd32e912c8ea15",
+      "candidateSha256": "7be2341ecdb859c2195fb8f5214b6ea24bd2feabd7d0ab2bcadd32e912c8ea15"
+    },
+    {
+      "source": "examples/portable-demo-game/tsconfig.browser.json",
+      "target": "examples/portable-demo-game/tsconfig.browser.json",
+      "sourceSha256": "ccdd370c2d924ef8bc0b68eaab7d860d5ce3de35646b353ffc035c1b93b4611d",
+      "candidateSha256": "ccdd370c2d924ef8bc0b68eaab7d860d5ce3de35646b353ffc035c1b93b4611d"
+    },
+    {
+      "source": "examples/portable-demo-game/tsconfig.json",
+      "target": "examples/portable-demo-game/tsconfig.json",
+      "sourceSha256": "b062009bc17ddab233d6842de9f8a45a8f7fff61ceb662b6ec66c58dbae802e8",
+      "candidateSha256": "b062009bc17ddab233d6842de9f8a45a8f7fff61ceb662b6ec66c58dbae802e8"
+    },
+    {
+      "source": "examples/portable-demo-game/tsconfig.tools.json",
+      "target": "examples/portable-demo-game/tsconfig.tools.json",
+      "sourceSha256": "99b08ef9149b0606e7aeb990c3fec20f072cd32c0f713c3769a802fd1ad5403b",
+      "candidateSha256": "99b08ef9149b0606e7aeb990c3fec20f072cd32c0f713c3769a802fd1ad5403b"
+    },
+    {
+      "source": "packages/capsule-features/README.md",
+      "target": "packages/capsule-features/README.md",
+      "sourceSha256": "d78c718d18c056e50c60a0b00cfa5ee096ce8d4f4ddbea07d8443a3de112b9c2",
+      "candidateSha256": "d78c718d18c056e50c60a0b00cfa5ee096ce8d4f4ddbea07d8443a3de112b9c2"
+    },
+    {
+      "source": "packages/capsule-features/package.json",
+      "target": "packages/capsule-features/package.json",
+      "sourceSha256": "977c82ceb789f359d8ac2f707cfafe1fe5ca61f5f4074ef7ed980bd100302f51",
+      "candidateSha256": "56c0ba3ff6838f74a76522df713a0c6384bde788b6c482f4290646940e3124bd"
+    },
+    {
+      "source": "packages/capsule-features/src/addon.ts",
+      "target": "packages/capsule-features/src/addon.ts",
+      "sourceSha256": "6e5b6eb2dac8d04ad355de9fb5e9f1c919b55d2ad23e3fd4c1f8e54322342662",
+      "candidateSha256": "6e5b6eb2dac8d04ad355de9fb5e9f1c919b55d2ad23e3fd4c1f8e54322342662"
+    },
+    {
+      "source": "packages/capsule-features/src/codec.ts",
+      "target": "packages/capsule-features/src/codec.ts",
+      "sourceSha256": "2bb8f5d22dc8fad7857862abb67cd8a7a998e8f6ac121b1991a6a0464d075bf3",
+      "candidateSha256": "2bb8f5d22dc8fad7857862abb67cd8a7a998e8f6ac121b1991a6a0464d075bf3"
+    },
+    {
+      "source": "packages/capsule-features/src/codegen.ts",
+      "target": "packages/capsule-features/src/codegen.ts",
+      "sourceSha256": "8920acab05650b3f0a1239ce65d5775105bf041f32bf642b31466496e069a30d",
+      "candidateSha256": "8920acab05650b3f0a1239ce65d5775105bf041f32bf642b31466496e069a30d"
+    },
+    {
+      "source": "packages/capsule-features/src/runtime.ts",
+      "target": "packages/capsule-features/src/runtime.ts",
+      "sourceSha256": "91eddeb3b0aa859fe92893892ee13bcef33a791c5a2ad35d2eae3ef40163c6df",
+      "candidateSha256": "91eddeb3b0aa859fe92893892ee13bcef33a791c5a2ad35d2eae3ef40163c6df"
+    },
+    {
+      "source": "packages/capsule-features/src/schema.ts",
+      "target": "packages/capsule-features/src/schema.ts",
+      "sourceSha256": "f47b99eb617e9c39667f7887b1313d35b3af54e2aaa1a8775bb161c285caac59",
+      "candidateSha256": "f47b99eb617e9c39667f7887b1313d35b3af54e2aaa1a8775bb161c285caac59"
+    },
+    {
+      "source": "packages/capsule-features/tests/addon.test.ts",
+      "target": "packages/capsule-features/tests/addon.test.ts",
+      "sourceSha256": "5767b2c5ea6e3e6f80d1e3f9dac85998ae2a85114120544c4c8958e14d00ca47",
+      "candidateSha256": "5767b2c5ea6e3e6f80d1e3f9dac85998ae2a85114120544c4c8958e14d00ca47"
+    },
+    {
+      "source": "packages/capsule-features/tests/codec.test.ts",
+      "target": "packages/capsule-features/tests/codec.test.ts",
+      "sourceSha256": "0bd1001cd8293c7a76377c2065c888ffaa22293ee879e8e3b49f939f7c35cb42",
+      "candidateSha256": "0bd1001cd8293c7a76377c2065c888ffaa22293ee879e8e3b49f939f7c35cb42"
+    },
+    {
+      "source": "packages/capsule-features/tests/delivery.test.ts",
+      "target": "packages/capsule-features/tests/delivery.test.ts",
+      "sourceSha256": "da37201577c0c273aa8a31b18bb043b1f85e653065ae0df526a0edf32bdcd02c",
+      "candidateSha256": "da37201577c0c273aa8a31b18bb043b1f85e653065ae0df526a0edf32bdcd02c"
+    },
+    {
+      "source": "packages/capsule-features/tests/requests.test.ts",
+      "target": "packages/capsule-features/tests/requests.test.ts",
+      "sourceSha256": "aa6d173ca6bca957fabf914a33106060f89502b24110bb98e247fb691f3489dc",
+      "candidateSha256": "aa6d173ca6bca957fabf914a33106060f89502b24110bb98e247fb691f3489dc"
+    },
+    {
+      "source": "packages/capsule-features/tests/shared-codegen.test.ts",
+      "target": "packages/capsule-features/tests/shared-codegen.test.ts",
+      "sourceSha256": "5bb9e9be4a30b57a0b85f188a58403feb98a2832f5d952a774b487a6dc0fcfb7",
+      "candidateSha256": "5bb9e9be4a30b57a0b85f188a58403feb98a2832f5d952a774b487a6dc0fcfb7"
+    },
+    {
+      "source": "packages/capsule-features/tsconfig.json",
+      "target": "packages/capsule-features/tsconfig.json",
+      "sourceSha256": "714c50db8c67afffcaa69978b0488842bc5e29f122e9defefeb990b9eea303ee",
+      "candidateSha256": "4f79cfb4cbe6237bd02583216a43f79e4a0fba8de5f7e82ac6af5cd56e9d48e4"
+    },
+    {
+      "source": "packages/capsule-react/.gitignore",
+      "target": "packages/capsule-react/.gitignore",
+      "sourceSha256": "ed19d3c9c8a5e34d0179e0b1a9c2907d2e657738733e4a432a8cf81c76ce56f1",
+      "candidateSha256": "ed19d3c9c8a5e34d0179e0b1a9c2907d2e657738733e4a432a8cf81c76ce56f1"
+    },
+    {
+      "source": "packages/capsule-react/README.md",
+      "target": "packages/capsule-react/README.md",
+      "sourceSha256": "36411d7366b0bc534de5ef3ea114197a690ea535dd3f018650f53f47f8622cac",
+      "candidateSha256": "5439ce7801f16fdd811c80ddcb9090bee155224afdc4343c4bbce4281008d927"
+    },
+    {
+      "source": "packages/capsule-react/package.json",
+      "target": "packages/capsule-react/package.json",
+      "sourceSha256": "bda9ae44059aedf64c623fbce3c0fe00f0bd6b8e48ca66552a1e649a5485be13",
+      "candidateSha256": "bda9ae44059aedf64c623fbce3c0fe00f0bd6b8e48ca66552a1e649a5485be13"
+    },
+    {
+      "source": "packages/capsule-react/src/components.tsx",
+      "target": "packages/capsule-react/src/components.tsx",
+      "sourceSha256": "de8520fcbd58b475cff6ea4b6958ae71830cf23a39bc9d93a18af938fc58dfdc",
+      "candidateSha256": "de8520fcbd58b475cff6ea4b6958ae71830cf23a39bc9d93a18af938fc58dfdc"
+    },
+    {
+      "source": "packages/capsule-react/src/index.ts",
+      "target": "packages/capsule-react/src/index.ts",
+      "sourceSha256": "c40417b60fdd621c087b7a6bb0e1883b8631d5eafa2b5867f61701783672ae6e",
+      "candidateSha256": "c40417b60fdd621c087b7a6bb0e1883b8631d5eafa2b5867f61701783672ae6e"
+    },
+    {
+      "source": "packages/capsule-react/src/panel.tsx",
+      "target": "packages/capsule-react/src/panel.tsx",
+      "sourceSha256": "b1e873c0a8219b7b6d092c92a5169bfeff4f9824c5a3de46dc8a4789a559d466",
+      "candidateSha256": "b1e873c0a8219b7b6d092c92a5169bfeff4f9824c5a3de46dc8a4789a559d466"
+    },
+    {
+      "source": "packages/capsule-react/src/presentation.ts",
+      "target": "packages/capsule-react/src/presentation.ts",
+      "sourceSha256": "2fdf42823d0da09582c0b1b4274525c816b1475a6ab9b7d22d96d4747b9303cd",
+      "candidateSha256": "2fdf42823d0da09582c0b1b4274525c816b1475a6ab9b7d22d96d4747b9303cd"
+    },
+    {
+      "source": "packages/capsule-react/src/props.ts",
+      "target": "packages/capsule-react/src/props.ts",
+      "sourceSha256": "cb94f6b81ae07532301b129cf4d8390a0e2886bc96fb9fc857205be85b333381",
+      "candidateSha256": "cb94f6b81ae07532301b129cf4d8390a0e2886bc96fb9fc857205be85b333381"
+    },
+    {
+      "source": "packages/capsule-react/src/scroll-list.tsx",
+      "target": "packages/capsule-react/src/scroll-list.tsx",
+      "sourceSha256": "b2f9d2a1d176223ef14657c53bd3af2dd3edb5cc14275647eb0d3d073b09d672",
+      "candidateSha256": "b2f9d2a1d176223ef14657c53bd3af2dd3edb5cc14275647eb0d3d073b09d672"
+    },
+    {
+      "source": "packages/capsule-react/src/text-edit.ts",
+      "target": "packages/capsule-react/src/text-edit.ts",
+      "sourceSha256": "67197340b2e27fc1e5ab882c68e0eb6bcd662f4a338e80a6ddf424ff47d40e4f",
+      "candidateSha256": "67197340b2e27fc1e5ab882c68e0eb6bcd662f4a338e80a6ddf424ff47d40e4f"
+    },
+    {
+      "source": "packages/capsule-react/src/window-state.ts",
+      "target": "packages/capsule-react/src/window-state.ts",
+      "sourceSha256": "2a6e596123f8a9c17ad8970bce1d9a278334fde91f8e126517b33064b08e93b3",
+      "candidateSha256": "2a6e596123f8a9c17ad8970bce1d9a278334fde91f8e126517b33064b08e93b3"
+    },
+    {
+      "source": "packages/capsule-react/text-edit-vectors.json",
+      "target": "packages/capsule-react/text-edit-vectors.json",
+      "sourceSha256": "b202fba14b39b63101b3368f43ddbe1bba69c0a0dca2df7b63406bd1beed9ecc",
+      "candidateSha256": "3d8e139739211f80dc6e627e9562eaf8eecd89826c4ebc1e1ce3ca087bd94bdd"
+    },
+    {
+      "source": "packages/capsule-react/tsconfig.json",
+      "target": "packages/capsule-react/tsconfig.json",
+      "sourceSha256": "a8c8d84e8ffc25cfb7680017ae5a4ae2f3a1d35e69caa20572985c95d3691c52",
+      "candidateSha256": "1f1f4fc15edd62e7aa0ffd0cdb463ac69d6bb100318f0a8d80082174e2bcf74f"
+    },
+    {
+      "source": "packages/capsule-workshop/README.md",
+      "target": "packages/capsule-workshop/README.md",
+      "sourceSha256": "4174e8490746fc7659fbc58cc2045547af82a88d45b814d1bceb329d042596a5",
+      "candidateSha256": "d1b8b73f46c4011c54dbfb3d3da488e2d806350434967e1db9308cd40c7d52ed"
+    },
+    {
+      "source": "packages/capsule-workshop/package.json",
+      "target": "packages/capsule-workshop/package.json",
+      "sourceSha256": "dc353fe686efdef749c44ad918261eb789604f698d3f5e5b8d91e3b0fe2dce47",
+      "candidateSha256": "dc353fe686efdef749c44ad918261eb789604f698d3f5e5b8d91e3b0fe2dce47"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/dom.ts",
+      "target": "packages/capsule-workshop/src/browser/dom.ts",
+      "sourceSha256": "95e246219469391087cede51e680abf7f36e7e7eb42a3226c76e4528a7891038",
+      "candidateSha256": "95e246219469391087cede51e680abf7f36e7e7eb42a3226c76e4528a7891038"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/layout.ts",
+      "target": "packages/capsule-workshop/src/browser/layout.ts",
+      "sourceSha256": "e3dd242fea29550e939831dfaa681e0a1f46b60eef1ff19d71bfcb5d757e0c13",
+      "candidateSha256": "e3dd242fea29550e939831dfaa681e0a1f46b60eef1ff19d71bfcb5d757e0c13"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/packet.ts",
+      "target": "packages/capsule-workshop/src/browser/packet.ts",
+      "sourceSha256": "43592473422cd4a0802979aaa9002f63d84050c0ce7922bac6d06b57af38122b",
+      "candidateSha256": "43592473422cd4a0802979aaa9002f63d84050c0ce7922bac6d06b57af38122b"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/presentation.ts",
+      "target": "packages/capsule-workshop/src/browser/presentation.ts",
+      "sourceSha256": "81881ddf7f9dbaa34f4e99cd82b8f4b5d1379c5203df68539f3bdd88aea2ffe2",
+      "candidateSha256": "81881ddf7f9dbaa34f4e99cd82b8f4b5d1379c5203df68539f3bdd88aea2ffe2"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/raster.ts",
+      "target": "packages/capsule-workshop/src/browser/raster.ts",
+      "sourceSha256": "19280ced90180c2f978a879ab3e14a21abe0b70e455217d510617918774b0eea",
+      "candidateSha256": "19280ced90180c2f978a879ab3e14a21abe0b70e455217d510617918774b0eea"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/runtime.ts",
+      "target": "packages/capsule-workshop/src/browser/runtime.ts",
+      "sourceSha256": "0a8eb47183afc6f4c2d8ab5bdcc4e83716002cd58b103557cd7034cd1d61ec03",
+      "candidateSha256": "0a8eb47183afc6f4c2d8ab5bdcc4e83716002cd58b103557cd7034cd1d61ec03"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/text-input.ts",
+      "target": "packages/capsule-workshop/src/browser/text-input.ts",
+      "sourceSha256": "223cb9e470b96eab58fcdd3712794ac99035841b9fe07bf4aeabe5488e6a9263",
+      "candidateSha256": "223cb9e470b96eab58fcdd3712794ac99035841b9fe07bf4aeabe5488e6a9263"
+    },
+    {
+      "source": "packages/capsule-workshop/src/browser/theme.ts",
+      "target": "packages/capsule-workshop/src/browser/theme.ts",
+      "sourceSha256": "b246a0833bb9ba1dde7a893ac13acd6f4653c6d0fb36a7e2fad2edee611ec7a1",
+      "candidateSha256": "b246a0833bb9ba1dde7a893ac13acd6f4653c6d0fb36a7e2fad2edee611ec7a1"
+    },
+    {
+      "source": "packages/capsule-workshop/src/compiler.mjs",
+      "target": "packages/capsule-workshop/src/compiler.mjs",
+      "sourceSha256": "bf11cc4c74676d4502ff2623c731a00d328a0ee64b951bcddd157014ffeb5313",
+      "candidateSha256": "bf11cc4c74676d4502ff2623c731a00d328a0ee64b951bcddd157014ffeb5313"
+    },
+    {
+      "source": "packages/capsule-workshop/src/deploy.ts",
+      "target": "packages/capsule-workshop/src/deploy.ts",
+      "sourceSha256": "97f2fb40d505cfa0c663c537ffa856547812beda8395a92402cb5686f7b29d0d",
+      "candidateSha256": "97f2fb40d505cfa0c663c537ffa856547812beda8395a92402cb5686f7b29d0d"
+    },
+    {
+      "source": "packages/capsule-workshop/src/feature-requirements.mjs",
+      "target": "packages/capsule-workshop/src/feature-requirements.mjs",
+      "sourceSha256": "2a6653cd8697d616197757677d750734159d70c700ea755223adc4cb64a7781a",
+      "candidateSha256": "2a6653cd8697d616197757677d750734159d70c700ea755223adc4cb64a7781a"
+    },
+    {
+      "source": "packages/capsule-workshop/src/legacy.d.ts",
+      "target": "packages/capsule-workshop/src/legacy.d.ts",
+      "sourceSha256": "b7c0e15a48d45ef78047d8c8b2a20167b1e7724dd099376fae966d80b83463b9",
+      "candidateSha256": "b7c0e15a48d45ef78047d8c8b2a20167b1e7724dd099376fae966d80b83463b9"
+    },
+    {
+      "source": "packages/capsule-workshop/src/package-theme.ts",
+      "target": "packages/capsule-workshop/src/package-theme.ts",
+      "sourceSha256": "dd7465714c065c1c009fd2e6f103472b9536ab5d3ea4cbf40e5c133cdc82cd8f",
+      "candidateSha256": "dd7465714c065c1c009fd2e6f103472b9536ab5d3ea4cbf40e5c133cdc82cd8f"
+    },
+    {
+      "source": "packages/capsule-workshop/src/script-chunks.mjs",
+      "target": "packages/capsule-workshop/src/script-chunks.mjs",
+      "sourceSha256": "b5a88fc17a366118bd7e5e3e8b62a3fdba7c05ef5ffec693698059c1daff694f",
+      "candidateSha256": "b5a88fc17a366118bd7e5e3e8b62a3fdba7c05ef5ffec693698059c1daff694f"
+    },
+    {
+      "source": "packages/capsule-workshop/src/sdk-paths.mjs",
+      "target": "packages/capsule-workshop/src/sdk-paths.mjs",
+      "sourceSha256": "76016782b7f17885973575c9f0671c8d3837b27ff0f0667c28ae3c9132800a96",
+      "candidateSha256": "76016782b7f17885973575c9f0671c8d3837b27ff0f0667c28ae3c9132800a96"
+    },
+    {
+      "source": "packages/capsule-workshop/src/server.ts",
+      "target": "packages/capsule-workshop/src/server.ts",
+      "sourceSha256": "60edb0d053836109eee92660a58970d735c8ee4e118eda01468497f529f7b4b6",
+      "candidateSha256": "60edb0d053836109eee92660a58970d735c8ee4e118eda01468497f529f7b4b6"
+    },
+    {
+      "source": "packages/capsule-workshop/src/theme-references.mjs",
+      "target": "packages/capsule-workshop/src/theme-references.mjs",
+      "sourceSha256": "e42584c898498e0b3be71a89544c4522209d38bfabb54aaeef5cc270fbc7ec06",
+      "candidateSha256": "e42584c898498e0b3be71a89544c4522209d38bfabb54aaeef5cc270fbc7ec06"
+    },
+    {
+      "source": "packages/capsule-workshop/src/theme.ts",
+      "target": "packages/capsule-workshop/src/theme.ts",
+      "sourceSha256": "30031ce74996a2f6ac08452ea513f6eafa082e88a1e56dfc69c40294c3c71e68",
+      "candidateSha256": "30031ce74996a2f6ac08452ea513f6eafa082e88a1e56dfc69c40294c3c71e68"
+    },
+    {
+      "source": "packages/capsule-workshop/tsconfig.addon.json",
+      "target": "packages/capsule-workshop/tsconfig.addon.json",
+      "sourceSha256": "fd68fb3105afb7028b01017a74f47bd3a0535b11fbb403d4879d339e5fe9da1f",
+      "candidateSha256": "c243b41784b22c2bed6a7a40e1302f8c12e44b549fde3e50f49f870a33c17d1e"
+    },
+    {
+      "source": "packages/capsule-workshop/tsconfig.json",
+      "target": "packages/capsule-workshop/tsconfig.json",
+      "sourceSha256": "ef22f5f414f2d5483623630251973a7a0a11c433aafc13df77f7d2a60855d446",
+      "candidateSha256": "1037954f717af8f3b84a50f9d391b731766e7bbf50e49d6674c9575c306cd0bf"
+    },
+    {
+      "source": "tools/capsule-react/.gitignore",
+      "target": "tools/capsule-react/.gitignore",
+      "sourceSha256": "c26497fa75a5a79134ab9d11f833f8e52d19cb4552e3a00e2cce0a2a8ee23914",
+      "candidateSha256": "c26497fa75a5a79134ab9d11f833f8e52d19cb4552e3a00e2cce0a2a8ee23914"
+    },
+    {
+      "source": "tools/capsule-react/README.md",
+      "target": "tools/capsule-react/README.md",
+      "sourceSha256": "16f0673a86989ed384c0f965524189371416293aead1d04a3f98b3c0983b0819",
+      "candidateSha256": "8a4cb092444a2cd1f02cf74a3b72611255a1e1cd9083e26b3056cb83a5953f07"
+    },
+    {
+      "source": "tools/capsule-react/benchmarks/hello.ts",
+      "target": "tools/capsule-react/benchmarks/hello.ts",
+      "sourceSha256": "f92c75b67d31fc8a2e1972dd2d7f9292ca6d94bd6f6711f158d0eceae6191b7c",
+      "candidateSha256": "f92c75b67d31fc8a2e1972dd2d7f9292ca6d94bd6f6711f158d0eceae6191b7c"
+    },
+    {
+      "source": "tools/capsule-react/benchmarks/react-bailout-adapter.ts",
+      "target": "tools/capsule-react/benchmarks/react-bailout-adapter.ts",
+      "sourceSha256": "eba8b6bbd1c656d56ffc35869f3136e9ebb456656353b12f4c3df3cd522507ab",
+      "candidateSha256": "eba8b6bbd1c656d56ffc35869f3136e9ebb456656353b12f4c3df3cd522507ab"
+    },
+    {
+      "source": "tools/capsule-react/docs/PROFILING.md",
+      "target": "tools/capsule-react/docs/PROFILING.md",
+      "sourceSha256": "47a6eec2f5b6359816f7e9e5bb4e81040dc66778fad96b693f1c93e924a15784",
+      "candidateSha256": "813ce9814af75f223c511bbd016b62b1810957659695b02bd84a6c61b793115f"
+    },
+    {
+      "source": "tools/capsule-react/docs/benchmarks.md",
+      "target": "tools/capsule-react/docs/benchmarks.md",
+      "sourceSha256": "3eef33d685738cc48f5578d969029f1945aede5b9e99a9be0b664b72cad1e9db",
+      "candidateSha256": "89a15187b91044fe83b6f7ff6ece60b2e527aafa014e205d438f093e1839badf"
+    },
+    {
+      "source": "tools/capsule-react/fixtures/feature-recovery.ts",
+      "target": "tools/capsule-react/fixtures/feature-recovery.ts",
+      "sourceSha256": "1fa1f8be5bbb947632593ca2bed9eb8d172e68bd6a988a1e987fa653ccbe2a65",
+      "candidateSha256": "6b7f4b2c438bcf30cd11bc576fd2ec3ddcddbcfeb2501053013564ce1dc36ce4"
+    },
+    {
+      "source": "tools/capsule-react/licenses/React-LICENSE.txt",
+      "target": "tools/capsule-react/licenses/React-LICENSE.txt",
+      "sourceSha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "candidateSha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+    },
+    {
+      "source": "tools/capsule-react/licenses/Reconciler-LICENSE.txt",
+      "target": "tools/capsule-react/licenses/Reconciler-LICENSE.txt",
+      "sourceSha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "candidateSha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+    },
+    {
+      "source": "tools/capsule-react/licenses/Scheduler-LICENSE.txt",
+      "target": "tools/capsule-react/licenses/Scheduler-LICENSE.txt",
+      "sourceSha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "candidateSha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+    },
+    {
+      "source": "tools/capsule-react/package.json",
+      "target": "tools/capsule-react/package.json",
+      "sourceSha256": "21a4f822b9e7afedbbcc461cd2d914122199c10e4353a1287d522485464bbf9b",
+      "candidateSha256": "f00508c0bc8a99f7a99e9ff8c8f60a10781967ec34bc27af67d1b985c6d20f60"
+    },
+    {
+      "source": "tools/capsule-react/scripts/build.mjs",
+      "target": "tools/capsule-react/scripts/build.mjs",
+      "sourceSha256": "1396f68622e185cec0b4dda4a9017e6e81033926725d0ef8106589aba25fdb03",
+      "candidateSha256": "1396f68622e185cec0b4dda4a9017e6e81033926725d0ef8106589aba25fdb03"
+    },
+    {
+      "source": "tools/capsule-react/scripts/package-paths.mjs",
+      "target": "tools/capsule-react/scripts/package-paths.mjs",
+      "sourceSha256": "92d36989b9b010ebe6e4f34c96765a8ee3c0234b41a7f95362032a9af3eff1ca",
+      "candidateSha256": "92d36989b9b010ebe6e4f34c96765a8ee3c0234b41a7f95362032a9af3eff1ca"
+    },
+    {
+      "source": "tools/capsule-react/scripts/paths.mjs",
+      "target": "tools/capsule-react/scripts/paths.mjs",
+      "sourceSha256": "1617f9bbcd97010d1f5621f69ef3d7f269200b8c2ef16e8767ef96e90cfa6674",
+      "candidateSha256": "1617f9bbcd97010d1f5621f69ef3d7f269200b8c2ef16e8767ef96e90cfa6674"
+    },
+    {
+      "source": "tools/capsule-react/scripts/profile.mjs",
+      "target": "tools/capsule-react/scripts/profile.mjs",
+      "sourceSha256": "0baf2750d037c12de893972d83bbc8e21af617e0979167afbbe3e0b41619afed",
+      "candidateSha256": "0baf2750d037c12de893972d83bbc8e21af617e0979167afbbe3e0b41619afed"
+    },
+    {
+      "source": "tools/capsule-react/scripts/sdk-paths.mjs",
+      "target": "tools/capsule-react/scripts/sdk-paths.mjs",
+      "sourceSha256": "76016782b7f17885973575c9f0671c8d3837b27ff0f0667c28ae3c9132800a96",
+      "candidateSha256": "76016782b7f17885973575c9f0671c8d3837b27ff0f0667c28ae3c9132800a96"
+    },
+    {
+      "source": "tools/capsule-react/scripts/tsconfig.json",
+      "target": "tools/capsule-react/scripts/tsconfig.json",
+      "sourceSha256": "1430fee14197eb0edfeac56369add5bddca5d4076b13b0185ac295f45796b63e",
+      "candidateSha256": "1430fee14197eb0edfeac56369add5bddca5d4076b13b0185ac295f45796b63e"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/dom.ts",
+      "target": "tools/capsule-react/src/browser/dom.ts",
+      "sourceSha256": "31a9e77a06d214cb4c617508c80493864a410c80a2f6684563adc54e25a9b388",
+      "candidateSha256": "31a9e77a06d214cb4c617508c80493864a410c80a2f6684563adc54e25a9b388"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/layout.ts",
+      "target": "tools/capsule-react/src/browser/layout.ts",
+      "sourceSha256": "1e4bba0aa8b663db4e406c11a31b7847c9015e32c7f51bef368a3ffe0bf1a184",
+      "candidateSha256": "1e4bba0aa8b663db4e406c11a31b7847c9015e32c7f51bef368a3ffe0bf1a184"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/packet.ts",
+      "target": "tools/capsule-react/src/browser/packet.ts",
+      "sourceSha256": "03781d2f0bd3123268e745efb8891ad151854811e99d8fd5f9e7479cc9dfa446",
+      "candidateSha256": "03781d2f0bd3123268e745efb8891ad151854811e99d8fd5f9e7479cc9dfa446"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/raster.ts",
+      "target": "tools/capsule-react/src/browser/raster.ts",
+      "sourceSha256": "57d91a4449657dedd5047ecf19bcbe9cc982c36eb84d35ef0c8968ea9be0917d",
+      "candidateSha256": "57d91a4449657dedd5047ecf19bcbe9cc982c36eb84d35ef0c8968ea9be0917d"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/runtime.ts",
+      "target": "tools/capsule-react/src/browser/runtime.ts",
+      "sourceSha256": "e4359dba4f1054ec7bd24f8b7f115d12c7fc31c0432c93cca76334c990a1a435",
+      "candidateSha256": "e4359dba4f1054ec7bd24f8b7f115d12c7fc31c0432c93cca76334c990a1a435"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/theme.ts",
+      "target": "tools/capsule-react/src/browser/theme.ts",
+      "sourceSha256": "bdbedcef0db2012e25c0ad3ffcaf59fc41a4a3e7d18510a1dd05d19f8304e9d6",
+      "candidateSha256": "bdbedcef0db2012e25c0ad3ffcaf59fc41a4a3e7d18510a1dd05d19f8304e9d6"
+    },
+    {
+      "source": "tools/capsule-react/src/browser/tsconfig.json",
+      "target": "tools/capsule-react/src/browser/tsconfig.json",
+      "sourceSha256": "82eb420568f7b476626dc15c6070c4162d71d4f7e238e883e6257bff907ef5bb",
+      "candidateSha256": "fc54564e8607968e48038bd8b930180ff72b070990efe2c5767b50bd7d6845e5"
+    },
+    {
+      "source": "tools/capsule-react/src/components.tsx",
+      "target": "tools/capsule-react/src/components.tsx",
+      "sourceSha256": "ef150f9c1f5564eb231e3531444dce2af784f8c561f2d7b0a231cc32667991a5",
+      "candidateSha256": "ef150f9c1f5564eb231e3531444dce2af784f8c561f2d7b0a231cc32667991a5"
+    },
+    {
+      "source": "tools/capsule-react/src/host.ts",
+      "target": "tools/capsule-react/src/host.ts",
+      "sourceSha256": "e6497c5c5e2309bb8d68d8ea7417fbc0c049d480b6acb4f974c110c4cae4931c",
+      "candidateSha256": "e6497c5c5e2309bb8d68d8ea7417fbc0c049d480b6acb4f974c110c4cae4931c"
+    },
+    {
+      "source": "tools/capsule-react/src/native-bridge.ts",
+      "target": "tools/capsule-react/src/native-bridge.ts",
+      "sourceSha256": "e8e4495d6b2a154dd21d1e997d35353eac3b350b76cd31b2c5cd6ef7f088d621",
+      "candidateSha256": "e8e4495d6b2a154dd21d1e997d35353eac3b350b76cd31b2c5cd6ef7f088d621"
+    },
+    {
+      "source": "tools/capsule-react/src/scheduler.ts",
+      "target": "tools/capsule-react/src/scheduler.ts",
+      "sourceSha256": "9c4ba72015eb04fa3f71abc863e41d868fafeaa4bb422a7b03f0e551a295aa88",
+      "candidateSha256": "9c4ba72015eb04fa3f71abc863e41d868fafeaa4bb422a7b03f0e551a295aa88"
+    },
+    {
+      "source": "tools/capsule-react/src/types.d.ts",
+      "target": "tools/capsule-react/src/types.d.ts",
+      "sourceSha256": "b7c0e15a48d45ef78047d8c8b2a20167b1e7724dd099376fae966d80b83463b9",
+      "candidateSha256": "b7c0e15a48d45ef78047d8c8b2a20167b1e7724dd099376fae966d80b83463b9"
+    },
+    {
+      "source": "tools/capsule-react/src/window-state.ts",
+      "target": "tools/capsule-react/src/window-state.ts",
+      "sourceSha256": "ad196ec1845aec71151466d29047d3034d1d3d4eec9d8a8b1541bf6b9d9f5c3a",
+      "candidateSha256": "ad196ec1845aec71151466d29047d3034d1d3d4eec9d8a8b1541bf6b9d9f5c3a"
+    },
+    {
+      "source": "tools/capsule-react/tests/available-port.ts",
+      "target": "tools/capsule-react/tests/available-port.ts",
+      "sourceSha256": "db24b311d82da0ba5a4d7e94009b061040d81b429155eb68ca324578cffa63aa",
+      "candidateSha256": "db24b311d82da0ba5a4d7e94009b061040d81b429155eb68ca324578cffa63aa"
+    },
+    {
+      "source": "tools/capsule-react/tests/capsule-consumer.test.ts",
+      "target": "tools/capsule-react/tests/capsule-consumer.test.ts",
+      "sourceSha256": "870e7f5b1eb0a2e1fff9d6f5470cad77f923e39b29ded0a594abd2eda124c430",
+      "candidateSha256": "870e7f5b1eb0a2e1fff9d6f5470cad77f923e39b29ded0a594abd2eda124c430"
+    },
+    {
+      "source": "tools/capsule-react/tests/dev.test.ts",
+      "target": "tools/capsule-react/tests/dev.test.ts",
+      "sourceSha256": "15dfa6f9c7e3030ea129831feb4ac7c354c4dc01636acd0bd507477b12181309",
+      "candidateSha256": "15dfa6f9c7e3030ea129831feb4ac7c354c4dc01636acd0bd507477b12181309"
+    },
+    {
+      "source": "tools/capsule-react/tests/feature-requirements.test.ts",
+      "target": "tools/capsule-react/tests/feature-requirements.test.ts",
+      "sourceSha256": "60e6a1106aaa202a0359fcdf8bb8dcddf1f3947ee644b18357ae70d713c437e8",
+      "candidateSha256": "60e6a1106aaa202a0359fcdf8bb8dcddf1f3947ee644b18357ae70d713c437e8"
+    },
+    {
+      "source": "tools/capsule-react/tests/focus-events.test.ts",
+      "target": "tools/capsule-react/tests/focus-events.test.ts",
+      "sourceSha256": "0d4d88ca5f115a1ac44a250b1419762989cbf6d11a766a15558ad002f8f04fdb",
+      "candidateSha256": "0d4d88ca5f115a1ac44a250b1419762989cbf6d11a766a15558ad002f8f04fdb"
+    },
+    {
+      "source": "tools/capsule-react/tests/hover-events.test.ts",
+      "target": "tools/capsule-react/tests/hover-events.test.ts",
+      "sourceSha256": "2412a9df1a5062ef68a4ac8119810b689751e7620dca105fecb9a9d6a36c17e6",
+      "candidateSha256": "2412a9df1a5062ef68a4ac8119810b689751e7620dca105fecb9a9d6a36c17e6"
+    },
+    {
+      "source": "tools/capsule-react/tests/image-regions.test.ts",
+      "target": "tools/capsule-react/tests/image-regions.test.ts",
+      "sourceSha256": "187f010fa392a26e3712d9429c200717af459a7e54d3b023f634525e6099df80",
+      "candidateSha256": "187f010fa392a26e3712d9429c200717af459a7e54d3b023f634525e6099df80"
+    },
+    {
+      "source": "tools/capsule-react/tests/package-build.test.ts",
+      "target": "tools/capsule-react/tests/package-build.test.ts",
+      "sourceSha256": "937d29d63540a773f7f0d69f0597ecccf3ca1183594629dafbabb17c758be3e3",
+      "candidateSha256": "937d29d63540a773f7f0d69f0597ecccf3ca1183594629dafbabb17c758be3e3"
+    },
+    {
+      "source": "tools/capsule-react/tests/package-deploy.test.ts",
+      "target": "tools/capsule-react/tests/package-deploy.test.ts",
+      "sourceSha256": "88891ef341b4591d0a86a19fa60558a1daeb763fdd424b503f29813e53608b29",
+      "candidateSha256": "88891ef341b4591d0a86a19fa60558a1daeb763fdd424b503f29813e53608b29"
+    },
+    {
+      "source": "tools/capsule-react/tests/scheduler-deadlines.test.ts",
+      "target": "tools/capsule-react/tests/scheduler-deadlines.test.ts",
+      "sourceSha256": "51b369d236383787412f5e3ceafc8218fdf57ef63afde9236d09ce5a8b830ae9",
+      "candidateSha256": "51b369d236383787412f5e3ceafc8218fdf57ef63afde9236d09ce5a8b830ae9"
+    },
+    {
+      "source": "tools/capsule-react/tests/script-chunks.test.ts",
+      "target": "tools/capsule-react/tests/script-chunks.test.ts",
+      "sourceSha256": "feebb5ba752a0003095e60575f549d56cd04004fdc00d0f64c77d72acb58452e",
+      "candidateSha256": "feebb5ba752a0003095e60575f549d56cd04004fdc00d0f64c77d72acb58452e"
+    },
+    {
+      "source": "tools/capsule-react/tests/snapshot-lifecycle-fixture.tsx",
+      "target": "tools/capsule-react/tests/snapshot-lifecycle-fixture.tsx",
+      "sourceSha256": "9fd67dc8d4ede4dfb054ccdfaa2c5694e3389dfeeac8520e2b26993c8a18334a",
+      "candidateSha256": "9fd67dc8d4ede4dfb054ccdfaa2c5694e3389dfeeac8520e2b26993c8a18334a"
+    },
+    {
+      "source": "tools/capsule-react/tests/text-edit.test.ts",
+      "target": "tools/capsule-react/tests/text-edit.test.ts",
+      "sourceSha256": "43d48d00aeadd061c215c3b14d7d631e7670228e4167d7446025bc0fc873b49f",
+      "candidateSha256": "43d48d00aeadd061c215c3b14d7d631e7670228e4167d7446025bc0fc873b49f"
+    },
+    {
+      "source": "tools/capsule-react/tests/theme-references.test.ts",
+      "target": "tools/capsule-react/tests/theme-references.test.ts",
+      "sourceSha256": "28910316d1299f103de6f62a093ca65f46c15fd4a4fee8315e1e7f1a8f4bb33f",
+      "candidateSha256": "28910316d1299f103de6f62a093ca65f46c15fd4a4fee8315e1e7f1a8f4bb33f"
+    },
+    {
+      "source": "tools/capsule-react/tests/tool-boundaries.test.ts",
+      "target": "tools/capsule-react/tests/tool-boundaries.test.ts",
+      "sourceSha256": "a0424430fe7deb11e419b3217384047a4879e31fb4fe32a0fe68acd4eaf3e090",
+      "candidateSha256": "c876cecfd8137b3c571a639db225e1dbbd9edd70722d5e82915d1b3efe935166"
+    },
+    {
+      "source": "tools/capsule-react/tests/tsconfig.json",
+      "target": "tools/capsule-react/tests/tsconfig.json",
+      "sourceSha256": "1430fee14197eb0edfeac56369add5bddca5d4076b13b0185ac295f45796b63e",
+      "candidateSha256": "1430fee14197eb0edfeac56369add5bddca5d4076b13b0185ac295f45796b63e"
+    },
+    {
+      "source": "tools/capsule-react/tests/value-action.test.ts",
+      "target": "tools/capsule-react/tests/value-action.test.ts",
+      "sourceSha256": "1d5f18e7b93b2dabcdca0497b009f6000bdb2f054e30be7285a2186237be1407",
+      "candidateSha256": "1d5f18e7b93b2dabcdca0497b009f6000bdb2f054e30be7285a2186237be1407"
+    },
+    {
+      "source": "tools/capsule-react/tests/whole-observations.test.ts",
+      "target": "tools/capsule-react/tests/whole-observations.test.ts",
+      "sourceSha256": "5a4bcfdfc37c6f6574913f2d4ad7a8e5e6b5fac91688e0e49dcfdae15f3208b0",
+      "candidateSha256": "5a4bcfdfc37c6f6574913f2d4ad7a8e5e6b5fac91688e0e49dcfdae15f3208b0"
+    },
+    {
+      "source": "tools/capsule-react/tests/window-state.test.ts",
+      "target": "tools/capsule-react/tests/window-state.test.ts",
+      "sourceSha256": "96bbd9d3c88900e31b1851477f41e85eb134bf74e2677aa5bf6daab7942333fd",
+      "candidateSha256": "96bbd9d3c88900e31b1851477f41e85eb134bf74e2677aa5bf6daab7942333fd"
+    },
+    {
+      "source": "tools/capsule-react/tests/workshop-portability.test.ts",
+      "target": "tools/capsule-react/tests/workshop-portability.test.ts",
+      "sourceSha256": "c250ad6b4b6b9740ea81d5cf251bcebf8bd16a57fe2aec2e79415e555992d3a3",
+      "candidateSha256": "bf5dfe5a242ba6baf0dae606e0e7d1e8a7125a0203f0a6a04feae84303ef6372"
+    },
+    {
+      "source": "tools/capsule-react/tests/world-presentation.test.ts",
+      "target": "tools/capsule-react/tests/world-presentation.test.ts",
+      "sourceSha256": "4cf7e6f15ddc3a497480d5312415a0f77490c4c8093f0d9522730603585ed7ed",
+      "candidateSha256": "4cf7e6f15ddc3a497480d5312415a0f77490c4c8093f0d9522730603585ed7ed"
+    },
+    {
+      "source": "tools/capsule-react/tsconfig.json",
+      "target": "tools/capsule-react/tsconfig.json",
+      "sourceSha256": "f5e07ac751a7f08e9ae74e754a74085f831ba6f5c334fb3f1b2d35efff5c3f61",
+      "candidateSha256": "2c4a2556e841f290138ac2f43d65f372739623e7edb7488e51d8f6467e3203a2"
+    },
+    {
+      "source": "tools/capsule-react/tsconfig.tools.json",
+      "target": "tools/capsule-react/tsconfig.tools.json",
+      "sourceSha256": "4dd76da1874072b70f525c7bc0d609769416b44074265c2406393d84b6017f43",
+      "candidateSha256": "73eeb394930b63c2b8964dfe20c6432a2e86c50a49177ad5ec50568504e525d0"
+    },
+    {
+      "source": "tools/capsule-react/vitest.config.ts",
+      "target": "tools/capsule-react/vitest.config.ts",
+      "sourceSha256": "8e4677c26a5e141c15229285eb40e23ebb8d8ac315ff0e7e7566b8e44a0f4353",
+      "candidateSha256": "8e4677c26a5e141c15229285eb40e23ebb8d8ac315ff0e7e7566b8e44a0f4353"
+    }
+  ],
+  "adaptations": [
+    "Independent Capsule workspace, frozen Bun lock, quality scripts and Apache-2.0 metadata",
+    "Public feature imports and declared tool dependencies; explicit compiler CLI and corrected recovery builder",
+    "Strict recursive directory UTF-8 typing; public workshop export in isolated consumer proof",
+    "Neutralized documentation, missing source-only links removed, historical game workloads retained in origin"
+  ],
+  "newFiles": [
+    "tools/capsule-react/scripts/compile.ts",
+    "tools/capsule-react/scripts/build-feature-recovery.ts",
+    "tools/capsule-react/tests/recovery-build.test.ts",
+    "tools/capsule-native-tests/build-fixture.mjs"
+  ]
+}

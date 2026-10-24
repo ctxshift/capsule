@@ -1,0 +1,35 @@
+{
+  "name": "capsule",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "packageManager": "bun@1.3.6",
+  "workspaces": [
+    "packages/capsule-features",
+    "packages/capsule-react",
+    "packages/capsule-workshop",
+    "tools/capsule-react",
+    "examples/portable-demo-game",
+    "examples/addons/capsule-counter"
+  ],
+  "scripts": {
+    "typecheck": "bun run --filter \"*\" typecheck",
+    "test": "bun run --cwd packages/capsule-features test && bun run --cwd tools/capsule-react test",
+    "build:sdk": "bun tools/capsule-react/scripts/build.mjs --output .local/authoring-sdk.js",
+    "dev:demo": "bun examples/portable-demo-game/scripts/dev.ts --sdk .local/authoring-sdk.js",
+    "lint": "eslint packages/capsule-features packages/capsule-react packages/capsule-workshop tools/capsule-react examples --max-warnings 0",
+    "format:check": "prettier --check \"packages/capsule-{features,react,workshop}/**/*.{ts,tsx,mjs,json}\" \"tools/capsule-react/**/*.{ts,tsx,mjs,json}\" \"examples/**/*.{ts,tsx,mjs,json}\" package.json eslint.config.mjs .prettierrc.json",
+    "check:js": "bun run lint && bun run format:check"
+  },
+  "devDependencies": {
+    "@eslint/js": "9",
+    "eslint": "9",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "typescript-eslint": "8.71.2",
+    "@capsule/workshop": "workspace:*"
+  }
+}

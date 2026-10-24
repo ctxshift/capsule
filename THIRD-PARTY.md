@@ -21,3 +21,8 @@ distribution. System fonts used dynamically by tests are not copied here.
 No Host artwork or licensed game content is included. A release must validate
 the actual packed dependency closure and notices; this file is not a replacement
 for that release audit or a broader platform-support claim.
+
+Authoring builds also retain React/reconciler/scheduler notices under
+`tools/capsule-react/licenses/`. The frozen Bun lock records compiler, TypeScript,
+Vite, esbuild, Yoga and test/quality dependencies. These are installed development
+inputs, not copied game assets. Packed transitive notices remain a release gate.

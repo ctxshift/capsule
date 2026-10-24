@@ -1,0 +1,385 @@
+{
+  "advances": [
+    {
+      "code": 32,
+      "value": 9.6
+    },
+    {
+      "code": 33,
+      "value": 9.6
+    },
+    {
+      "code": 34,
+      "value": 9.6
+    },
+    {
+      "code": 35,
+      "value": 9.6
+    },
+    {
+      "code": 36,
+      "value": 9.6
+    },
+    {
+      "code": 37,
+      "value": 9.6
+    },
+    {
+      "code": 38,
+      "value": 9.6
+    },
+    {
+      "code": 39,
+      "value": 9.6
+    },
+    {
+      "code": 40,
+      "value": 9.6
+    },
+    {
+      "code": 41,
+      "value": 9.6
+    },
+    {
+      "code": 42,
+      "value": 9.6
+    },
+    {
+      "code": 43,
+      "value": 9.6
+    },
+    {
+      "code": 44,
+      "value": 9.6
+    },
+    {
+      "code": 45,
+      "value": 9.6
+    },
+    {
+      "code": 46,
+      "value": 9.6
+    },
+    {
+      "code": 47,
+      "value": 9.6
+    },
+    {
+      "code": 48,
+      "value": 9.6
+    },
+    {
+      "code": 49,
+      "value": 9.6
+    },
+    {
+      "code": 50,
+      "value": 9.6
+    },
+    {
+      "code": 51,
+      "value": 9.6
+    },
+    {
+      "code": 52,
+      "value": 9.6
+    },
+    {
+      "code": 53,
+      "value": 9.6
+    },
+    {
+      "code": 54,
+      "value": 9.6
+    },
+    {
+      "code": 55,
+      "value": 9.6
+    },
+    {
+      "code": 56,
+      "value": 9.6
+    },
+    {
+      "code": 57,
+      "value": 9.6
+    },
+    {
+      "code": 58,
+      "value": 9.6
+    },
+    {
+      "code": 59,
+      "value": 9.6
+    },
+    {
+      "code": 60,
+      "value": 9.6
+    },
+    {
+      "code": 61,
+      "value": 9.6
+    },
+    {
+      "code": 62,
+      "value": 9.6
+    },
+    {
+      "code": 63,
+      "value": 9.6
+    },
+    {
+      "code": 64,
+      "value": 9.6
+    },
+    {
+      "code": 65,
+      "value": 9.6
+    },
+    {
+      "code": 66,
+      "value": 9.6
+    },
+    {
+      "code": 67,
+      "value": 9.6
+    },
+    {
+      "code": 68,
+      "value": 9.6
+    },
+    {
+      "code": 69,
+      "value": 9.6
+    },
+    {
+      "code": 70,
+      "value": 9.6
+    },
+    {
+      "code": 71,
+      "value": 9.6
+    },
+    {
+      "code": 72,
+      "value": 9.6
+    },
+    {
+      "code": 73,
+      "value": 9.6
+    },
+    {
+      "code": 74,
+      "value": 9.6
+    },
+    {
+      "code": 75,
+      "value": 9.6
+    },
+    {
+      "code": 76,
+      "value": 9.6
+    },
+    {
+      "code": 77,
+      "value": 9.6
+    },
+    {
+      "code": 78,
+      "value": 9.6
+    },
+    {
+      "code": 79,
+      "value": 9.6
+    },
+    {
+      "code": 80,
+      "value": 9.6
+    },
+    {
+      "code": 81,
+      "value": 9.6
+    },
+    {
+      "code": 82,
+      "value": 9.6
+    },
+    {
+      "code": 83,
+      "value": 9.6
+    },
+    {
+      "code": 84,
+      "value": 9.6
+    },
+    {
+      "code": 85,
+      "value": 9.6
+    },
+    {
+      "code": 86,
+      "value": 9.6
+    },
+    {
+      "code": 87,
+      "value": 9.6
+    },
+    {
+      "code": 88,
+      "value": 9.6
+    },
+    {
+      "code": 89,
+      "value": 9.6
+    },
+    {
+      "code": 90,
+      "value": 9.6
+    },
+    {
+      "code": 91,
+      "value": 9.6
+    },
+    {
+      "code": 92,
+      "value": 9.6
+    },
+    {
+      "code": 93,
+      "value": 9.6
+    },
+    {
+      "code": 94,
+      "value": 9.6
+    },
+    {
+      "code": 95,
+      "value": 9.6
+    },
+    {
+      "code": 96,
+      "value": 9.6
+    },
+    {
+      "code": 97,
+      "value": 9.6
+    },
+    {
+      "code": 98,
+      "value": 9.6
+    },
+    {
+      "code": 99,
+      "value": 9.6
+    },
+    {
+      "code": 100,
+      "value": 9.6
+    },
+    {
+      "code": 101,
+      "value": 9.6
+    },
+    {
+      "code": 102,
+      "value": 9.6
+    },
+    {
+      "code": 103,
+      "value": 9.6
+    },
+    {
+      "code": 104,
+      "value": 9.6
+    },
+    {
+      "code": 105,
+      "value": 9.6
+    },
+    {
+      "code": 106,
+      "value": 9.6
+    },
+    {
+      "code": 107,
+      "value": 9.6
+    },
+    {
+      "code": 108,
+      "value": 9.6
+    },
+    {
+      "code": 109,
+      "value": 9.6
+    },
+    {
+      "code": 110,
+      "value": 9.6
+    },
+    {
+      "code": 111,
+      "value": 9.6
+    },
+    {
+      "code": 112,
+      "value": 9.6
+    },
+    {
+      "code": 113,
+      "value": 9.6
+    },
+    {
+      "code": 114,
+      "value": 9.6
+    },
+    {
+      "code": 115,
+      "value": 9.6
+    },
+    {
+      "code": 116,
+      "value": 9.6
+    },
+    {
+      "code": 117,
+      "value": 9.6
+    },
+    {
+      "code": 118,
+      "value": 9.6
+    },
+    {
+      "code": 119,
+      "value": 9.6
+    },
+    {
+      "code": 120,
+      "value": 9.6
+    },
+    {
+      "code": 121,
+      "value": 9.6
+    },
+    {
+      "code": 122,
+      "value": 9.6
+    },
+    {
+      "code": 123,
+      "value": 9.6
+    },
+    {
+      "code": 124,
+      "value": 9.6
+    },
+    {
+      "code": 125,
+      "value": 9.6
+    },
+    {
+      "code": 126,
+      "value": 9.6
+    }
+  ],
+  "pairs": []
+}

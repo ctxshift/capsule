@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "originRevision": "48795a96",
+  "packageMode": "private-source-workspace",
+  "tools": {
+    "node": "25.6.1",
+    "bun": "1.3.6",
+    "esbuild": "0.25.12",
+    "vitest": "4.0.18",
+    "typescript": "5.9.3"
+  },
+  "checks": {
+    "nativeImport": "163 files / 88 GUIDs / 5 boundaries unchanged",
+    "neutralCounterCompile": "857 bytes",
+    "typecheckWorkspaces": 6,
+    "publicWorkshopExternalReloadTest": "passed after export-only import change",
+    "lint": "passed",
+    "featureTests": 14,
+    "nativeSmoke": 21,
+    "nativeCwd": "Fresh OS temporary directory outside both source checkouts; resources and published host staged explicitly",
+    "realWasmRecovery": "passed: admission, read-only request, gap invalidation, reset, late subscriber, retirement",
+    "format": "passed",
+    "nativeLifecycle": 48,
+    "freshNativeAddonCompile": "1235 bytes",
+    "authoringTests": 42,
+    "freshExport": "Fresh staged-tree archive in an OS temporary directory: frozen install, all six workspace typechecks, 14 feature tests and 42 authoring tests passed without Host or source-workspace node_modules"
+  },
+  "stagedHashes": [
+    {
+      "sha256": "1F17251756F41283B483EE6813FCECE2788EB8B33F39B0E06477CB35F50BF25A",
+      "file": "bridge.dll"
+    },
+    {
+      "sha256": "E63276E59EFB43195B15716018A42B12B89249B3047DFA4E711C24F952C43393",
+      "file": "bundle.js"
+    },
+    {
+      "sha256": "0C5DFA49D0797B3599057D7B1428FA9C42E75542CC09F163CBE69D9DBCCFA5B7",
+      "file": "carrier.bytes"
+    },
+    {
+      "sha256": "AE0AA87E7464D4DC0E7308BF0B88E7C9A05D94D58FE630297F78B911B7CC996C",
+      "file": "sdk.js"
+    },
+    {
+      "sha256": "19B3880FBB92F1826C58AC9F5E2A472692B5FC3D012A1A7A41983CCF77544607",
+      "file": "wasmtime.dll"
+    },
+    {
+      "sha256": "7E7815F2304D6402F79CDC720880ED835DC162416FAB1DB28F3F147C3366EA43",
+      "file": "yoga.dll"
+    },
+    {
+      "sha256": "2FD143B712DF0F0D0BCE4FBBD135AC5005AF0AF6BC0D8A3E6CFE59F43F614E48",
+      "file": "Capsule.Core.dll"
+    },
+    {
+      "sha256": "2D879DCBED737C1E913F295B2CC6A0EADAD71AFC24E7BF242A188515A55F46B4",
+      "file": "Capsule.Core.pdb"
+    },
+    {
+      "sha256": "C5BC02FC70E4E08AD0BB5512579AAF9B29C33241D3BAA10A5828AEF23C75601D",
+      "file": "Capsule.Native.Tests.deps.json"
+    },
+    {
+      "sha256": "DE75173340A0849D5A1505411B312C2F2140431F3845A2209318743C21212AAB",
+      "file": "Capsule.Native.Tests.dll"
+    },
+    {
+      "sha256": "5D02A48621152F05D44CABE8422688276458A0765497F7CA65099867C415D903",
+      "file": "Capsule.Native.Tests.exe"
+    },
+    {
+      "sha256": "1D25EBA129703C514C600D3BE8650C552FBC162C7C76614E980609E418AE7E48",
+      "file": "Capsule.Native.Tests.pdb"
+    },
+    {
+      "sha256": "3C0BF772B95C93363A0A14E5DF78E4EC408C90F04CB7103205AF97B2D276FAB0",
+      "file": "Capsule.Native.Tests.runtimeconfig.json"
+    },
+    {
+      "sha256": "9097E327CCFCF2EFAE8CEC5BCB483433D6F35C10EF716F3D9D83A99603E32ADB",
+      "file": "Capsule.Package.dll"
+    },
+    {
+      "sha256": "158650D85946DBE361CD1D1D9A84A54025DB70B5FC7799DBA6B4709D5CBBBB56",
+      "file": "Capsule.Package.pdb"
+    },
+    {
+      "sha256": "F4871E00F94FA2E50976B1336ECE2CC05917A6CC159E5607FE5D3949560DAC62",
+      "file": "Capsule.Wasmtime.dll"
+    },
+    {
+      "sha256": "D599DFED5DB89D5727837BB688575B24DF5D624CCEED8255DFFD34AF9C1DEED2",
+      "file": "Capsule.Wasmtime.pdb"
+    },
+    {
+      "sha256": "2E878C35D8BBA0E8CCE4F8D90FC751604E136A5CD22EA180383C0818FC513F50",
+      "file": "Capsule.Yoga.dll"
+    },
+    {
+      "sha256": "AAF43569B34DD07F6E87F9655D9D77906F8B48751C086D6CB99B6E9E88F53020",
+      "file": "Capsule.Yoga.pdb"
+    },
+    {
+      "sha256": "4816C4276F575E4D85B80633A0DF2EADF29496FE00BDC33CD7843E61373BDE0E",
+      "file": "Newtonsoft.Json.dll"
+    }
+  ],
+  "retainedLogs": [
+    ".local/authoring-typecheck.log",
+    ".local/authoring-tests.log",
+    ".local/authoring-quality.log",
+    ".local/authoring-portability.log",
+    ".local/authoring-counter.log",
+    ".local/authoring-native-import.log",
+    ".local/authoring-native/external/",
+    ".local/authoring-native/recovery-native.log",
+    ".local/authoring-fresh-install.log",
+    ".local/authoring-fresh-typecheck.log",
+    ".local/authoring-fresh-tests.log"
+  ],
+  "boundaries": [
+    "No Unity Editor/Player changes or engine validation required for this authoring-only candidate",
+    "Compiler/browser publication reload is verified; rendered live reload in a running Unity game is a later explicit acceptance gate",
+    "Godot adapter not implemented",
+    "No registry publication, release tarball acceptance or Host consumer cutover",
+    "Host retains its source snapshot until consumer migration"
+  ]
+}

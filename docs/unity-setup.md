@@ -5,6 +5,11 @@ observed during validation. The native libraries are real UPM packages; an Edito
 setup wizard is not implemented yet. Authoring/compiler distribution, reusable
 game features and release feeds are separate stages.
 
+The intended everyday workflow is a running game plus a React UI development
+server, with edits live-reloading in the game. See [UI development](ui-development.md)
+for the loop and required end-to-end demonstration. Plugin setup should configure
+and validate that development connection as well as runtime dependencies.
+
 ## Requirements and verified starting point
 
 Use Unity **6000.6.3f1** on Windows x86_64 for the shipped native libraries. The
@@ -107,9 +112,9 @@ package failures retain the last-good addon publication. Capsule does not own
 account, economy or world outcomes and must not add a hardcoded game UI fallback.
 
 The neutral fixtures demonstrate adapter/lifecycle behavior, not a production
-game host, live backend binding or an OS IME session. Add the authoring/workshop
-guide when those packages are extracted; do not present Host's tools as the
-public Capsule SDK.
+game host, live backend binding or an OS IME session. The extracted authoring
+workspace supplies the [UI development entry point](ui-development.md); its
+browser preview and native proofs do not yet establish rendered game live reload.
 
 ## Proposed plugin setup automation
 

@@ -1,8 +1,9 @@
-# Capsule native packages
+# Capsule
 
 Capsule provides portable addon runtime libraries and a Unity presentation adapter.
-This repository currently contains the native package candidate; authoring SDK,
-compiler/workshop and reusable feature-package extraction are separate stages.
+This repository contains the native package candidate, React authoring SDK,
+feature infrastructure and compiler/workshop. Reusable RPG/MMO/skill packages
+and coordinated release feeds are separate stages.
 No game integration, game artwork, backend or remote registry is required for the
 portable checks below. No publication destination is configured.
 
@@ -11,6 +12,33 @@ licenses; see [third-party notices](THIRD-PARTY.md).
 
 See the [Unity setup guide](docs/unity-setup.md) for existing-project integration,
 first-run resource/settings checks and the proposed Editor setup automation.
+See [UI development](docs/ui-development.md) for the primary workflow: a running
+game plus a React development server, with UI edits live-reloading in the game.
+The engine demonstration remains an explicit acceptance gate.
+
+## React authoring
+
+From the repository root with Bun 1.3.6 and Node installed:
+
+```powershell
+bun install --frozen-lockfile
+bun run typecheck
+bun run test
+bun run check:js
+bun run build:sdk
+bun run dev:demo
+```
+
+The last command starts the neutral Aster browser preview and watched workshop.
+It does not start an engine host. UI projects use public `@capsule/react`,
+`@capsule/features` and `@capsule/workshop` exports. The compiler CLI accepts
+explicit source/project/manifest/output paths; see the
+[counter example](examples/addons/capsule-counter/README.md).
+Authoring is a private source workspace candidate; packed release installation
+is not yet established. The [authoring import map](docs/provenance/authoring-import.json)
+records the reviewed sources and adaptations; filtered authoring history is
+retained as a merge parent. [Verification](docs/verification/authoring.json)
+distinguishes browser/compiler/native proofs from in-game live reload.
 
 ## Layout
 
@@ -25,6 +53,10 @@ first-run resource/settings checks and the proposed Editor setup automation.
   projection and shaders, with separate EditMode/PlayMode test assemblies.
 - `packages/capsule-native`: standalone .NET Standard 2.1 projects compiling
   those same package-owned sources, with dependency enforcement.
+- `packages/capsule-{features,react,workshop}`: schemas/codecs/codegen, public
+  React controls/contracts, compiler and browser workshop.
+- `tools/capsule-react`: SDK build, diagnostics and authoring regression tests.
+- `examples`: neutral Aster and counter addons with no game content.
 - `tools`: neutral managed/native test runners and pinned native build recipes.
 - `unity`: minimal Unity 6000.6.3f1 consumer of the embedded packages.
 
@@ -82,8 +114,10 @@ pwsh -NoProfile -File tools/capsule-native-tests/run-isolated.ps1 `
 ```
 
 The checked-in compiled addon is the neutral TSX fixture snapshot, not game UI.
-Its source is adjacent under `fixture/`; the compiler is not extracted in this
-stage. The import provenance records its bundle digest. Omitting both SDK and
+Its source is adjacent under `fixture/`; rebuild it with the public compiler via
+`bun tools/capsule-native-tests/build-fixture.mjs <fresh-output-directory>`.
+Use that output's `bundle.js` with `.local/authoring-sdk.js` to test current
+authoring output. The import provenance records the snapshot digest. Omitting both SDK and
 bundle runs only the four-resource smoke. Native build/install operations are
 for runtime maintenance and require Zig 0.16.0; carrier builds additionally require
 wasm-tools 1.241.2. Never replace a DLL while an Editor or Player uses it.

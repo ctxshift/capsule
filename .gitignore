@@ -10,3 +10,6 @@ unity/MemoryCaptures/
 unity/*.csproj
 unity/*.sln
 unity/*.slnx
+
+**/node_modules/
+**/dist/

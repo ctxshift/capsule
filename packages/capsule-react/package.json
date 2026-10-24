@@ -1,0 +1,47 @@
+{
+  "name": "@capsule/react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./panel": {
+      "types": "./src/panel.tsx",
+      "default": "./src/panel.tsx"
+    },
+    "./text-edit": {
+      "types": "./src/text-edit.ts",
+      "default": "./src/text-edit.ts"
+    },
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./components": {
+      "types": "./src/components.tsx",
+      "default": "./src/components.tsx"
+    },
+    "./window-state": {
+      "types": "./src/window-state.ts",
+      "default": "./src/window-state.ts"
+    },
+    "./scroll-list": {
+      "types": "./src/scroll-list.tsx",
+      "default": "./src/scroll-list.tsx"
+    },
+    "./presentation": {
+      "types": "./src/presentation.ts",
+      "default": "./src/presentation.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "declarations": "tsc -p tsconfig.json --noEmit false --declaration --emitDeclarationOnly --outDir dist"
+  },
+  "peerDependencies": {
+    "react": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.27",
+    "typescript": "5.9.3"
+  }
+}

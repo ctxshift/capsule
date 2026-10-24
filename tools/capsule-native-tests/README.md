@@ -24,6 +24,16 @@ The script publishes the .NET host and copies the supplied resources. For lifecy
 mode, also pass `-Sdk <absolute-compatible-react-sdk.js>` and
 `-AddonBundle <absolute-compiled-neutral-addon.js>`. The four-resource smoke
 requires no React compiler or Host checkout.
+
+Build a fresh neutral addon through the public workshop compiler when authoring
+dependencies are installed:
+
+```powershell
+bun tools/capsule-native-tests/build-fixture.mjs .local/authoring-native/addon
+```
+
+Use the resulting `bundle.js` as `-AddonBundle`; pass the matching SDK as
+`-Sdk`. Keep those input paths explicit in native proofs.
 Execution changes working directory to the isolated output and passes only staged
 absolute resource paths. It needs .NET 9 and the copied native resources, not Unity
 or game files. Each subprocess has a 120-second deadline and retained stdout/stderr.
@@ -66,8 +76,10 @@ The Unity PlayMode text-input fixture separately exercises TMP editing and
 gameplay shortcut isolation; neither test claims an operating-system IME session.
 ## Observation transport measurements
 
-For feature snapshot recovery, provide a compatible SDK and compiled neutral
-recovery fixture as explicit absolute paths after the four native resources.
+For feature snapshot recovery, build the neutral fixture with
+`bun tools/capsule-react/scripts/build-feature-recovery.ts .local/authoring-native/recovery.js`.
+Provide a compatible SDK and the compiled recovery fixture as explicit absolute
+paths after the four native resources for `--feature-recovery`.
 The real Wasm guest exercises loader admission, an
 explicit read without a UI event, a dropped ordered revision, snapshot recovery,
 late subscription and retirement. `--imports` separately checks that gameplay
