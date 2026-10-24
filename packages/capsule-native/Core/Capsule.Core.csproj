@@ -2,6 +2,8 @@
   <PropertyGroup>
     <AssemblyName>Capsule.Core</AssemblyName>
     <RootNamespace>Capsule</RootNamespace>
+    <PackageId>Capsule.Core</PackageId>
+    <Description>Engine-independent Capsule contracts and session runtime.</Description>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../../unity/Packages/com.capsule.core/Runtime/*.cs" Link="Core/%(Filename)%(Extension)" />

@@ -2,10 +2,15 @@
   <PropertyGroup>
     <AssemblyName>Capsule.Yoga</AssemblyName>
     <RootNamespace>Capsule.Yoga</RootNamespace>
+    <PackageId>Capsule.Yoga</PackageId>
+    <Description>Capsule Yoga layout and Windows x64 native bridge.</Description>
     <CapsuleAllowCore>true</CapsuleAllowCore>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Core/Capsule.Core.csproj" />
     <Compile Include="../../../unity/Packages/com.capsule.yoga/Runtime/*.cs" Link="Yoga/%(Filename)%(Extension)" />
+    <None Include="../../../unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/portable_ui_yoga.dll" Pack="true" PackagePath="runtimes/win-x64/native/portable_ui_yoga.dll" />
+    <None Include="../../../unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/LICENSE.yoga.txt" Pack="true" PackagePath="licenses/LICENSE.yoga.txt" />
+    <None Include="../../../unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/provenance.json" Pack="true" PackagePath="licenses/yoga-provenance.json" />
   </ItemGroup>
 </Project>
