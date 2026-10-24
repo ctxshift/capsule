@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "origin": "Host",
+  "origin": "Capsule source history",
   "originRevision": "48795a9682086b67a39c3a5adf7720632108d9cd",
   "importedHistoryCommits": 64,
   "historyScope": "Exact reviewed current paths for the 121 authoring files; no broad game directories or former mixed tool trees. Original authorship retained through filtered history as a second parent. Earlier renamed paths remain in the origin repository.",
@@ -9,7 +9,7 @@
       "source": "examples/addons/capsule-counter/README.md",
       "target": "examples/addons/capsule-counter/README.md",
       "sourceSha256": "860ed16b51a2ba2287f94a9b0d36cfcf8f1f04960391dd4be60210b22eaece94",
-      "candidateSha256": "a2f6c986abea3dd0c2d74412087757419354beb869202aee7b43a4465ebee659"
+      "candidateSha256": "6416f563c16db0b9e141695990a9b00ef405243a603b0fbf7d17fa874fbaaa80"
     },
     {
       "source": "examples/addons/capsule-counter/addon.json",
@@ -123,7 +123,7 @@
       "source": "packages/capsule-features/README.md",
       "target": "packages/capsule-features/README.md",
       "sourceSha256": "d78c718d18c056e50c60a0b00cfa5ee096ce8d4f4ddbea07d8443a3de112b9c2",
-      "candidateSha256": "d78c718d18c056e50c60a0b00cfa5ee096ce8d4f4ddbea07d8443a3de112b9c2"
+      "candidateSha256": "4308adf68a66c47393df0482f39bcc73d698263d7772603879b1565b5998a197"
     },
     {
       "source": "packages/capsule-features/package.json",
@@ -207,7 +207,7 @@
       "source": "packages/capsule-react/README.md",
       "target": "packages/capsule-react/README.md",
       "sourceSha256": "36411d7366b0bc534de5ef3ea114197a690ea535dd3f018650f53f47f8622cac",
-      "candidateSha256": "5439ce7801f16fdd811c80ddcb9090bee155224afdc4343c4bbce4281008d927"
+      "candidateSha256": "da6443a3ee28f569935f38de5db82345db34c5f2f1413b3fad7a5ee9d3746938"
     },
     {
       "source": "packages/capsule-react/package.json",
@@ -279,7 +279,7 @@
       "source": "packages/capsule-workshop/README.md",
       "target": "packages/capsule-workshop/README.md",
       "sourceSha256": "4174e8490746fc7659fbc58cc2045547af82a88d45b814d1bceb329d042596a5",
-      "candidateSha256": "d1b8b73f46c4011c54dbfb3d3da488e2d806350434967e1db9308cd40c7d52ed"
+      "candidateSha256": "019633d7960cb1a1469ad25a56f07dc431043ceccba1fee5c9fcd6976058304d"
     },
     {
       "source": "packages/capsule-workshop/package.json",
@@ -675,7 +675,7 @@
       "source": "tools/capsule-react/tests/tool-boundaries.test.ts",
       "target": "tools/capsule-react/tests/tool-boundaries.test.ts",
       "sourceSha256": "a0424430fe7deb11e419b3217384047a4879e31fb4fe32a0fe68acd4eaf3e090",
-      "candidateSha256": "c876cecfd8137b3c571a639db225e1dbbd9edd70722d5e82915d1b3efe935166"
+      "candidateSha256": "59c1e06dec3533661c5132f329627d9a14bb201188a90fdb37fbe2b1c22fdfd9"
     },
     {
       "source": "tools/capsule-react/tests/tsconfig.json",
@@ -743,5 +743,6 @@
     "tools/capsule-react/scripts/build-feature-recovery.ts",
     "tools/capsule-react/tests/recovery-build.test.ts",
     "tools/capsule-native-tests/build-fixture.mjs"
-  ]
+  ],
+  "publicationPolicy": "Historical paths and comments use neutral host terminology; commit subjects omit unsupported tracker scopes. Runtime binaries, carrier, SDK, GUIDs and public APIs are preserved."
 }

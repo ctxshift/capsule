@@ -1,7 +1,7 @@
 # Capsule React SDK
 
 `@capsule/react` is the versioned, game-independent authoring package. It has no
-Host theme, artwork or gameplay dependencies. This is a private workspace package;
+game theme, artwork or gameplay dependencies. This is an unpublished workspace package;
 it is not yet published to a registry.
 
 - `@capsule/react`: declarative primitives, render and observation hooks.

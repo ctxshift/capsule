@@ -34,7 +34,7 @@ It does not start an engine host. UI projects use public `@capsule/react`,
 `@capsule/features` and `@capsule/workshop` exports. The compiler CLI accepts
 explicit source/project/manifest/output paths; see the
 [counter example](examples/addons/capsule-counter/README.md).
-Authoring is a private source workspace candidate; packed release installation
+Authoring is a source workspace candidate; packed release installation
 is not yet established. The [authoring import map](docs/provenance/authoring-import.json)
 records the reviewed sources and adaptations; filtered authoring history is
 retained as a merge parent. [Verification](docs/verification/authoring.json)
@@ -66,9 +66,8 @@ with its preceding path names and original authorship. The former shared parent
 folder metadata is archived outside Unity; each former assembly directory's GUID
 now belongs to its package's `Runtime` directory.
 
-Host remains on its existing source snapshot until its separate consumer cutover.
-Do not edit both snapshots as if they were synchronized or install the old source
-tree and these UPM packages into the same Unity project.
+Host integrations belong in their consuming projects. Do not install copied
+runtime sources and these UPM packages into the same Unity project.
 
 ## Portable verification
 
@@ -146,5 +145,5 @@ agent-unity test playmode Capsule.Unity.PlayModeTests --filter-type assembly --p
 
 For a closed project use `agent-unity test-headless` with the same mode/filter.
 Retain nonzero results and fresh logs. [Test extraction](docs/test-extraction.json)
-identifies removed game-only assertions. Package tests do not establish Host
+identifies excluded game-only assertions. Package tests do not establish game
 backend behavior, final game rendering parity, IL2CPP or additional platforms.

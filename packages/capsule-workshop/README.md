@@ -23,7 +23,7 @@ shows a fictional host with its own assets, mock observations and actions;
 engine hosts supply their own development connection and game providers. See
 [the development workflow](../../docs/ui-development.md) for the in-game acceptance gate.
 
-Source exports are for this private workspace stage; TypeScript tooling consumers
+Source exports are for this source workspace stage; TypeScript tooling consumers
 enable `allowJs` for the compiler modules. Registry publication is later release work.
 
 Large addons can declare `scriptEntries` in their source manifest: relative TS/TSX

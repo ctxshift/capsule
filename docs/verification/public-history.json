@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-24",
+  "rewrittenCommits": 174,
+  "reachableCommitsBeforeCleanup": 174,
+  "historyScan": "All reachable refs exported and checked: no private application identifier; unsupported commit scopes removed",
+  "provenanceCommitTargetsVerified": 172,
+  "authoringFileHashesVerified": 121,
+  "nativePayloads": "Current native binaries, carrier, SDK, GUIDs and public APIs preserved; runtime source edits are comments only",
+  "historicalWasmNameChangesValidated": 1,
+  "checks": {
+    "typecheckWorkspaces": 6,
+    "featureTests": 14,
+    "authoringTests": 42,
+    "finalBoundaryTest": 1,
+    "dependencyRejections": 10,
+    "importVerifierTests": 1,
+    "nativeImportFiles": 163,
+    "nativeImportGuids": 88,
+    "lint": "passed",
+    "format": "passed"
+  },
+  "publication": "No remote or visibility changes performed by this cleanup; local backup retained outside the repository"
+}

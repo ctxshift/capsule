@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "origin": "Host",
+  "origin": "Capsule source history",
   "originRevision": "e989ba941af61ee4dd27d0643441f8212924d879",
   "importedHistoryCommits": 108,
   "historyScope": [
@@ -159,7 +159,7 @@
     {
       "source": "client/Assets/Host/Capsule/Core/UiContract.cs",
       "target": "unity/Packages/com.capsule.core/Runtime/UiContract.cs",
-      "sha256": "1c698f50834a029bf24ccbe5ccdf3058b0c4ecdcb2658ef180b354fea98119b3",
+      "sha256": "7baf9f0ba7f3f30f3cad38b6b342ee81eb6d9044499e099454ddbfb58f29df61",
       "canonicalSha256": "7a23227aa3194e527a66e6435342dc3b460fdb3c57db6bddef8f76568e5d6ab2"
     },
     {
@@ -794,7 +794,7 @@
     {
       "source": "client/Assets/Host/Capsule/Unity/NativeUiWidget.cs",
       "target": "unity/Packages/com.capsule.unity/Runtime/NativeUiWidget.cs",
-      "sha256": "005ebb08091a58e13edf6a2f20d2d2444a2290d0a20b0e0244e5522fc0469bc3",
+      "sha256": "ef778d3bb4d940f3914844d4eef67b1fb020d028070ad26f501a6125eb9b8abe",
       "canonicalSha256": "8e74fb1024aa350a1b294e8dd920ddb622b39e17372249b65e6611bc980dcc23"
     },
     {
@@ -1065,5 +1065,6 @@
     "sha256": "e63276e59efb43195b15716018a42b12b89249b3047dfa4e711c24f952c43393",
     "generation": "Captured from the same neutral compiler fixture used by the Host ownership baseline; compiler extraction is a separate stage."
   },
-  "lineEndings": "Only .cs/.meta may undergo Git CRLF/LF translation, checked by canonical digest. Original byte hashes retained; all runtime resource hashes remain exact."
+  "lineEndings": "Only .cs/.meta may undergo Git CRLF/LF translation, checked by canonical digest. Original byte hashes retained; all runtime resource hashes remain exact.",
+  "publicationPolicy": "Historical paths and comments use neutral host terminology; commit subjects omit unsupported tracker scopes. Runtime binaries, carrier, SDK, GUIDs and public APIs are preserved."
 }
