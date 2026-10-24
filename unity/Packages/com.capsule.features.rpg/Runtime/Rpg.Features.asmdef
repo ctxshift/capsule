@@ -1,0 +1,9 @@
+{
+  "name": "Rpg.Features",
+  "rootNamespace": "Rpg.Features",
+  "references": [
+    "Capsule.Core"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

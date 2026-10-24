@@ -1,0 +1,12 @@
+{
+  "name": "com.capsule.features.mmo",
+  "version": "0.1.0",
+  "displayName": "Capsule MMO Features",
+  "description": "Generated native interfaces for reusable mmo feature contracts.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.capsule.core": "0.1.0"
+  },
+  "unityRelease": "3f1",
+  "license": "Apache-2.0"
+}

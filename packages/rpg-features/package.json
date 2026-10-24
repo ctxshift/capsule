@@ -1,0 +1,44 @@
+{
+  "name": "@capsule/rpg-features",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./hud": "./src/hud.ts",
+    "./hud-mock": "./src/hud-mock.ts",
+    "./nameplates": "./src/nameplates.ts",
+    "./nameplates-mock": "./src/nameplates-mock.ts",
+    "./dialogue": "./src/dialogue.ts",
+    "./bag": "./src/bag.ts",
+    "./equipment": "./src/equipment.ts",
+    "./equipment-mock": "./src/equipment-mock.ts",
+    "./loot": "./src/loot.ts",
+    "./loot-mock": "./src/loot-mock.ts",
+    "./merchant": "./src/merchant.ts",
+    "./merchant-mock": "./src/merchant-mock.ts",
+    "./items": "./src/items.ts",
+    "./contracts": "./src/contracts.ts",
+    "./dialogue-mock": "./src/dialogue-mock.ts",
+    "./quests": "./src/quests.ts",
+    "./quest-prerequisites": "./src/quest-prerequisites.ts",
+    "./quest-catalog": "./src/quest-catalog.ts",
+    "./quests-mock": "./src/quests-mock.ts",
+    "./effects": "./src/effects.ts",
+    "./effects-mock": "./src/effects-mock.ts",
+    "./combat": "./src/combat.ts",
+    "./combat-mock": "./src/combat-mock.ts"
+  },
+  "scripts": {
+    "generate:features": "bun scripts/generate.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@capsule/features": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}

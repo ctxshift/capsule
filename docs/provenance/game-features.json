@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "policy": "Extraction preserves package/feature identities, descriptor bytes, canonical native content and native GUIDs. Integration-owned behavior and source history are excluded.",
+  "packages": [
+    {
+      "name": "@capsule/rpg-features",
+      "version": "0.1.0",
+      "descriptors": "packages/rpg-features/generated/features.json",
+      "descriptorSha256": "52a2ffde1ce7bca3809cecf295dbc715b0cb3d57120f161b595c7e245fdedd1f",
+      "features": [
+        {
+          "name": "@rpg/combat",
+          "version": "1.0.0",
+          "fingerprint": "6dc56f295a6e9719a04cb4015d0592ad81eeb5caec0fc7edc9d9d92d0454d2fe"
+        },
+        {
+          "name": "@rpg/status-effects",
+          "version": "1.0.0",
+          "fingerprint": "3ace475d3bffcc8f5f25d9da771a8aab43aecf894a5bdde5ece93013bc93d526"
+        },
+        {
+          "name": "@rpg/quests",
+          "version": "1.0.0",
+          "fingerprint": "b9d00f2cc298955108f6aeb3aaeef562c1f7330bf729d8e6551092a11b4c25a0"
+        },
+        {
+          "name": "@rpg/hud-frames",
+          "version": "1.0.0",
+          "fingerprint": "651047f05d829f44ac7a0e9fb4c335587b1804e2808a0e0ace8c37cb3ecea185"
+        },
+        {
+          "name": "@rpg/nameplates",
+          "version": "1.0.0",
+          "fingerprint": "f17ea87e038fe2a33049ccdffd7fc561eef244f6a3c78dcdce3bcd9e5c9ac44b"
+        },
+        {
+          "name": "@rpg/dialogue",
+          "version": "1.0.0",
+          "fingerprint": "6fcbd6fafdbe08a696ef6fe5a7cf260e1dad436ac73dea60136324b0b9a34043"
+        },
+        {
+          "name": "@rpg/bag",
+          "version": "1.0.0",
+          "fingerprint": "30a9ccd49dedaaec385f950f5de0d074c503338f63e5dfae61db6d9c45c5c85d"
+        },
+        {
+          "name": "@rpg/equipment",
+          "version": "1.0.0",
+          "fingerprint": "8f8361b6b5d00466de6920c0c911a90ebee1c098ed6dc9499853d3c91bc8af02"
+        },
+        {
+          "name": "@rpg/loot",
+          "version": "1.0.0",
+          "fingerprint": "7b34edb85c748ae24fbc086fdcbc2a2708b22003702ada61f25f963742fc5193"
+        },
+        {
+          "name": "@rpg/merchant",
+          "version": "1.0.0",
+          "fingerprint": "e5e871d2d5b9bddf82ff0ccb64c4b6a5bbef5d9f4c101cf019d2698845d7c845"
+        }
+      ],
+      "nativeSource": "unity/Packages/com.capsule.features.rpg/Runtime/RpgFeatures.Generated.cs",
+      "canonicalNativeSha256": "21a86107299130c984d7980203569a9f2ebd5b010cde69a52bb3a67dcc6f49a6",
+      "guid": "ea594815f7ef4004bc754766431fbf75",
+      "generatedMetaSha256": "86673475abc748d14a6b80eefc855346a0105ea21818d4a66da9d50a135a475b",
+      "nativeAssembly": "Rpg.Features",
+      "generatedMetaCanonicalSha256": "86673475abc748d14a6b80eefc855346a0105ea21818d4a66da9d50a135a475b"
+    },
+    {
+      "name": "@capsule/mmo-features",
+      "version": "0.1.0",
+      "descriptors": "packages/mmo-features/generated/features.json",
+      "descriptorSha256": "e40bb222a4db03398918731b701f7295b4c1ec9499cf60b48abc2408d255a2bf",
+      "features": [
+        {
+          "name": "@mmo/chat",
+          "version": "1.0.0",
+          "fingerprint": "1957c95dcd1ea7c21cb96ce61691675dd16d0e463757868e8ea8081c3a44bee6"
+        },
+        {
+          "name": "@mmo/player-trade",
+          "version": "1.0.0",
+          "fingerprint": "5c31db5f5e800d2a8be4f66179711c62280f139de67ddae6805d027eaba45b74"
+        }
+      ],
+      "nativeSource": "unity/Packages/com.capsule.features.mmo/Runtime/MmoFeatures.Generated.cs",
+      "canonicalNativeSha256": "df39b15cd012fff66e1b8d75f1bee42a670d18253437ca0514c9a588eb1c1eac",
+      "guid": "8c3d9caff6374de2a97fc37f422fc016",
+      "generatedMetaSha256": "846f44dadb4342110637b833bb115e053d430e069d1941bd949a32f2b57c6f3e",
+      "nativeAssembly": "Mmo.Features",
+      "generatedMetaCanonicalSha256": "846f44dadb4342110637b833bb115e053d430e069d1941bd949a32f2b57c6f3e"
+    },
+    {
+      "name": "@capsule/skill-system-features",
+      "version": "0.1.0",
+      "descriptors": "packages/skill-system-features/generated/features.json",
+      "descriptorSha256": "589ff0e235488d24f135b3add6c13cd62b807026cf076fea5db6322a530437c6",
+      "features": [
+        {
+          "name": "@skill-system/progression",
+          "version": "1.0.0",
+          "fingerprint": "d565b7a1e669ac0d48a3274a0587281baff3e13dc80a9e3f322cfd57c3a89a36"
+        },
+        {
+          "name": "@skill-system/training",
+          "version": "1.0.0",
+          "fingerprint": "c0d7ee1ecf3fbb33b0f53bac7afac0c352060c955f99ede906a6c7fc7cca15d9"
+        }
+      ],
+      "nativeSource": "unity/Packages/com.capsule.features.skill-system/Runtime/SkillSystemFeatures.Generated.cs",
+      "canonicalNativeSha256": "2ff53faadb48811ea93a12ca1bab821aef59efb81d6651aa9d69ee127dc8bc9d",
+      "guid": "2405e0ee904740ab86a0d7016c3b6297",
+      "generatedMetaSha256": "58592e8f6315142416d3cad0cd59a18c8f16d1ca2451f71b436e379795b2fce3",
+      "nativeAssembly": "SkillSystem.Features",
+      "generatedMetaCanonicalSha256": "58592e8f6315142416d3cad0cd59a18c8f16d1ca2451f71b436e379795b2fce3"
+    }
+  ],
+  "inventoryExample": {
+    "version": "1.2.5",
+    "exampleOnly": true,
+    "descriptors": "packages/inventory-feature/generated/contracts.json",
+    "nativeSha256": "bdda93a6ca389cd87123509a8c00f8dcec775e7b189e288daa0ce4bb0b478023",
+    "name": "@capsule-example/inventory",
+    "nativeSource": "packages/inventory-feature/generated/InventoryFeature.Generated.cs",
+    "descriptorSha256": "89bf44cf1a3ca774af22cd90ec04ed128a676d3544f156565dca2c0a9864e838",
+    "canonicalNativeSha256": "bdda93a6ca389cd87123509a8c00f8dcec775e7b189e288daa0ce4bb0b478023"
+  },
+  "sharedQuestSchema": {
+    "path": "packages/rpg-features/generated/quest-prerequisites.json",
+    "sha256": "b98b6bea910c053459297cc99803e46cf994d9c9c838924905a7113a13a99ae2"
+  }
+}

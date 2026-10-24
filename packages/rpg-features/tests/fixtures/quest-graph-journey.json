@@ -1,0 +1,409 @@
+{
+  "catalog": {
+    "formatVersion": 1,
+    "definitions": [
+      {
+        "id": "hunt",
+        "revision": 1,
+        "title": "Valley Hunt",
+        "description": "Protect the valley.",
+        "prerequisites": {
+          "version": 1,
+          "root": "all",
+          "nodes": [
+            {
+              "id": "all",
+              "kind": "all",
+              "subject": "",
+              "children": ["permit", "choice"]
+            },
+            {
+              "id": "permit",
+              "kind": "fact",
+              "subject": "permit",
+              "children": []
+            },
+            {
+              "id": "choice",
+              "kind": "any",
+              "subject": "",
+              "children": ["trained", "invited"]
+            },
+            {
+              "id": "trained",
+              "kind": "fact",
+              "subject": "trained",
+              "children": []
+            },
+            {
+              "id": "invited",
+              "kind": "fact",
+              "subject": "invited",
+              "children": []
+            }
+          ]
+        },
+        "objectives": [
+          {
+            "id": "beasts",
+            "event": "defeat",
+            "target": "beast",
+            "world": "valley",
+            "description": "Defeat valley beasts",
+            "required": 1,
+            "after": []
+          }
+        ],
+        "completion": "report",
+        "repeat": "once",
+        "reward": "supplies"
+      },
+      {
+        "id": "patrol",
+        "revision": 1,
+        "title": "Valley Patrol",
+        "description": "Protect the valley.",
+        "prerequisites": {
+          "version": 1,
+          "root": "all",
+          "nodes": [
+            {
+              "id": "all",
+              "kind": "all",
+              "subject": "",
+              "children": ["permit", "choice"]
+            },
+            {
+              "id": "permit",
+              "kind": "fact",
+              "subject": "permit",
+              "children": []
+            },
+            {
+              "id": "choice",
+              "kind": "any",
+              "subject": "",
+              "children": ["trained", "invited"]
+            },
+            {
+              "id": "trained",
+              "kind": "fact",
+              "subject": "trained",
+              "children": []
+            },
+            {
+              "id": "invited",
+              "kind": "fact",
+              "subject": "invited",
+              "children": []
+            }
+          ]
+        },
+        "objectives": [
+          {
+            "id": "beasts",
+            "event": "defeat",
+            "target": "beast",
+            "world": "valley",
+            "description": "Defeat valley beasts",
+            "required": 2,
+            "after": []
+          }
+        ],
+        "completion": "report",
+        "repeat": "once",
+        "reward": "supplies"
+      }
+    ],
+    "bindings": [
+      {
+        "quest": "hunt",
+        "role": "offer",
+        "actor": "warden"
+      },
+      {
+        "quest": "hunt",
+        "role": "report",
+        "actor": "warden"
+      },
+      {
+        "quest": "patrol",
+        "role": "offer",
+        "actor": "warden"
+      },
+      {
+        "quest": "patrol",
+        "role": "report",
+        "actor": "warden"
+      }
+    ],
+    "facts": [
+      {
+        "id": "permit",
+        "type": "boolean",
+        "owner": "training",
+        "scope": "character",
+        "lifetime": "persistent"
+      },
+      {
+        "id": "trained",
+        "type": "boolean",
+        "owner": "training",
+        "scope": "character",
+        "lifetime": "persistent"
+      },
+      {
+        "id": "invited",
+        "type": "boolean",
+        "owner": "training",
+        "scope": "character",
+        "lifetime": "persistent"
+      }
+    ]
+  },
+  "references": {
+    "actors": ["warden"],
+    "rewards": ["supplies"],
+    "targets": ["beast"],
+    "worlds": ["valley"]
+  },
+  "checkpoints": [
+    {
+      "name": "accepted",
+      "state": {
+        "freshness": "fresh",
+        "epoch": 1,
+        "ownerGeneration": 1,
+        "sequence": 1,
+        "quests": [
+          {
+            "id": "hunt",
+            "status": "active",
+            "contentVersion": 1,
+            "title": "Valley Hunt",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 0,
+                "required": 1
+              }
+            ],
+            "rewards": []
+          },
+          {
+            "id": "patrol",
+            "status": "active",
+            "contentVersion": 1,
+            "title": "Valley Patrol",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 0,
+                "required": 2
+              }
+            ],
+            "rewards": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "shared-credit",
+      "state": {
+        "freshness": "fresh",
+        "epoch": 1,
+        "ownerGeneration": 1,
+        "sequence": 2,
+        "quests": [
+          {
+            "id": "hunt",
+            "status": "ready",
+            "contentVersion": 1,
+            "title": "Valley Hunt",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 1,
+                "required": 1
+              },
+              {
+                "id": "report",
+                "description": "Return to the Warden",
+                "current": 0,
+                "required": 1
+              }
+            ],
+            "rewards": []
+          },
+          {
+            "id": "patrol",
+            "status": "active",
+            "contentVersion": 1,
+            "title": "Valley Patrol",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 1,
+                "required": 2
+              }
+            ],
+            "rewards": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "reported-hunt",
+      "state": {
+        "freshness": "fresh",
+        "epoch": 1,
+        "ownerGeneration": 1,
+        "sequence": 3,
+        "quests": [
+          {
+            "id": "hunt",
+            "status": "completed",
+            "contentVersion": 1,
+            "title": "Valley Hunt",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 1,
+                "required": 1
+              }
+            ],
+            "rewards": []
+          },
+          {
+            "id": "patrol",
+            "status": "active",
+            "contentVersion": 1,
+            "title": "Valley Patrol",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 1,
+                "required": 2
+              }
+            ],
+            "rewards": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "ready-patrol",
+      "state": {
+        "freshness": "fresh",
+        "epoch": 1,
+        "ownerGeneration": 1,
+        "sequence": 4,
+        "quests": [
+          {
+            "id": "hunt",
+            "status": "completed",
+            "contentVersion": 1,
+            "title": "Valley Hunt",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 1,
+                "required": 1
+              }
+            ],
+            "rewards": []
+          },
+          {
+            "id": "patrol",
+            "status": "ready",
+            "contentVersion": 1,
+            "title": "Valley Patrol",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 2,
+                "required": 2
+              },
+              {
+                "id": "report",
+                "description": "Return to the Warden",
+                "current": 0,
+                "required": 1
+              }
+            ],
+            "rewards": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "completed",
+      "state": {
+        "freshness": "fresh",
+        "epoch": 1,
+        "ownerGeneration": 1,
+        "sequence": 5,
+        "quests": [
+          {
+            "id": "hunt",
+            "status": "completed",
+            "contentVersion": 1,
+            "title": "Valley Hunt",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 1,
+                "required": 1
+              }
+            ],
+            "rewards": []
+          },
+          {
+            "id": "patrol",
+            "status": "completed",
+            "contentVersion": 1,
+            "title": "Valley Patrol",
+            "description": "Protect the valley.",
+            "npc": "Warden",
+            "objectives": [
+              {
+                "id": "beasts",
+                "description": "Defeat valley beasts",
+                "current": 2,
+                "required": 2
+              }
+            ],
+            "rewards": []
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,295 @@
+[
+  {
+    "name": "@skill-system/progression",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "SkillProgressionState",
+          "fields": {
+            "freshness": {
+              "kind": "text",
+              "maxBytes": 16
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "ownerGeneration": {
+              "kind": "u32"
+            },
+            "sequence": {
+              "kind": "u32"
+            },
+            "available": {
+              "kind": "bool"
+            },
+            "skills": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "SkillProgress",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 32
+                  },
+                  "name": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "description": {
+                    "kind": "text",
+                    "maxBytes": 2048
+                  },
+                  "icon": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "rank": {
+                    "kind": "u32"
+                  },
+                  "maximumRank": {
+                    "kind": "u32"
+                  },
+                  "experience": {
+                    "kind": "u32"
+                  },
+                  "nextRankExperience": {
+                    "kind": "u32"
+                  },
+                  "unlocked": {
+                    "kind": "bool"
+                  },
+                  "requirements": {
+                    "kind": "list",
+                    "element": {
+                      "kind": "record",
+                      "name": "SkillRequirement",
+                      "fields": {
+                        "id": {
+                          "kind": "text",
+                          "maxBytes": 128
+                        },
+                        "description": {
+                          "kind": "text",
+                          "maxBytes": 512
+                        },
+                        "met": {
+                          "kind": "bool"
+                        }
+                      }
+                    },
+                    "maxCount": 32
+                  }
+                }
+              },
+              "maxCount": 256
+            },
+            "resources": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "ProgressionResource",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "value": {
+                    "kind": "u32"
+                  },
+                  "spent": {
+                    "kind": "u32"
+                  },
+                  "limit": {
+                    "kind": "u32"
+                  }
+                }
+              },
+              "maxCount": 32
+            }
+          }
+        },
+        "permission": "progression.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {},
+    "fingerprint": "d565b7a1e669ac0d48a3274a0587281baff3e13dc80a9e3f322cfd57c3a89a36"
+  },
+  {
+    "name": "@skill-system/training",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "TrainingState",
+          "fields": {
+            "freshness": {
+              "kind": "text",
+              "maxBytes": 16
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "ownerGeneration": {
+              "kind": "u32"
+            },
+            "sequence": {
+              "kind": "u32"
+            },
+            "open": {
+              "kind": "bool"
+            },
+            "source": {
+              "kind": "text",
+              "maxBytes": 128
+            },
+            "offers": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "TrainingOffer",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "skill": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "rank": {
+                    "kind": "u32"
+                  },
+                  "currentRank": {
+                    "kind": "u32"
+                  },
+                  "available": {
+                    "kind": "bool"
+                  },
+                  "reason": {
+                    "kind": "text",
+                    "maxBytes": 512
+                  },
+                  "costs": {
+                    "kind": "list",
+                    "element": {
+                      "kind": "record",
+                      "name": "SkillCost",
+                      "fields": {
+                        "resource": {
+                          "kind": "text",
+                          "maxBytes": 128
+                        },
+                        "amount": {
+                          "kind": "u32"
+                        },
+                        "affordable": {
+                          "kind": "bool"
+                        }
+                      }
+                    },
+                    "maxCount": 16
+                  },
+                  "requirements": {
+                    "kind": "list",
+                    "element": {
+                      "kind": "record",
+                      "name": "SkillRequirement",
+                      "fields": {
+                        "id": {
+                          "kind": "text",
+                          "maxBytes": 128
+                        },
+                        "description": {
+                          "kind": "text",
+                          "maxBytes": 512
+                        },
+                        "met": {
+                          "kind": "bool"
+                        }
+                      }
+                    },
+                    "maxCount": 32
+                  }
+                }
+              },
+              "maxCount": 128
+            },
+            "resources": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "ProgressionResource",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "value": {
+                    "kind": "u32"
+                  },
+                  "spent": {
+                    "kind": "u32"
+                  },
+                  "limit": {
+                    "kind": "u32"
+                  }
+                }
+              },
+              "maxCount": 32
+            }
+          }
+        },
+        "permission": "training.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Interact": {
+        "input": {
+          "kind": "record",
+          "name": "TrainingIntent",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "ownerGeneration": {
+              "kind": "u32"
+            },
+            "sequence": {
+              "kind": "u32"
+            },
+            "offer": {
+              "kind": "text",
+              "maxBytes": 128
+            },
+            "close": {
+              "kind": "bool"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "TrainingResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "training.interact"
+      }
+    },
+    "fingerprint": "c0d7ee1ecf3fbb33b0f53bac7afac0c352060c955f99ede906a6c7fc7cca15d9"
+  }
+]

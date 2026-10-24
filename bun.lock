@@ -80,6 +80,60 @@
         "react": "18.3.1",
       },
     },
+    "packages/inventory-feature": {
+      "name": "@capsule-example/inventory",
+      "version": "1.2.5",
+      "dependencies": {
+        "@capsule/features": "workspace:*",
+        "@capsule/react": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "25.0.3",
+        "@types/react": "18.3.27",
+        "typescript": "5.9.3",
+        "vitest": "4.0.18",
+      },
+      "peerDependencies": {
+        "react": "18.3.1",
+      },
+    },
+    "packages/mmo-features": {
+      "name": "@capsule/mmo-features",
+      "version": "0.1.0",
+      "dependencies": {
+        "@capsule/features": "workspace:*",
+        "@capsule/rpg-features": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "25.0.3",
+        "typescript": "5.9.3",
+        "vitest": "4.0.18",
+      },
+    },
+    "packages/rpg-features": {
+      "name": "@capsule/rpg-features",
+      "version": "0.1.0",
+      "dependencies": {
+        "@capsule/features": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "25.0.3",
+        "typescript": "5.9.3",
+        "vitest": "4.0.18",
+      },
+    },
+    "packages/skill-system-features": {
+      "name": "@capsule/skill-system-features",
+      "version": "0.1.0",
+      "dependencies": {
+        "@capsule/features": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/node": "25.0.3",
+        "typescript": "5.9.3",
+        "vitest": "4.0.18",
+      },
+    },
     "tools/capsule-react": {
       "name": "@capsule/react-tools",
       "version": "0.1.0",
@@ -138,13 +192,21 @@
 
     "@babel/types": ["@babel/types@7.29.11", "", { "dependencies": { "@babel/helper-string-parser": "^7.29.11", "@babel/helper-validator-identifier": "^7.29.7" } }, "sha512-WCsemW40Cpc6gouC1SrY6PBaZ+oLRlEVY9XBvZBI7il/HyUrb2nJ505wE1MHEFyDZNnrWDEuy4jL50WVHfTTSQ=="],
 
+    "@capsule-example/inventory": ["@capsule-example/inventory@workspace:packages/inventory-feature"],
+
     "@capsule-examples/counter": ["@capsule-examples/counter@workspace:examples/addons/capsule-counter"],
 
     "@capsule/features": ["@capsule/features@workspace:packages/capsule-features"],
 
+    "@capsule/mmo-features": ["@capsule/mmo-features@workspace:packages/mmo-features"],
+
     "@capsule/react": ["@capsule/react@workspace:packages/capsule-react"],
 
     "@capsule/react-tools": ["@capsule/react-tools@workspace:tools/capsule-react"],
+
+    "@capsule/rpg-features": ["@capsule/rpg-features@workspace:packages/rpg-features"],
+
+    "@capsule/skill-system-features": ["@capsule/skill-system-features@workspace:packages/skill-system-features"],
 
     "@capsule/workshop": ["@capsule/workshop@workspace:packages/capsule-workshop"],
 

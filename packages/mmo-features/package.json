@@ -1,0 +1,27 @@
+{
+  "name": "@capsule/mmo-features",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./chat": "./src/chat.ts",
+    "./chat-mock": "./src/chat-mock.ts",
+    "./trade": "./src/trade.ts",
+    "./trade-mock": "./src/trade-mock.ts",
+    "./contracts": "./src/contracts.ts"
+  },
+  "scripts": {
+    "generate:features": "bun scripts/generate.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@capsule/features": "workspace:*",
+    "@capsule/rpg-features": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}

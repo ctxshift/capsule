@@ -1,8 +1,20 @@
+# Authored JavaScript/TypeScript must agree with Prettier on fresh Windows checkouts.
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+package.json text eol=lf
+.prettierrc.json text eol=lf
+packages/**/*.json text eol=lf
+tools/capsule-react/**/*.json text eol=lf
+examples/**/*.json text eol=lf
+
 # Preserve Unity serialization and imported upstream bytes without whitespace repair.
 unity/Packages/**/Runtime/** -text -whitespace
 unity/Packages/**/*.cs text=auto whitespace
 unity/Packages/**/*.meta text=auto -whitespace
 *.meta -whitespace
+packages/*/generated/*.json -text
 unity/ProjectSettings/** -whitespace
 "unity/Assets/TextMesh Pro/**" -whitespace
 tools/capsule-quickjs/QuickJS-LICENSE.txt -whitespace

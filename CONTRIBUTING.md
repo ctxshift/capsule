@@ -16,6 +16,11 @@ provided separately from mise. Engine validation uses the explicit project and
 the tooling described in [Unity setup](docs/unity-setup.md); ordinary authoring
 checks do not start an Editor or game.
 
+`mise run generate` updates feature descriptors and canonical native contracts;
+`mise run check-features` checks drift, dependency direction and neutral providers.
+The root `check` task includes this gate. Generated descriptor JSON is owned by
+the generator and excluded from source formatting.
+
 `mise run build-sdk` builds a local runtime artifact. `mise run dev` starts the
 neutral React workshop/browser preview. See [UI development](docs/ui-development.md)
 for the running-game development goal and verification boundaries. Use

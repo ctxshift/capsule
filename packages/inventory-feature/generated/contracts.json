@@ -1,0 +1,143 @@
+[
+  {
+    "name": "@capsule-example/items",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "ItemState",
+          "fields": {
+            "revision": {
+              "kind": "u32"
+            },
+            "items": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "Item",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "name": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "asset": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  }
+                }
+              },
+              "maxCount": 4096
+            }
+          }
+        },
+        "permission": "items.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {},
+    "fingerprint": "a0077b6f3e0184219e32e53d050da1761d80676bb6e73c88cf9de944e27635b1"
+  },
+  {
+    "name": "@capsule-example/inventory",
+    "version": "1.2.5",
+    "dependencies": {
+      "@capsule-example/items": "1.0.*"
+    },
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "InventoryState",
+          "fields": {
+            "available": {
+              "kind": "bool"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "entries": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "InventoryEntry",
+                "fields": {
+                  "item": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "container": {
+                    "kind": "text",
+                    "maxBytes": 64
+                  },
+                  "quantity": {
+                    "kind": "u32"
+                  },
+                  "transferable": {
+                    "kind": "bool"
+                  }
+                }
+              },
+              "maxCount": 4096
+            }
+          }
+        },
+        "permission": "inventory.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Transfer": {
+        "input": {
+          "kind": "record",
+          "name": "Transfer",
+          "fields": {
+            "requestId": {
+              "kind": "u32"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "item": {
+              "kind": "text",
+              "maxBytes": 128
+            },
+            "destination": {
+              "kind": "text",
+              "maxBytes": 64
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "TransferResult",
+          "fields": {
+            "requestId": {
+              "kind": "u32"
+            },
+            "outcome": {
+              "kind": "u32"
+            },
+            "reason": {
+              "kind": "text",
+              "maxBytes": 256
+            }
+          }
+        },
+        "permission": "inventory.transfer"
+      }
+    },
+    "fingerprint": "370bf4cc8f4cffc80338b82681c06bafea1b64788d237e13f8ae230f19cd67ac"
+  }
+]

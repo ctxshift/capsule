@@ -2,8 +2,8 @@
 
 Capsule provides portable addon runtime libraries and a Unity presentation adapter.
 This repository contains the native package candidate, React authoring SDK,
-feature infrastructure and compiler/workshop. Reusable RPG/MMO/skill packages
-and coordinated release feeds are separate stages.
+feature infrastructure, compiler/workshop and reusable RPG/MMO/skill packages.
+Coordinated release feeds remain a separate stage.
 No game integration, game artwork, backend or remote registry is required for the
 portable checks below. No publication destination is configured.
 
@@ -12,6 +12,8 @@ licenses; see [third-party notices](THIRD-PARTY.md).
 
 See the [Unity setup guide](docs/unity-setup.md) for existing-project integration,
 first-run resource/settings checks and the proposed Editor setup automation.
+See [contributing](CONTRIBUTING.md) for pinned mise tools and the Capsule Bees
+tracker, and [game features](docs/game-features.md) for contracts and generators.
 See [UI development](docs/ui-development.md) for the primary workflow: a running
 game plus a React development server, with UI edits live-reloading in the game.
 The engine demonstration remains an explicit acceptance gate.
@@ -57,6 +59,10 @@ distinguishes browser/compiler/native proofs from in-game live reload.
   React controls/contracts, compiler and browser workshop.
 - `tools/capsule-react`: SDK build, diagnostics and authoring regression tests.
 - `examples`: neutral Aster and counter addons with no game content.
+- `packages/{rpg-features,mmo-features,skill-system-features}`: reusable feature
+  definitions, mocks and native contract projects.
+- `packages/inventory-feature`: example-only inventory contract and view.
+- `unity/Packages/com.capsule.features.*`: canonical generated native contracts.
 - `tools`: neutral managed/native test runners and pinned native build recipes.
 - `unity`: minimal Unity 6000.6.3f1 consumer of the embedded packages.
 

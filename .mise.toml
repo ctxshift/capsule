@@ -25,8 +25,16 @@ run = "bun run format"
 
 [tasks.check]
 description = "Check workspace types, source quality, contracts and native imports"
-depends = ["typecheck", "js-check"]
+depends = ["typecheck", "js-check", "check-features"]
 run = "node tools/verify-native-import.mjs"
+
+[tasks.check-features]
+description = "Check contract generation, dependencies and native providers"
+run = "bun run check:features"
+
+[tasks.generate]
+description = "Regenerate reusable feature contracts and example bindings"
+run = "bun run generate:features"
 
 [tasks.build-sdk]
 description = "Build the React host SDK without installing it into an engine"

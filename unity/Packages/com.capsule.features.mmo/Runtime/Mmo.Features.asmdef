@@ -1,0 +1,9 @@
+{
+  "name": "Mmo.Features",
+  "rootNamespace": "Mmo.Features",
+  "references": [
+    "Capsule.Core"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

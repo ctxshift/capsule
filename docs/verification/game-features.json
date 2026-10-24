@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-24",
+  "capsuleBaseline": "a7dd78a",
+  "packageMode": "independent-source-workspace",
+  "tools": {
+    "bees": "0.4.0",
+    "dotnetSdk": "10.0.401",
+    "node": "25.6.1",
+    "bun": "1.3.6"
+  },
+  "preserved": {
+    "publicPackageNamesAndVersions": "unchanged",
+    "generatedNativeContracts": 3,
+    "productionNativeContent": "unchanged after LF normalization",
+    "descriptorJsonFiles": 5,
+    "inventoryNativeBytes": "unchanged",
+    "runtimeBinaries": "unchanged",
+    "productionFeatures": 14,
+    "exampleFeatures": 2,
+    "generatedNativeGuids": 3
+  },
+  "checks": {
+    "nodeToolTests": 3,
+    "nativePackageBoundaries": 8,
+    "lint": "passed",
+    "miseTasks": 11,
+    "workspaceTypechecks": 10,
+    "independentConsumer": "Fresh temporary source workspace installs all declared dependencies; 16 public definitions, codegen, React peer resolution and mock admission",
+    "nativeFixtures": [
+      "RPG/MMO/skill providers, state publication, request identity and codec bounds",
+      "Inventory TypeScript/C# cross-language encoding and binding lifecycle"
+    ],
+    "nativeImportFiles": 175,
+    "freshCheckoutLineEndings": "Explicit authored LF attributes; exact generated descriptors and binary resources preserved",
+    "nativeContractLibraries": 3,
+    "freshCheckout": "Frozen install, capsule-prefix Bees reconstruction and mise run check passed in an exported OS temporary checkout",
+    "featureTests": {
+      "skillSystem": 3,
+      "mmo": 4,
+      "rpg": 29,
+      "inventory": 8
+    },
+    "nativeImportGuids": 91,
+    "format": "passed"
+  },
+  "historyPolicy": "Reviewed source snapshots only; no consumer history imported",
+  "retainedLogs": [
+    ".local/feature-extraction/",
+    ".local/feature-complete-check.log",
+    ".local/feature-consumer-proof.log",
+    ".local/feature-fresh-install.log",
+    ".local/feature-fresh-bees.log",
+    ".local/feature-fresh-check.log",
+    ".local/feature-final-quality.log",
+    ".local/feature-final-import-tests.log"
+  ],
+  "boundaries": [
+    "New Unity feature packages checked structurally; no Editor import/build, Player, backend or rendered gameplay acceptance claimed",
+    "Source consumer installation is verified; release tarballs, private feeds and registry publication remain separate",
+    "The running-game React live-reload demonstration remains an explicit later gate",
+    "No consumer cutover or source deletion performed"
+  ]
+}

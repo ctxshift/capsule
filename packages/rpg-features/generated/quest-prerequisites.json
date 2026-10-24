@@ -1,0 +1,47 @@
+{
+  "format": "@rpg/quest-prerequisites",
+  "version": 1,
+  "schema": {
+    "kind": "record",
+    "name": "QuestPrerequisites",
+    "fields": {
+      "version": {
+        "kind": "u32"
+      },
+      "root": {
+        "kind": "text",
+        "maxBytes": 128
+      },
+      "nodes": {
+        "kind": "list",
+        "element": {
+          "kind": "record",
+          "name": "QuestConditionNode",
+          "fields": {
+            "id": {
+              "kind": "text",
+              "maxBytes": 128
+            },
+            "kind": {
+              "kind": "text",
+              "maxBytes": 32
+            },
+            "subject": {
+              "kind": "text",
+              "maxBytes": 128
+            },
+            "children": {
+              "kind": "list",
+              "element": {
+                "kind": "text",
+                "maxBytes": 128
+              },
+              "maxCount": 32
+            }
+          }
+        },
+        "maxCount": 256
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@capsule/skill-system-features",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./progression": "./src/progression.ts",
+    "./training": "./src/training.ts",
+    "./mocks": "./src/mocks.ts",
+    "./contracts": "./src/contracts.ts"
+  },
+  "scripts": {
+    "generate:features": "bun scripts/generate.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@capsule/features": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.3",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  }
+}

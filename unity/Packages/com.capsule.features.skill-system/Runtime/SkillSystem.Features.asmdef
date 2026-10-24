@@ -1,0 +1,9 @@
+{
+  "name": "SkillSystem.Features",
+  "rootNamespace": "SkillSystem.Features",
+  "references": [
+    "Capsule.Core"
+  ],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

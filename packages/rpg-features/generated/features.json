@@ -1,0 +1,1043 @@
+[
+  {
+    "name": "@rpg/combat",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "CombatState",
+          "fields": {
+            "available": {
+              "kind": "bool"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "slots": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "CombatSlot",
+                "fields": {
+                  "action": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "available": {
+                    "kind": "bool"
+                  },
+                  "active": {
+                    "kind": "bool"
+                  },
+                  "name": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "icon": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "phase": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "durationMs": {
+                    "kind": "u32"
+                  },
+                  "revision": {
+                    "kind": "u32"
+                  },
+                  "queued": {
+                    "kind": "bool"
+                  }
+                }
+              },
+              "maxCount": 64
+            },
+            "hits": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "CombatHit",
+                "fields": {
+                  "entity": {
+                    "kind": "u32"
+                  },
+                  "generation": {
+                    "kind": "u32"
+                  },
+                  "revision": {
+                    "kind": "u32"
+                  },
+                  "damage": {
+                    "kind": "u32"
+                  },
+                  "lane": {
+                    "kind": "u32"
+                  },
+                  "incoming": {
+                    "kind": "bool"
+                  },
+                  "healing": {
+                    "kind": "bool"
+                  }
+                }
+              },
+              "maxCount": 64
+            },
+            "errorRevision": {
+              "kind": "u32"
+            },
+            "error": {
+              "kind": "text",
+              "maxBytes": 80
+            }
+          }
+        },
+        "permission": "combat.read",
+        "delivery": "ordered"
+      }
+    },
+    "requests": {
+      "Activate": {
+        "input": {
+          "kind": "record",
+          "name": "ActivateCombat",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "slot": {
+              "kind": "u32"
+            },
+            "action": {
+              "kind": "text",
+              "maxBytes": 128
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "CombatActivation",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "combat.activate"
+      }
+    },
+    "fingerprint": "6dc56f295a6e9719a04cb4015d0592ad81eeb5caec0fc7edc9d9d92d0454d2fe"
+  },
+  {
+    "name": "@rpg/status-effects",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "EffectsState",
+          "fields": {
+            "available": {
+              "kind": "bool"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "owner": {
+              "kind": "record",
+              "name": "EffectActor",
+              "fields": {
+                "entity": {
+                  "kind": "u32"
+                },
+                "generation": {
+                  "kind": "u32"
+                },
+                "effects": {
+                  "kind": "list",
+                  "element": {
+                    "kind": "record",
+                    "name": "StatusEffect",
+                    "fields": {
+                      "instance": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "id": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "name": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "icon": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "kind": {
+                        "kind": "text",
+                        "maxBytes": 32
+                      },
+                      "stacks": {
+                        "kind": "u32"
+                      },
+                      "timed": {
+                        "kind": "bool"
+                      },
+                      "remainingMs": {
+                        "kind": "u32"
+                      }
+                    }
+                  },
+                  "maxCount": 64
+                }
+              }
+            },
+            "target": {
+              "kind": "record",
+              "name": "EffectActor",
+              "fields": {
+                "entity": {
+                  "kind": "u32"
+                },
+                "generation": {
+                  "kind": "u32"
+                },
+                "effects": {
+                  "kind": "list",
+                  "element": {
+                    "kind": "record",
+                    "name": "StatusEffect",
+                    "fields": {
+                      "instance": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "id": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "name": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "icon": {
+                        "kind": "text",
+                        "maxBytes": 128
+                      },
+                      "kind": {
+                        "kind": "text",
+                        "maxBytes": 32
+                      },
+                      "stacks": {
+                        "kind": "u32"
+                      },
+                      "timed": {
+                        "kind": "bool"
+                      },
+                      "remainingMs": {
+                        "kind": "u32"
+                      }
+                    }
+                  },
+                  "maxCount": 64
+                }
+              }
+            }
+          }
+        },
+        "permission": "effects.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {},
+    "fingerprint": "3ace475d3bffcc8f5f25d9da771a8aab43aecf894a5bdde5ece93013bc93d526"
+  },
+  {
+    "name": "@rpg/quests",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "QuestState",
+          "fields": {
+            "freshness": {
+              "kind": "text",
+              "maxBytes": 16
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "ownerGeneration": {
+              "kind": "u32"
+            },
+            "sequence": {
+              "kind": "u32"
+            },
+            "quests": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "QuestEntry",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "status": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "contentVersion": {
+                    "kind": "u32"
+                  },
+                  "title": {
+                    "kind": "text",
+                    "maxBytes": 512
+                  },
+                  "description": {
+                    "kind": "text",
+                    "maxBytes": 4096
+                  },
+                  "npc": {
+                    "kind": "text",
+                    "maxBytes": 512
+                  },
+                  "objectives": {
+                    "kind": "list",
+                    "element": {
+                      "kind": "record",
+                      "name": "QuestObjective",
+                      "fields": {
+                        "id": {
+                          "kind": "text",
+                          "maxBytes": 128
+                        },
+                        "description": {
+                          "kind": "text",
+                          "maxBytes": 1024
+                        },
+                        "current": {
+                          "kind": "u32"
+                        },
+                        "required": {
+                          "kind": "u32"
+                        }
+                      }
+                    },
+                    "maxCount": 8
+                  },
+                  "rewards": {
+                    "kind": "list",
+                    "element": {
+                      "kind": "record",
+                      "name": "QuestReward",
+                      "fields": {
+                        "kind": {
+                          "kind": "text",
+                          "maxBytes": 32
+                        },
+                        "id": {
+                          "kind": "text",
+                          "maxBytes": 128
+                        },
+                        "name": {
+                          "kind": "text",
+                          "maxBytes": 128
+                        },
+                        "quantity": {
+                          "kind": "u32"
+                        }
+                      }
+                    },
+                    "maxCount": 16
+                  }
+                }
+              },
+              "maxCount": 64
+            }
+          }
+        },
+        "permission": "quests.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {},
+    "fingerprint": "b9d00f2cc298955108f6aeb3aaeef562c1f7330bf729d8e6551092a11b4c25a0"
+  },
+  {
+    "name": "@rpg/hud-frames",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "HudFrameState",
+          "fields": {
+            "available": {
+              "kind": "bool"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "player": {
+              "kind": "record",
+              "name": "HudUnitState",
+              "fields": {
+                "present": {
+                  "kind": "bool"
+                },
+                "name": {
+                  "kind": "text",
+                  "maxBytes": 80
+                },
+                "current": {
+                  "kind": "u32"
+                },
+                "maximum": {
+                  "kind": "u32"
+                },
+                "portrait": {
+                  "kind": "text",
+                  "maxBytes": 16
+                }
+              }
+            },
+            "target": {
+              "kind": "record",
+              "name": "HudUnitState",
+              "fields": {
+                "present": {
+                  "kind": "bool"
+                },
+                "name": {
+                  "kind": "text",
+                  "maxBytes": 80
+                },
+                "current": {
+                  "kind": "u32"
+                },
+                "maximum": {
+                  "kind": "u32"
+                },
+                "portrait": {
+                  "kind": "text",
+                  "maxBytes": 16
+                }
+              }
+            }
+          }
+        },
+        "permission": "hud.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {},
+    "fingerprint": "651047f05d829f44ac7a0e9fb4c335587b1804e2808a0e0ace8c37cb3ecea185"
+  },
+  {
+    "name": "@rpg/nameplates",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "NameplateState",
+          "fields": {
+            "available": {
+              "kind": "bool"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "selected": {
+              "kind": "u32"
+            },
+            "actors": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "NameplateActor",
+                "fields": {
+                  "entity": {
+                    "kind": "u32"
+                  },
+                  "generation": {
+                    "kind": "u32"
+                  },
+                  "current": {
+                    "kind": "u32"
+                  },
+                  "maximum": {
+                    "kind": "u32"
+                  },
+                  "kind": {
+                    "kind": "u32"
+                  },
+                  "relation": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "questMarker": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "name": {
+                    "kind": "text",
+                    "maxBytes": 80
+                  }
+                }
+              },
+              "maxCount": 64
+            }
+          }
+        },
+        "permission": "nameplates.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Select": {
+        "input": {
+          "kind": "record",
+          "name": "SelectNameplate",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "entity": {
+              "kind": "u32"
+            },
+            "generation": {
+              "kind": "u32"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "NameplateSelection",
+          "fields": {
+            "selected": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "nameplates.select"
+      }
+    },
+    "fingerprint": "f17ea87e038fe2a33049ccdffd7fc561eef244f6a3c78dcdce3bcd9e5c9ac44b"
+  },
+  {
+    "name": "@rpg/dialogue",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "DialogueState",
+          "fields": {
+            "revision": {
+              "kind": "u32"
+            },
+            "open": {
+              "kind": "bool"
+            },
+            "title": {
+              "kind": "text",
+              "maxBytes": 128
+            },
+            "body": {
+              "kind": "text",
+              "maxBytes": 2048
+            },
+            "prompt": {
+              "kind": "text",
+              "maxBytes": 256
+            },
+            "primary": {
+              "kind": "text",
+              "maxBytes": 64
+            },
+            "primaryEnabled": {
+              "kind": "bool"
+            },
+            "secondary": {
+              "kind": "text",
+              "maxBytes": 64
+            },
+            "secondaryEnabled": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "dialogue.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Act": {
+        "input": {
+          "kind": "record",
+          "name": "DialogueIntent",
+          "fields": {
+            "revision": {
+              "kind": "u32"
+            },
+            "action": {
+              "kind": "u32"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "DialogueResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "dialogue.act"
+      }
+    },
+    "fingerprint": "6fcbd6fafdbe08a696ef6fe5a7cf260e1dad436ac73dea60136324b0b9a34043"
+  },
+  {
+    "name": "@rpg/bag",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "BagState",
+          "fields": {
+            "status": {
+              "kind": "text",
+              "maxBytes": 16
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "items": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "BagItem",
+                "fields": {
+                  "token": {
+                    "kind": "u32"
+                  },
+                  "quantity": {
+                    "kind": "u32"
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "canEquip": {
+                    "kind": "bool"
+                  }
+                }
+              },
+              "maxCount": 24
+            }
+          }
+        },
+        "permission": "bag.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Equip": {
+        "input": {
+          "kind": "record",
+          "name": "EquipBagItem",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "token": {
+              "kind": "u32"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "BagEquipResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "bag.equip"
+      }
+    },
+    "fingerprint": "30a9ccd49dedaaec385f950f5de0d074c503338f63e5dfae61db6d9c45c5c85d"
+  },
+  {
+    "name": "@rpg/equipment",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "EquipmentState",
+          "fields": {
+            "status": {
+              "kind": "text",
+              "maxBytes": 16
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "generation": {
+              "kind": "u32"
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "health": {
+              "kind": "u32"
+            },
+            "surface": {
+              "kind": "bool"
+            },
+            "items": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "EquippedItem",
+                "fields": {
+                  "slot": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "canUnequip": {
+                    "kind": "bool"
+                  }
+                }
+              },
+              "maxCount": 8
+            }
+          }
+        },
+        "permission": "equipment.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Unequip": {
+        "input": {
+          "kind": "record",
+          "name": "UnequipItem",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "generation": {
+              "kind": "u32"
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "slot": {
+              "kind": "text",
+              "maxBytes": 16
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "UnequipResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "equipment.unequip"
+      }
+    },
+    "fingerprint": "8f8361b6b5d00466de6920c0c911a90ebee1c098ed6dc9499853d3c91bc8af02"
+  },
+  {
+    "name": "@rpg/loot",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "LootState",
+          "fields": {
+            "sequence": {
+              "kind": "u32"
+            },
+            "state": {
+              "kind": "u32"
+            },
+            "entries": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "LootEntry",
+                "fields": {
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "name": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "quantity": {
+                    "kind": "u32"
+                  }
+                }
+              },
+              "maxCount": 24
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "corpses": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "LootableCorpse",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "reference": {
+                    "kind": "text",
+                    "maxBytes": 64
+                  }
+                }
+              },
+              "maxCount": 64
+            }
+          }
+        },
+        "permission": "loot.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Interact": {
+        "input": {
+          "kind": "record",
+          "name": "LootIntent",
+          "fields": {
+            "sequence": {
+              "kind": "u32"
+            },
+            "action": {
+              "kind": "u32"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "LootResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "loot.interact"
+      },
+      "Open": {
+        "input": {
+          "kind": "record",
+          "name": "OpenLoot",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "corpseId": {
+              "kind": "text",
+              "maxBytes": 128
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "LootResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "loot.interact"
+      }
+    },
+    "fingerprint": "7b34edb85c748ae24fbc086fdcbc2a2708b22003702ada61f25f963742fc5193"
+  },
+  {
+    "name": "@rpg/merchant",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "MerchantState",
+          "fields": {
+            "available": {
+              "kind": "bool"
+            },
+            "sequence": {
+              "kind": "u32"
+            },
+            "ready": {
+              "kind": "bool"
+            },
+            "pending": {
+              "kind": "bool"
+            },
+            "retry": {
+              "kind": "bool"
+            },
+            "state": {
+              "kind": "text",
+              "maxBytes": 64
+            },
+            "name": {
+              "kind": "text",
+              "maxBytes": 512
+            },
+            "coins": {
+              "kind": "u32"
+            },
+            "notice": {
+              "kind": "text",
+              "maxBytes": 1024
+            },
+            "offers": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "MerchantOffer",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "name": {
+                    "kind": "text",
+                    "maxBytes": 512
+                  },
+                  "price": {
+                    "kind": "u32"
+                  },
+                  "quantity": {
+                    "kind": "u32"
+                  }
+                }
+              },
+              "maxCount": 64
+            },
+            "bag": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "MerchantItem",
+                "fields": {
+                  "present": {
+                    "kind": "bool"
+                  },
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "quantity": {
+                    "kind": "u32"
+                  },
+                  "sellable": {
+                    "kind": "bool"
+                  },
+                  "salePrice": {
+                    "kind": "u32"
+                  },
+                  "reason": {
+                    "kind": "text",
+                    "maxBytes": 256
+                  }
+                }
+              },
+              "maxCount": 24
+            }
+          }
+        },
+        "permission": "merchant.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Interact": {
+        "input": {
+          "kind": "record",
+          "name": "MerchantIntent",
+          "fields": {
+            "sequence": {
+              "kind": "u32"
+            },
+            "action": {
+              "kind": "u32"
+            },
+            "index": {
+              "kind": "u32"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "MerchantResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "merchant.interact"
+      }
+    },
+    "fingerprint": "e5e871d2d5b9bddf82ff0ccb64c4b6a5bbef5d9f4c101cf019d2698845d7c845"
+  }
+]

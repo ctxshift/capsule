@@ -1,0 +1,238 @@
+[
+  {
+    "name": "@mmo/chat",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "ChatState",
+          "fields": {
+            "sequence": {
+              "kind": "u32"
+            },
+            "epoch": {
+              "kind": "u32"
+            },
+            "ready": {
+              "kind": "bool"
+            },
+            "pending": {
+              "kind": "bool"
+            },
+            "accepted": {
+              "kind": "u32"
+            },
+            "error": {
+              "kind": "text",
+              "maxBytes": 512
+            },
+            "wake": {
+              "kind": "u32"
+            },
+            "messages": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "ChatMessage",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 24
+                  },
+                  "channel": {
+                    "kind": "text",
+                    "maxBytes": 16
+                  },
+                  "sender": {
+                    "kind": "text",
+                    "maxBytes": 160
+                  },
+                  "text": {
+                    "kind": "text",
+                    "maxBytes": 960
+                  }
+                }
+              },
+              "maxCount": 4
+            }
+          }
+        },
+        "permission": "chat.read",
+        "delivery": "ordered"
+      }
+    },
+    "requests": {
+      "Send": {
+        "input": {
+          "kind": "record",
+          "name": "ChatSend",
+          "fields": {
+            "epoch": {
+              "kind": "u32"
+            },
+            "sequence": {
+              "kind": "u32"
+            },
+            "channel": {
+              "kind": "text",
+              "maxBytes": 16
+            },
+            "text": {
+              "kind": "text",
+              "maxBytes": 512
+            },
+            "recipient": {
+              "kind": "text",
+              "maxBytes": 80
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "ChatResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "chat.send"
+      }
+    },
+    "fingerprint": "1957c95dcd1ea7c21cb96ce61691675dd16d0e463757868e8ea8081c3a44bee6"
+  },
+  {
+    "name": "@mmo/player-trade",
+    "version": "1.0.0",
+    "dependencies": {},
+    "states": {
+      "State": {
+        "schema": {
+          "kind": "record",
+          "name": "TradeState",
+          "fields": {
+            "sequence": {
+              "kind": "u32"
+            },
+            "status": {
+              "kind": "text",
+              "maxBytes": 24
+            },
+            "revision": {
+              "kind": "u32"
+            },
+            "accepted": {
+              "kind": "bool"
+            },
+            "peerAccepted": {
+              "kind": "bool"
+            },
+            "coins": {
+              "kind": "u32"
+            },
+            "offeredCoins": {
+              "kind": "u32"
+            },
+            "peerCoins": {
+              "kind": "u32"
+            },
+            "peerName": {
+              "kind": "text",
+              "maxBytes": 160
+            },
+            "candidateName": {
+              "kind": "text",
+              "maxBytes": 160
+            },
+            "canCreate": {
+              "kind": "bool"
+            },
+            "notice": {
+              "kind": "text",
+              "maxBytes": 512
+            },
+            "items": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "TradeItem",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 24
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "available": {
+                    "kind": "u32"
+                  },
+                  "offered": {
+                    "kind": "u32"
+                  }
+                }
+              },
+              "maxCount": 24
+            },
+            "peerItems": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "TradePeerItem",
+                "fields": {
+                  "id": {
+                    "kind": "text",
+                    "maxBytes": 24
+                  },
+                  "kind": {
+                    "kind": "text",
+                    "maxBytes": 128
+                  },
+                  "quantity": {
+                    "kind": "u32"
+                  }
+                }
+              },
+              "maxCount": 24
+            }
+          }
+        },
+        "permission": "trade.read",
+        "delivery": "latest"
+      }
+    },
+    "requests": {
+      "Interact": {
+        "input": {
+          "kind": "record",
+          "name": "TradeIntent",
+          "fields": {
+            "sequence": {
+              "kind": "u32"
+            },
+            "action": {
+              "kind": "u32"
+            },
+            "value": {
+              "kind": "u32"
+            }
+          }
+        },
+        "output": {
+          "kind": "record",
+          "name": "TradeResult",
+          "fields": {
+            "accepted": {
+              "kind": "bool"
+            }
+          }
+        },
+        "permission": "trade.interact"
+      }
+    },
+    "fingerprint": "5c31db5f5e800d2a8be4f66179711c62280f139de67ddae6805d027eaba45b74"
+  }
+]

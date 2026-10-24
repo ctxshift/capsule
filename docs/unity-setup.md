@@ -60,6 +60,13 @@ and do not commit machine-specific local paths. The planned attach/detach workfl
 will manage temporary overrides and restore the pinned release set; it is not
 available yet. No supported release feed or remote install URL is configured.
 
+Hosts using reusable contracts can also install `com.capsule.features.rpg`,
+`com.capsule.features.mmo` and `com.capsule.features.skill-system` from disk.
+They depend on Core and supply the canonical generated contract assemblies;
+standalone consumers compile the same source. See [game features](game-features.md).
+Preserved GUIDs support migration, but host wiring and Unity import/build of these
+new feature packages are not established by standalone provider tests.
+
 A native DLL change requires a safe Editor restart because Windows retains loaded
 libraries. Keep carrier, SDK and native versions compatible. A compiler/SDK build
 does not establish compatibility with an arbitrary older native runtime.
