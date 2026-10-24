@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net9.0": {
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.2",
+        "contentHash": "R2pZ3B0UjeyHShm9vG+Tu0EBb2lC8b0dFzV9gVn50ofHXh9Smjk6kTn7A/FdAsC8B5cKib1OnGYOXxRBz5XQDg=="
+      },
+      "capsule.core": {
+        "type": "Project"
+      },
+      "capsule.package": {
+        "type": "Project",
+        "dependencies": {
+          "Capsule.Core": "[1.0.0, )",
+          "Newtonsoft.Json": "[13.0.2, 13.0.2]"
+        }
+      },
+      "capsule.wasmtime": {
+        "type": "Project",
+        "dependencies": {
+          "Capsule.Core": "[1.0.0, )"
+        }
+      },
+      "capsule.yoga": {
+        "type": "Project",
+        "dependencies": {
+          "Capsule.Core": "[1.0.0, )"
+        }
+      }
+    }
+  }
+}

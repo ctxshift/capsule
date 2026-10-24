@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "namespace": "portable_ui_v1",
+  "profile": "react-ui-v1",
+  "limits": {
+    "hostCallsPerInvocation": 64,
+    "hostSelectedExtendedCallsPerInvocation": 2048,
+    "packetBytes": 65536,
+    "eventBytes": 272,
+    "textEventBytes": 1052,
+    "observationBytes": 264,
+    "wholeObservationBytes": 4194312,
+    "actionBytes": 4194304,
+    "assetKeyBytes": 96
+  },
+  "operations": [
+    {
+      "id": 0,
+      "enum": "Reserve",
+      "js": "reserve",
+      "import": "ui_reserve_handle",
+      "params": "i",
+      "available": true
+    },
+    {
+      "id": 1,
+      "enum": "Submit",
+      "js": "submit",
+      "import": "ui_submit",
+      "params": "ii",
+      "available": true
+    },
+    {
+      "id": 2,
+      "enum": "NextEvent",
+      "js": "nextEvent",
+      "import": "ui_next_event",
+      "params": "ii",
+      "available": true
+    },
+    {
+      "id": 3,
+      "enum": "NextObservation",
+      "js": "nextObservation",
+      "import": "game_next_observation",
+      "params": "ii",
+      "available": true
+    },
+    {
+      "id": 4,
+      "enum": "RequestAction",
+      "js": "requestAction",
+      "import": "game_request_action",
+      "params": "liii",
+      "available": true
+    },
+    {
+      "id": 5,
+      "enum": "ReadData",
+      "js": "readData",
+      "import": "package_read_data",
+      "params": "iiii",
+      "available": false
+    },
+    {
+      "id": 6,
+      "enum": "AcquireImage",
+      "js": "acquireImage",
+      "import": "package_acquire_image",
+      "params": "iiii",
+      "available": false
+    }
+  ],
+  "errors": {
+    "Rejected": -1,
+    "InvalidArgument": -2,
+    "Unsupported": -3,
+    "QuotaExceeded": -4,
+    "Unavailable": -5,
+    "Internal": -6
+  }
+}

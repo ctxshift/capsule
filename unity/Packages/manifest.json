@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "com.unity.inputsystem": "1.19.0",
+    "com.unity.ugui": "2.6.0",
+    "com.unity.nuget.newtonsoft-json": "3.2.2",
+    "com.unity.test-framework": "1.8.0",
+    "com.unity.pipeline": "0.8.0-exp.1"
+  },
+  "testables": [
+    "com.capsule.unity"
+  ]
+}

@@ -1,0 +1,17 @@
+<Project>
+  <!-- Applied only to these reusable libraries, never their host/test consumers. -->
+  <Target Name="EnforceCapsuleManagedDependencies" BeforeTargets="CoreCompile" DependsOnTargets="ResolveReferences">
+    <PropertyGroup><_CapsuleCoreProject>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)Core/Capsule.Core.csproj'))</_CapsuleCoreProject></PropertyGroup>
+    <ItemGroup>
+      <_CapsuleUnexpectedProject Include="@(ProjectReference)"
+        Condition="'$(CapsuleAllowCore)' != 'true' Or '%(ProjectReference.FullPath)' != '$(_CapsuleCoreProject)'" />
+      <_CapsuleUnexpectedPackage Include="@(PackageReference)"
+        Condition="'%(PackageReference.Identity)' != 'Newtonsoft.Json' Or '$(CapsuleAllowNewtonsoft)' != 'true' Or '%(PackageReference.Version)' != '[13.0.2]'" />
+      <_CapsuleUnexpectedAssembly Include="@(ReferencePath)"
+        Condition="!('%(ReferencePath.FrameworkReferenceName)' == 'NETStandard.Library' And '%(ReferencePath.NuGetPackageId)' == 'NETStandard.Library.Ref') And !('%(ReferencePath.Filename)' == 'Newtonsoft.Json' And '%(ReferencePath.NuGetPackageId)' == 'Newtonsoft.Json' And '$(CapsuleAllowNewtonsoft)' == 'true') And !('%(ReferencePath.Filename)' == 'Capsule.Core' And '%(ReferencePath.ReferenceSourceTarget)' == 'ProjectReference' And '$(CapsuleAllowCore)' == 'true')" />
+    </ItemGroup>
+    <Error Condition="'@(_CapsuleUnexpectedPackage)' != ''" Text="CAPSULE_DEPENDENCY: Unapproved package: @(_CapsuleUnexpectedPackage)." />
+    <Error Condition="'@(_CapsuleUnexpectedAssembly)' != ''" Text="CAPSULE_DEPENDENCY: Unapproved resolved assembly: @(_CapsuleUnexpectedAssembly)." />
+    <Error Condition="'@(_CapsuleUnexpectedProject)' != ''" Text="CAPSULE_DEPENDENCY: Unapproved project: @(_CapsuleUnexpectedProject)." />
+  </Target>
+</Project>

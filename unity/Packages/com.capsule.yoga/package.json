@@ -1,0 +1,12 @@
+{
+  "name": "com.capsule.yoga",
+  "version": "0.1.0",
+  "displayName": "Capsule Yoga",
+  "description": "Capsule Yoga layout and Windows native bridge.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.capsule.core": "0.1.0"
+  },
+  "unityRelease": "3f1",
+  "license": "Apache-2.0"
+}

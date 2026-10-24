@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Capsule.Core</AssemblyName>
+    <RootNamespace>Capsule</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../unity/Packages/com.capsule.core/Runtime/*.cs" Link="Core/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

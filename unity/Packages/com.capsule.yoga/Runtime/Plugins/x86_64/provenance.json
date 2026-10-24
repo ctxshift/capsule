@@ -1,0 +1,10 @@
+{
+  "abi": 2,
+  "yoga": "3.2.1",
+  "commit": "042f5013152eb81c1552dec945b88f7b95ca350f",
+  "compiler": "Zig 0.16.0",
+  "platform": "Windows x86_64",
+  "sourceSha256": "D0AB40EBFA8679D256D8DEEB6A97A2562AA98D925226BDC421D394D91FB98602",
+  "dllSha256": "7E7815F2304D6402F79CDC720880ED835DC162416FAB1DB28F3F147C3366EA43",
+  "recipe": "C++20, O2, no RTTI, exceptions enabled; tools/capsule-yoga/build.ps1"
+}

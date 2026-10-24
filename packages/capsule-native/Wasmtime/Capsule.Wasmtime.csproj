@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Capsule.Wasmtime</AssemblyName>
+    <RootNamespace>Capsule.Wasmtime</RootNamespace>
+    <CapsuleAllowCore>true</CapsuleAllowCore>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Core/Capsule.Core.csproj" />
+    <Compile Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/WasmtimeUiGuest.cs" Link="Wasmtime/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

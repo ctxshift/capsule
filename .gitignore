@@ -1,0 +1,12 @@
+.local/
+**/bin/
+**/obj/
+unity/Library/
+unity/Logs/
+unity/Temp/
+unity/Obj/
+unity/UserSettings/
+unity/MemoryCaptures/
+unity/*.csproj
+unity/*.sln
+unity/*.slnx

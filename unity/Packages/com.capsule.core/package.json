@@ -1,0 +1,10 @@
+{
+  "name": "com.capsule.core",
+  "version": "0.1.0",
+  "displayName": "Capsule Core",
+  "description": "Engine-independent Capsule contracts and session runtime.",
+  "unity": "6000.6",
+  "dependencies": {},
+  "unityRelease": "3f1",
+  "license": "Apache-2.0"
+}

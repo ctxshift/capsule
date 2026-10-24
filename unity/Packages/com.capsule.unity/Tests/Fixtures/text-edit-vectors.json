@@ -1,0 +1,6 @@
+{"vectors":[
+  {"phase":"change","text":"","composition":"","anchor":0,"focus":0,"composing":false,"userInput":true,"hex":"010102000000000000000000"},
+  {"phase":"composition","text":"A😀é","composition":"日","anchor":1,"focus":3,"composing":true,"userInput":true,"hex":"01020300010003000700030041f09f9880c3a9e697a5"},
+  {"phase":"submit","text":"A😀é","composition":"","anchor":4,"focus":4,"composing":false,"userInput":true,"hex":"01030200040004000700000041f09f9880c3a9"},
+  {"phase":"change","text":"42","composition":"","anchor":2,"focus":0,"composing":false,"userInput":false,"hex":"0101000002000000020000003432"}
+]}

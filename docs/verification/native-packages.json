@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-24",
+  "originRevision": "e989ba94",
+  "candidate": "native packages and neutral Unity consumer; Host cutover not performed",
+  "runtimeImport": {
+    "unchangedPayloads": 163,
+    "preservedGuids": 88,
+    "uniqueConsumerAndPackageGuids": 168,
+    "historyCommits": 108,
+    "packages": [
+      "com.capsule.core",
+      "com.capsule.package",
+      "com.capsule.wasmtime",
+      "com.capsule.yoga",
+      "com.capsule.unity"
+    ]
+  },
+  "managed": {
+    "framework": "netstandard2.1",
+    "runnerFramework": "net9.0",
+    "portableBuilds": 4,
+    "lockedRestores": 5,
+    "coreChecks": 3071,
+    "hostLifecycleChecks": 181,
+    "guestLifetimes": 13,
+    "managedChecks": 29,
+    "packageChecks": 65,
+    "featureActivationChecks": 62,
+    "dependencyRejections": 10
+  },
+  "native": {
+    "smokeChecks": 21,
+    "lifecycleChecks": 48,
+    "resources": "All runtime libraries, carrier, SDK and compiled neutral addon supplied from this repository.",
+    "logDirectory": ".local/candidate-lifecycle"
+  },
+  "unity": {
+    "version": "6000.6.3f1",
+    "editMode": {
+      "passed": 37,
+      "failed": 0,
+      "logDirectory": ".local/unity-editmode-linear"
+    },
+    "playMode": {
+      "passed": 11,
+      "failed": 0,
+      "logDirectory": ".local/unity-playmode-tmp-ready"
+    },
+    "playModeRepeat": {
+      "passed": 11,
+      "failed": 0,
+      "logDirectory": ".local/unity-playmode-repeat"
+    },
+    "activeInputHandler": 2,
+    "colorSpace": "Linear",
+    "tmpEssentials": "Imported standard resources retained in neutral consumer with OFL/Unity license notices.",
+    "inputEvidence": "Automated native semantic event injection and Unity EventSystem raycasts; not an OS IME session or live game backend."
+  },
+  "negativeChecks": {
+    "importVerifier": "Rejects changed payloads, duplicate path aliases and escaping targets; node test passed.",
+    "managedDependencies": "Injected unexpected game/engine assemblies, project and package references rejected."
+  },
+  "knownSetupFailures": [
+    "Headless launch was refused by helper because CLI discovery reported the unopened project as running; official Editor open recovered connected validation.",
+    "Fresh consumer defaulted to legacy input/Gamma and lacked TMP Essentials. Input backend was enabled, color space set to Linear, TMP Essentials imported. No runtime/shader byte changes.",
+    "No-font fixtures initially raised TMP exceptions. Consumer resources and explicit dynamically constructed Windows Arial fixture resolved them."
+  ],
+  "limitations": [
+    "No Host source/package switch, game backend integration or scene migration.",
+    "No IL2CPP Player build or final game visual/performance acceptance in this stage.",
+    "No registry publication, package feed or remote configured.",
+    "Authoring/compiler and RPG/MMO/skill feature packages remain separate extraction stages.",
+    "Existing Host source snapshot is retained until cutover; native import verifier captures the initial package candidate, not a prohibition on deliberate later changes."
+  ]
+}

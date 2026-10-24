@@ -1,0 +1,21 @@
+{
+  "name": "Capsule.Unity.EditModeTests",
+  "rootNamespace": "Capsule.Tests",
+  "references": [
+    "Capsule.Core",
+    "Capsule.Package",
+    "Capsule.Yoga",
+    "Capsule.Wasmtime",
+    "Capsule.Unity",
+    "Unity.ugui",
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "autoReferenced": false,
+  "includePlatforms": [
+    "Editor"
+  ]
+}

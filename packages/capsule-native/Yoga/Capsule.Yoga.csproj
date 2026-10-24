@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Capsule.Yoga</AssemblyName>
+    <RootNamespace>Capsule.Yoga</RootNamespace>
+    <CapsuleAllowCore>true</CapsuleAllowCore>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Core/Capsule.Core.csproj" />
+    <Compile Include="../../../unity/Packages/com.capsule.yoga/Runtime/*.cs" Link="Yoga/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

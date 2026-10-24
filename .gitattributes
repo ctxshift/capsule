@@ -1,0 +1,10 @@
+# Preserve Unity serialization and imported upstream bytes without whitespace repair.
+unity/Packages/**/Runtime/** -text -whitespace
+unity/Packages/**/*.cs text=auto whitespace
+unity/Packages/**/*.meta text=auto -whitespace
+*.meta -whitespace
+unity/ProjectSettings/** -whitespace
+"unity/Assets/TextMesh Pro/**" -whitespace
+tools/capsule-quickjs/QuickJS-LICENSE.txt -whitespace
+unity/Packages/com.capsule.wasmtime/ThirdPartyNotices/QuickJS-LICENSE.txt -whitespace
+tools/capsule-wasmtime-native/bridge.c -whitespace

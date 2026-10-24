@@ -1,0 +1,16 @@
+{
+  "name": "com.capsule.unity",
+  "version": "0.1.0",
+  "displayName": "Capsule Unity",
+  "description": "Capsule Unity presentation and input adapter.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.capsule.core": "0.1.0",
+    "com.unity.inputsystem": "1.19.0",
+    "com.unity.ugui": "2.6.0",
+    "com.capsule.package": "0.1.0",
+    "com.capsule.yoga": "0.1.0"
+  },
+  "unityRelease": "3f1",
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,27 @@
+{
+  "originRevision": "e989ba94",
+  "namespace": "Capsule.Tests",
+  "removedGameAssertions": {
+    "CapsuleAlphaAwareTests": [
+      "GenericImagesBindThemeSamplingAndRetainedChangesUnwindTintOwnership",
+      "CircularSurfaceClipsItsChildrenAndReleasesMaskOnStyleChange"
+    ],
+    "CapsuleHoverTests": [
+      "SurfaceShadowCompensationMatchesDisplaySpaceSourceOver",
+      "HoverSurfaceAppliesAndClearsHostShadowWithoutChangingBackground",
+      "DividerStretchIsOptInAndLeavesOtherImageStylingToTheFactory"
+    ],
+    "CapsuleFrameRailsTests": [
+      "ThemeRejectsInvalidRailRegions"
+    ],
+    "CapsuleTiledImageTests": [
+      "ThemeBoundsTileDimensionsAndRejectsConflictingSampling"
+    ],
+    "CapsuleWorldPresentationTests": [
+      "PlateAnchorFollowsAuthoredBodyBoundsAndFallsBackToCollider"
+    ]
+  },
+  "textInput": "Removed LocalGameplayFixture integration and assertions; retained native focus, composition, limits, revision and teardown checks. Original Host integration tests remain. The isolated factory supplies a dynamic Windows Arial font and disposes owned textures/material/font; standard TMP Essentials is a consumer dependency.",
+  "fontMetrics": "OS-font conformance stays in Host; no system font is redistributed.",
+  "omittedFontConformance": "CapsuleYogaTextTests stays in Host because it uses exact OS reference fonts and emits historical fixture metrics. Native Yoga layout/measurement/lifecycle remains covered by managed/native proofs."
+}

@@ -1,0 +1,1069 @@
+{
+  "schemaVersion": 1,
+  "origin": "Host",
+  "originRevision": "e989ba941af61ee4dd27d0643441f8212924d879",
+  "importedHistoryCommits": 108,
+  "historyScope": [
+    "client/Assets/Host/Capsule",
+    "client/Assets/Host/PortableUi"
+  ],
+  "historyPolicy": "Path-filtered native-only history imported with original authorship. No remote, game art or game integration. Host source retained until consumer cutover.",
+  "parentFolderMetadata": "Archived outside Unity: multiple UPM packages replace one former parent folder; no active duplicate GUID.",
+  "files": [
+    {
+      "source": "client/Assets/Host/Capsule.meta",
+      "target": "docs/provenance/Capsule.meta",
+      "sha256": "944260276ddd03bb0a8b17c69067a1b8ab86693c9a1325f4f3d5cdc41d8346d7",
+      "guid": "70663b3b47fba494aa7796536e47ec82",
+      "canonicalSha256": "944260276ddd03bb0a8b17c69067a1b8ab86693c9a1325f4f3d5cdc41d8346d7"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/CapsuleJsSdk.txt",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleJsSdk.txt",
+      "sha256": "38f95d083d2836d464ac3ec52a5463f2b13dadf630d407d9c46357e5c3ef283c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/CapsuleJsSdk.txt.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleJsSdk.txt.meta",
+      "sha256": "9a28ece545e651086bc584263fe53e3cf5ef5b5ba6649a2cadc738d1119fc61e",
+      "guid": "4c2f17c2afd9e2148b29d7ab09bd6345",
+      "canonicalSha256": "9a28ece545e651086bc584263fe53e3cf5ef5b5ba6649a2cadc738d1119fc61e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/CapsuleReactSdk.txt",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleReactSdk.txt",
+      "sha256": "ae0aa87e7464d4dc0e7308bf0b88e7c9a05d94d58fe630297f78b911b7cc996c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/CapsuleReactSdk.txt.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleReactSdk.txt.meta",
+      "sha256": "334660a020e6de7580a57c731b01027eaee66219f7da2266dcc73c137878c537",
+      "guid": "c64a5c9a6e0d4bf89e875859def1a3a5",
+      "canonicalSha256": "439b6c3aac594397df02886a1860a9290b63c68957d1c63000862b8769823399"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/CapsuleYogaReactSdk.txt",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleYogaReactSdk.txt",
+      "sha256": "ae0aa87e7464d4dc0e7308bf0b88e7c9a05d94d58fe630297f78b911b7cc996c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/CapsuleYogaReactSdk.txt.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleYogaReactSdk.txt.meta",
+      "sha256": "32045b38198ed6a914ac71ced71bb774fb28bca4c02dc805cbe1eae63343a527",
+      "guid": "27c44e8a3641cfa44af62998ae458e43",
+      "canonicalSha256": "32045b38198ed6a914ac71ced71bb774fb28bca4c02dc805cbe1eae63343a527"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Carrier.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Carrier.meta",
+      "sha256": "42dc6cd233b4cdb2dcec63bfb44b7a4b493e98757672f6da84f3abfa45e6ca69",
+      "guid": "720b1424f5f0b6042bee0d3ae3872b53",
+      "canonicalSha256": "42dc6cd233b4cdb2dcec63bfb44b7a4b493e98757672f6da84f3abfa45e6ca69"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Carrier/CapsuleQuickJs.bytes",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Carrier/CapsuleQuickJs.bytes",
+      "sha256": "0c5dfa49d0797b3599057d7b1428fa9c42e75542cc09f163cbe69d9dbccfa5b7"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Carrier/CapsuleQuickJs.bytes.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Carrier/CapsuleQuickJs.bytes.meta",
+      "sha256": "0e41106919703c10e4b9a46b6fe23c7178d7463aa55363980a144c94a17ef460",
+      "guid": "0455c37db274cc2418b367222743e560",
+      "canonicalSha256": "0e41106919703c10e4b9a46b6fe23c7178d7463aa55363980a144c94a17ef460"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime.meta",
+      "sha256": "6717b5edeb9b6c4b0b0e2298b579bda5e4d6dbdfab18e063bd7b74af90bf9db1",
+      "guid": "836f5c160c5b5c441b565ae076d305ca",
+      "canonicalSha256": "6717b5edeb9b6c4b0b0e2298b579bda5e4d6dbdfab18e063bd7b74af90bf9db1"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/Capsule.Core.asmdef",
+      "target": "unity/Packages/com.capsule.core/Runtime/Capsule.Core.asmdef",
+      "sha256": "5fc79ff089fa482f9f0c52e41d913b298c5c5a3bc58d8a16874355b708e94207"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/Capsule.Core.asmdef.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/Capsule.Core.asmdef.meta",
+      "sha256": "f688950a99f9b0c82eab557237b6438bbacccb25b4756352e538ab03720a5292",
+      "guid": "9f8e7f2958c28ba4cb43891e94de529b",
+      "canonicalSha256": "f688950a99f9b0c82eab557237b6438bbacccb25b4756352e538ab03720a5292"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/IUiGuest.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/IUiGuest.cs",
+      "sha256": "1a80f126affbab1c478f3cfb963c168b697b4708cf99b83b1376c6e9503bc8a6",
+      "canonicalSha256": "109fa79371c7944248b7c553d983a4f15d3071abe7a39cf8ece32a59e79a76b2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/IUiGuest.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/IUiGuest.cs.meta",
+      "sha256": "6088feccf822e293e5dc01f7a677b659ac0057db5a91314ac4389aa2964fd226",
+      "guid": "5237d26d761d9d946a75e1a40d17271b",
+      "canonicalSha256": "6088feccf822e293e5dc01f7a677b659ac0057db5a91314ac4389aa2964fd226"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAddonRegistry.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAddonRegistry.cs",
+      "sha256": "98c4b847b5c76b2d333d469569195cb47ec5cea534a51a24f1f42a9a3581be6f",
+      "canonicalSha256": "232a67608c93ce836feb8a8211236d688fa43e98a89f6b133a7c3a9d4abc3b32"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAddonRegistry.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAddonRegistry.cs.meta",
+      "sha256": "536adb4e45039b158ca4329577fe957f34783699b41fe22e10c76b9c4ec0abbf",
+      "guid": "920c99464c2d62f4597565088510cd82",
+      "canonicalSha256": "536adb4e45039b158ca4329577fe957f34783699b41fe22e10c76b9c4ec0abbf"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAsyncDispatcher.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAsyncDispatcher.cs",
+      "sha256": "4a0f6d165d42a1344701f5b9f8d9158cdcf921072cc6420576401710cf03af21",
+      "canonicalSha256": "4a0f6d165d42a1344701f5b9f8d9158cdcf921072cc6420576401710cf03af21"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAsyncDispatcher.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAsyncDispatcher.cs.meta",
+      "sha256": "547730dd5cac8002c5db905ce0dec3f6cd4761fdf3efd90eb3f2eabf423408f6",
+      "guid": "98474af856e646e684a137bf5715656a",
+      "canonicalSha256": "b85866eeb736b7f606676b5915411d1bdbafe943dc5f69ad5093b67b31026b62"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAsyncHostSession.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAsyncHostSession.cs",
+      "sha256": "1684c3ddc304196669f6e3e9335f4ea6722a2898643af8bd63ac2ee433d183ef",
+      "canonicalSha256": "0532eaf59a0b968090a20be0db12c322de662187e93dfdcbedbce814fd5d1209"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAsyncHostSession.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAsyncHostSession.cs.meta",
+      "sha256": "ca83cf50dcf53be07aa6a55c7c5057447ddfd2c3e3de0f179693f0e2b4307697",
+      "guid": "41c380ed66df47438e89b5cd102501c2",
+      "canonicalSha256": "9e90c45f2d7669e97e0d18affe50d022912437ec25f12c1d0a5b5977b280f083"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAsyncWorker.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAsyncWorker.cs",
+      "sha256": "5c7a812bcc220895ca679f195c0365a88418573165745a15bc37c4b2dcedb4d1",
+      "canonicalSha256": "5c7a812bcc220895ca679f195c0365a88418573165745a15bc37c4b2dcedb4d1"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiAsyncWorker.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiAsyncWorker.cs.meta",
+      "sha256": "e6510f8a13943b1448332282541e4f9d3486e4f84b639e092458cbc03dd015a3",
+      "guid": "7cd9c8d72a44414090bab4d1a8b58ed1",
+      "canonicalSha256": "15df9194ff2158efcd5f9368e19ad41923ade34ca6760912d0f0c5c1f6b2e9f0"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiContract.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiContract.cs",
+      "sha256": "1c698f50834a029bf24ccbe5ccdf3058b0c4ecdcb2658ef180b354fea98119b3",
+      "canonicalSha256": "7a23227aa3194e527a66e6435342dc3b460fdb3c57db6bddef8f76568e5d6ab2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiContract.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiContract.cs.meta",
+      "sha256": "5c53eb107cc7016e862c5ba6486529886fb4f1af1ea5fdf368aaa033a3c5398a",
+      "guid": "57c27836e81f6244fa3ceaf45d148a08",
+      "canonicalSha256": "5c53eb107cc7016e862c5ba6486529886fb4f1af1ea5fdf368aaa033a3c5398a"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiFeatureProvider.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiFeatureProvider.cs",
+      "sha256": "d413314cd79c5eeb52002c4c42cdf7e387f4e5769cbb5c614a534660d313801c",
+      "canonicalSha256": "8f5260235571ed4d42931e17a278973486e689f1a6fe145d81e3f2dd372e2ef8"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiFeatureProvider.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiFeatureProvider.cs.meta",
+      "sha256": "82d456116ecd7fe64e7dc8752dce4fc5e2b1b5f25dfd7fe294a9b16eee7ccdb4",
+      "guid": "e11e843d29324f4ea93411a6c478feae",
+      "canonicalSha256": "f2728e6e69b3a3cb8a4e9e753995a42fe1bd4e7b8336c2c98af71f8429fbd2e6"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiFeatureRegistry.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiFeatureRegistry.cs",
+      "sha256": "f8fb182359644142b5007dd579b77f0eff5ed70c6b63737f5e6497d7823848f7",
+      "canonicalSha256": "b04cbd722c1fcb5a8e7a9bc2d88093726b00eabe93c7ee4e55a3f97639f58fbb"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiFeatureRegistry.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiFeatureRegistry.cs.meta",
+      "sha256": "bb1b356b12374eee4081b2ec49cdf62d077f48c0eda9d5460315c9a399144bc9",
+      "guid": "18c5333a96874896ba2c2c192247003f",
+      "canonicalSha256": "2fc857df8956fae73a59622989efba2e218808d919fa89b9df30b08e7ead84c8"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiHostBridgeContract.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiHostBridgeContract.cs",
+      "sha256": "c141e9d88ce93b0d0b6cb28e81965f3d25232d7782bb273739864478c27fcd6a",
+      "canonicalSha256": "c141e9d88ce93b0d0b6cb28e81965f3d25232d7782bb273739864478c27fcd6a"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiHostBridgeContract.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiHostBridgeContract.cs.meta",
+      "sha256": "42cff9342bb459081c6c19b3b544c2692412496726fca530a76e8c8505ff3c44",
+      "guid": "ddbd161132884b78ba52dcfa15a3a033",
+      "canonicalSha256": "cadf9bd3795bbdd9fa1efc7362f1f28fac885321416ba3d150a9769542bc7153"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiInputPayload.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiInputPayload.cs",
+      "sha256": "3fe037ff25457dc91779c87106cdcfb623a7b2dcc930568ae599c9667a2d7b78",
+      "canonicalSha256": "3fe037ff25457dc91779c87106cdcfb623a7b2dcc930568ae599c9667a2d7b78"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiInputPayload.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiInputPayload.cs.meta",
+      "sha256": "0fe4620e4bd00d523a0bade078e88ae0f4c75fdd7871bb429808e2e5d0aac3cd",
+      "guid": "c1022744b2f14fd48e633a20d08e152e",
+      "canonicalSha256": "9627a99e23b4902868418fa63eeb012116511a71db2e54aeeffd29f45107e921"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiLayout.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiLayout.cs",
+      "sha256": "a92b58752e86bf895b52f64a0a923d90634acc2b3d28b131a64468a449175cf0",
+      "canonicalSha256": "a92b58752e86bf895b52f64a0a923d90634acc2b3d28b131a64468a449175cf0"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiLayout.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiLayout.cs.meta",
+      "sha256": "9e4c7e9daa1696062c08129744701550a5e2596a63da238277013da280159699",
+      "guid": "607da3df3a5799945a18ea4ad6b1333c",
+      "canonicalSha256": "9e4c7e9daa1696062c08129744701550a5e2596a63da238277013da280159699"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiObservationPayload.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiObservationPayload.cs",
+      "sha256": "b208b24561c8284d837e5fe697b32946022f27216e99589a79719a0631821dc9",
+      "canonicalSha256": "b208b24561c8284d837e5fe697b32946022f27216e99589a79719a0631821dc9"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiObservationPayload.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiObservationPayload.cs.meta",
+      "sha256": "7f915ddda6493960c0536ff8fef4fe0ede8469d2eed335a539fccc3fa09005d2",
+      "guid": "fcd8c477c2a2490187b26c552498c548",
+      "canonicalSha256": "7f915ddda6493960c0536ff8fef4fe0ede8469d2eed335a539fccc3fa09005d2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiPacket.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiPacket.cs",
+      "sha256": "8174e3faf97d35113d2b87f935fa105ff620f887536d9b3ac1d020f10b429081",
+      "canonicalSha256": "2011f7a3dfe892722bef962cf22550fbecc5f5a9f435a8de8bad82bc768d04d3"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiPacket.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiPacket.cs.meta",
+      "sha256": "eb3cf9d0597b57acc4fd7e017836fc27a48f0ee6f4a00821f1e9faae51b78362",
+      "guid": "84beb0cd15852af46919637a1cd30b86",
+      "canonicalSha256": "eb3cf9d0597b57acc4fd7e017836fc27a48f0ee6f4a00821f1e9faae51b78362"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiPerformanceWindow.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiPerformanceWindow.cs",
+      "sha256": "ecf9ef8a0e37f3b8141b36d425b3ff20b6a5a3879e6e1ec3f4877af74587031f",
+      "canonicalSha256": "ecf9ef8a0e37f3b8141b36d425b3ff20b6a5a3879e6e1ec3f4877af74587031f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiPerformanceWindow.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiPerformanceWindow.cs.meta",
+      "sha256": "77c11eee998f09a4eb5638dccb2b30b2fa3584328d0dc5ad81ce0f2337b90d0f",
+      "guid": "bcf003f4aa4246f8992bf159ac6670e3",
+      "canonicalSha256": "3c15870a58aa9e6828616baad64663a80af66d00fe28c6dee984914e3479c413"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiPresentation.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiPresentation.cs",
+      "sha256": "7eea9ccc46f01346cb517dd5f03763e87e294621e943965653682a14f4f71d62",
+      "canonicalSha256": "7eea9ccc46f01346cb517dd5f03763e87e294621e943965653682a14f4f71d62"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiPresentation.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiPresentation.cs.meta",
+      "sha256": "2d217e3b3d9b1c6fc004c578339f39e68942466f1435bde25a966d75b5d088d4",
+      "guid": "d5335521b052cf77b2b6acb37ef4b5e9",
+      "canonicalSha256": "2d217e3b3d9b1c6fc004c578339f39e68942466f1435bde25a966d75b5d088d4"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiSession.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiSession.cs",
+      "sha256": "f09017a8be66b0675d5f85cd0f4a8d0aab1e59c896a8e5663ef3779c938a7574",
+      "canonicalSha256": "a5060b75b005f279af60a51565d3d4a1ddb80cbbd5cd06b2f7c58aa827e36dfa"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiSession.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiSession.cs.meta",
+      "sha256": "76faab5e03fce32b4cfd04480dc5c7f18b29081171fd2620e1e6e15a07aff623",
+      "guid": "4797db7b664a8034d82e87c80bc6af88",
+      "canonicalSha256": "76faab5e03fce32b4cfd04480dc5c7f18b29081171fd2620e1e6e15a07aff623"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiSnapshotValidator.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiSnapshotValidator.cs",
+      "sha256": "c332ddec46c98062ee4866b6767cfb2a42bbd684ac3971ec94b0cdd6da3a66d0",
+      "canonicalSha256": "c332ddec46c98062ee4866b6767cfb2a42bbd684ac3971ec94b0cdd6da3a66d0"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiSnapshotValidator.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiSnapshotValidator.cs.meta",
+      "sha256": "853eca596d78da2894f3fde3ae38d689e480523812fa5c0c4df76f12cb398c97",
+      "guid": "ab49730f84b14c83931d1dfddeb62d2e",
+      "canonicalSha256": "b3841dae90831314375deabd0fbf7c71055c857d22095ca19f082bd498ac09ee"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiSurfaceAdmission.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiSurfaceAdmission.cs",
+      "sha256": "95102bcc480cb96e29f50df39e797f3bf9857e84a7aca21c1ed6ed331d818596",
+      "canonicalSha256": "95102bcc480cb96e29f50df39e797f3bf9857e84a7aca21c1ed6ed331d818596"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiSurfaceAdmission.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiSurfaceAdmission.cs.meta",
+      "sha256": "246f3acba21fddd26ba304e4f81f02681840e821bbf0b76a50c50f44bb1baca4",
+      "guid": "8a8002034de9466187dcb14f890b40f0",
+      "canonicalSha256": "e8cbe7950277f44250f42cbe21c2ca8c6b2c0a01b4e008a2c88ccb63ae3b4148"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiTextEdit.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiTextEdit.cs",
+      "sha256": "2c547a2053d4348407437aa380d17f55c247832f4966cab416a44c6b2a4e4fff",
+      "canonicalSha256": "2c547a2053d4348407437aa380d17f55c247832f4966cab416a44c6b2a4e4fff"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiTextEdit.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiTextEdit.cs.meta",
+      "sha256": "215ac12e64b967e8d32b9c0ce1f04bbc0f57be4f64cea431885fdaac4cbfba29",
+      "guid": "9b618080ff2e4ece93dbabbdc0af9782",
+      "canonicalSha256": "215ac12e64b967e8d32b9c0ce1f04bbc0f57be4f64cea431885fdaac4cbfba29"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiThemeSnapshot.cs",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiThemeSnapshot.cs",
+      "sha256": "13568ef713078457b97a312534688de8769e1ab738f6261ca2176c971fcb5ee7",
+      "canonicalSha256": "13568ef713078457b97a312534688de8769e1ab738f6261ca2176c971fcb5ee7"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Core/UiThemeSnapshot.cs.meta",
+      "target": "unity/Packages/com.capsule.core/Runtime/UiThemeSnapshot.cs.meta",
+      "sha256": "70d5c516b721284351bda899b47f880f6879f5c0bfb7e7993128bbbc1bd2fa97",
+      "guid": "c351caf67f33423ca380f71b2b0a2c46",
+      "canonicalSha256": "e8fecd712110be8ad242ec6d868fc996f68f4edd95c2435cfe10d695f4d11e13"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime.meta",
+      "sha256": "9009f448f917e474fdecb055e801f3b9aeb52282f424ca79c0c6dad70a657d29",
+      "guid": "eb9fba7fa38ac83428242f7be3e8483c",
+      "canonicalSha256": "9009f448f917e474fdecb055e801f3b9aeb52282f424ca79c0c6dad70a657d29"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/Capsule.Package.asmdef",
+      "target": "unity/Packages/com.capsule.package/Runtime/Capsule.Package.asmdef",
+      "sha256": "d12ad0f7f6ebe1fe0be3fa571d455bd86617aa7d328d7c9de9dce7af559191f5"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/Capsule.Package.asmdef.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/Capsule.Package.asmdef.meta",
+      "sha256": "c1da58be4d84585f05b115adf36c33eaa8e5c0423b00bbd41e97a69c13c3fe42",
+      "guid": "926ef2157e9e23447a6e8def148fbe53",
+      "canonicalSha256": "c1da58be4d84585f05b115adf36c33eaa8e5c0423b00bbd41e97a69c13c3fe42"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiControlTheme.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiControlTheme.cs",
+      "sha256": "c2a0c6333ad7e610f31696cff2d774d1c1e5ee980adf05d4ec8085d9cd9b7c1b",
+      "canonicalSha256": "ed57bb5e172e22fddcf6d46c568d80dc267299fb314749cc7e856c73827df0fb"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiControlTheme.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiControlTheme.cs.meta",
+      "sha256": "10741777a7e1357e840d3ad0f3aeb46bdae9ebbbbba43565fe27b07fed569849",
+      "guid": "008deb772f04bc8499bc20263fc60362",
+      "canonicalSha256": "10741777a7e1357e840d3ad0f3aeb46bdae9ebbbbba43565fe27b07fed569849"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiDirectoryChangeStamp.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiDirectoryChangeStamp.cs",
+      "sha256": "449c80d189c2f20d6c7fa3a139090bd29402820660a3a94d8af44b581fd40369",
+      "canonicalSha256": "449c80d189c2f20d6c7fa3a139090bd29402820660a3a94d8af44b581fd40369"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiDirectoryChangeStamp.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiDirectoryChangeStamp.cs.meta",
+      "sha256": "c7b942f4e82139c1274002335338c3edf8d575d94c1688dd34dabb36f7ad62a3",
+      "guid": "ebb7ba9eb55d4304aac075b60ad88ad5",
+      "canonicalSha256": "c7b942f4e82139c1274002335338c3edf8d575d94c1688dd34dabb36f7ad62a3"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiDirectoryPackageLoader.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiDirectoryPackageLoader.cs",
+      "sha256": "c74944f2659540d86df176ad6ead7f1800ed0a33b81d08749f7c6a39c2cb3907",
+      "canonicalSha256": "c07413911256cb3005c4a283a0686a3f626cf2098a118bbbfdfec52e8b130293"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiDirectoryPackageLoader.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiDirectoryPackageLoader.cs.meta",
+      "sha256": "f35956c97127b47f07082a154f239c8edd5904a06241f8621d3475ca495aef1f",
+      "guid": "bdc794c5864783d4298874e218b1b960",
+      "canonicalSha256": "f35956c97127b47f07082a154f239c8edd5904a06241f8621d3475ca495aef1f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiFeatureSession.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiFeatureSession.cs",
+      "sha256": "fdba4039f2d45a665fc7c2cd473901d8b6966851e7e10759abb2e300f30d121e",
+      "canonicalSha256": "fdba4039f2d45a665fc7c2cd473901d8b6966851e7e10759abb2e300f30d121e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiFeatureSession.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiFeatureSession.cs.meta",
+      "sha256": "fe5153dad22168033d5e4dee7e01fd476dced97489151eef490f9cffa9b62e6f",
+      "guid": "7809d283b4f14f42970d82f4a423dc3f",
+      "canonicalSha256": "680154a32f77ace4202de5387dc71ccc25222f17d999564071df06b06c798856"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageImage.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageImage.cs",
+      "sha256": "f10935fd743d7d765c50dfe56f931656254cd827a17ba9d99be45b337b651d53",
+      "canonicalSha256": "f10935fd743d7d765c50dfe56f931656254cd827a17ba9d99be45b337b651d53"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageImage.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageImage.cs.meta",
+      "sha256": "ac2a5990a3254b27cea997d1dceb2333099236e98833e71843f0e86d767317cf",
+      "guid": "660270623faa5b04897cb761a5f168f5",
+      "canonicalSha256": "ac2a5990a3254b27cea997d1dceb2333099236e98833e71843f0e86d767317cf"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageImageCache.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageImageCache.cs",
+      "sha256": "f418ffcaee56c71847133431ba4f90c0b8ad967d54d4a8beb4ff05cda0d695f3",
+      "canonicalSha256": "6e2803bda27fa6b4798f12a7f78f105618acb3dad3eea0f9f6e238be1217769b"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageImageCache.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageImageCache.cs.meta",
+      "sha256": "33479820014276d9b2b38dd07fe3282bffe2e3c0485862a440d3212fb66274ac",
+      "guid": "9866a7871b47cba48b3d5a426f556755",
+      "canonicalSha256": "33479820014276d9b2b38dd07fe3282bffe2e3c0485862a440d3212fb66274ac"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageLimits.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageLimits.cs",
+      "sha256": "f501b3166e476669a9e1bdba4eddd2f9ed971cce7f46ad74658d6906d56c13d5",
+      "canonicalSha256": "f501b3166e476669a9e1bdba4eddd2f9ed971cce7f46ad74658d6906d56c13d5"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageLimits.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageLimits.cs.meta",
+      "sha256": "3f7e3b8fd8bd70ce2bce211ac947d874f59ec01624b9a33bffe8e7cdbbe9857f",
+      "guid": "9c31cb0f7d0a421b8afeab4fed2baa9f",
+      "canonicalSha256": "09e2153ce259628f745d4bebc3b7a3153941881a1eae8a94dc122c14646aa1a1"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageManifest.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageManifest.cs",
+      "sha256": "37b409700df18e0b86dce3d19f946a7346022f69753d37de772db61104cc3e67",
+      "canonicalSha256": "37b409700df18e0b86dce3d19f946a7346022f69753d37de772db61104cc3e67"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageManifest.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageManifest.cs.meta",
+      "sha256": "fd7492a7118936646eaed8a20e069461903acd05e6322740daf591f9d1e871ca",
+      "guid": "13e4b160ffc3f824592b6c216247864b",
+      "canonicalSha256": "fd7492a7118936646eaed8a20e069461903acd05e6322740daf591f9d1e871ca"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageRevision.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageRevision.cs",
+      "sha256": "111e249e0b1dd58b7eaf439de0ae504f23e6d600d069fed294b9d4e4fe07d65c",
+      "canonicalSha256": "111e249e0b1dd58b7eaf439de0ae504f23e6d600d069fed294b9d4e4fe07d65c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageRevision.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageRevision.cs.meta",
+      "sha256": "c2eb3dfb9173f7a272cfb64b9f9fb8103d3359ba4c7ba66d081f267499e305e5",
+      "guid": "f16606cb08efd31428b2f20039e77a5a",
+      "canonicalSha256": "c2eb3dfb9173f7a272cfb64b9f9fb8103d3359ba4c7ba66d081f267499e305e5"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageTheme.cs",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageTheme.cs",
+      "sha256": "88114d4b3f77c64aa6beeb48a18879c0b1848b28adfdc105f7d48ae8a71666fd",
+      "canonicalSha256": "88114d4b3f77c64aa6beeb48a18879c0b1848b28adfdc105f7d48ae8a71666fd"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Package/UiPackageTheme.cs.meta",
+      "target": "unity/Packages/com.capsule.package/Runtime/UiPackageTheme.cs.meta",
+      "sha256": "5407a25add2e0ebb7f455c00b14a0b4c47adb6cccd5cc4217941465fe0222be3",
+      "guid": "8db40a399af34c819cc4670867143736",
+      "canonicalSha256": "ddbbe511e422e642b71644abc71ea2c85531b248ddd179cec8aaa62536ac5bbe"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/PlainJsFixture.txt",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/PlainJsFixture.txt",
+      "sha256": "3fde2c7ea73441348ddc904088a49d4d0a6cfd463574f5f7263930768e17a795"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/PlainJsFixture.txt.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Resources/PlainJsFixture.txt.meta",
+      "sha256": "5890780253dfa500aa116e0c0494a5b660fa9422d47b71a17abe6b37d48c2e5e",
+      "guid": "9fadc9e98eb7d7848a0cf1ac003f1c05",
+      "canonicalSha256": "5890780253dfa500aa116e0c0494a5b660fa9422d47b71a17abe6b37d48c2e5e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime.meta",
+      "sha256": "0a42e79f4c929fd04bd978d9b08ffa76952fceb3f17f909edeb8f5cd1a9f0547",
+      "guid": "862510625c6920c42833500be3099378",
+      "canonicalSha256": "0a42e79f4c929fd04bd978d9b08ffa76952fceb3f17f909edeb8f5cd1a9f0547"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/AnimatedCharacterSurface.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/AnimatedCharacterSurface.cs",
+      "sha256": "ca7c150937e218e871a808c581069cc8510a984bd4c278b4857fafe1093dd805",
+      "canonicalSha256": "ca7c150937e218e871a808c581069cc8510a984bd4c278b4857fafe1093dd805"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/AnimatedCharacterSurface.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/AnimatedCharacterSurface.cs.meta",
+      "sha256": "f4b276457085948d1235136a5915f67932cf5fcc17d9e5110361dab7337e427d",
+      "guid": "993ea985cec548b7aee9cd84fc53aaec",
+      "canonicalSha256": "3a114ec8fb87153738750b7dfb767e3ed074927d5d758b28faad14caa971d35d"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Capsule.Unity.asmdef",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Capsule.Unity.asmdef",
+      "sha256": "aa1ca05466f49e43515de20937718af66d1d2c54b8a701754b72fbaa26b8d60e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Capsule.Unity.asmdef.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Capsule.Unity.asmdef.meta",
+      "sha256": "8aeeee25de773bbd18d7a0088b4029a72234e5aa89007a0c9d04f02662edb75b",
+      "guid": "f09d941e6cb2c704598b0ea5c4b32a4d",
+      "canonicalSha256": "8aeeee25de773bbd18d7a0088b4029a72234e5aa89007a0c9d04f02662edb75b"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleAlphaAwareImage.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleAlphaAwareImage.cs",
+      "sha256": "ce159f9771a3e3a256489091537fc193bcddae5ca9eaf1b9b150b5dd71839669",
+      "canonicalSha256": "dccab2f1385e9db4dedd302ba6b27512d0ae4153bbf70b775d26efcde764466e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleAlphaAwareImage.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleAlphaAwareImage.cs.meta",
+      "sha256": "9e25797fcee26e84bb23d493bce687a48070e84e97cf7b2809c225dfd560e294",
+      "guid": "5f40d6781787c9b42b7fa848ebfdcb88",
+      "canonicalSha256": "9e25797fcee26e84bb23d493bce687a48070e84e97cf7b2809c225dfd560e294"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleBrightness.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleBrightness.cs",
+      "sha256": "6b0fd5db66dee5fa9fc982c60f589853d26f9a5b5fe58e7c85474642b5003717",
+      "canonicalSha256": "6b0fd5db66dee5fa9fc982c60f589853d26f9a5b5fe58e7c85474642b5003717"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleBrightness.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleBrightness.cs.meta",
+      "sha256": "9e4cffaf1e22bc785d07e830349595189b40daac54b7962cb276be6fbeb2ba9c",
+      "guid": "247e46aeb0efafc4589b1d6ba35fc706",
+      "canonicalSha256": "9e4cffaf1e22bc785d07e830349595189b40daac54b7962cb276be6fbeb2ba9c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleChevron.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleChevron.cs",
+      "sha256": "9700c855242c93ad603ca1c8620cc9a7c53b4a46c864680fc2f8fd19c74224c4",
+      "canonicalSha256": "9700c855242c93ad603ca1c8620cc9a7c53b4a46c864680fc2f8fd19c74224c4"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleChevron.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleChevron.cs.meta",
+      "sha256": "5da61e0b37045c269e9c41c4068950b9fabe01d8ae2ab09c49c1d18a9d474fc2",
+      "guid": "6f4b5f14a6118834db998814131824ba",
+      "canonicalSha256": "5da61e0b37045c269e9c41c4068950b9fabe01d8ae2ab09c49c1d18a9d474fc2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleCircleMask.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleCircleMask.cs",
+      "sha256": "b02a2f821e9242424e9c1f14391fe326c036aa4a715f36d1cb7548b6a818f5d6",
+      "canonicalSha256": "66721c1febe38107b33866e920548a065dbaec8f3178442ce2c4b797c8afb6e8"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleCircleMask.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleCircleMask.cs.meta",
+      "sha256": "ccd2be6faf1dfe2e63c2954f9f1bc9ddd0465809bf2a3a0bbc6b36639884964b",
+      "guid": "0cc2fc4fce5341e7b33721aa66fbde54",
+      "canonicalSha256": "aa69211cc08981913d24c4e8094cdc18d1aa189f96e47c850051dcb399655974"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleControlFeedback.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleControlFeedback.cs",
+      "sha256": "8eefd54a7803022066f66b6fd07d84d434be2fc439bf3967fde3c1d286994b06",
+      "canonicalSha256": "8cf6fe08cc167567ba49b16ebd5f6c91b6a4658d28adba0b6cd56048adc0f36d"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleControlFeedback.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleControlFeedback.cs.meta",
+      "sha256": "48fdc6d88780e1b9fafc5393fe13c103d2ed9ed19d47aa1cdb53f14d4a2cfed4",
+      "guid": "0a29ed3928486b64ab4d6e6fd63677ee",
+      "canonicalSha256": "48fdc6d88780e1b9fafc5393fe13c103d2ed9ed19d47aa1cdb53f14d4a2cfed4"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleControlSkin.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleControlSkin.cs",
+      "sha256": "baa06bc0392abd9a3de95d1eff77195e83092a4af8e6e4a3fcf4e16169f6421e",
+      "canonicalSha256": "438d0efa074d6b6dcfdda2255ca562c00388461357a82cbca861da7c459126ab"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleControlSkin.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleControlSkin.cs.meta",
+      "sha256": "07484b239c7ecfa8fd12a4a688df5e025175191e3b02e5631c02207f5555ecfc",
+      "guid": "055f48f9905ae0d45aae743bb03e21fe",
+      "canonicalSha256": "07484b239c7ecfa8fd12a4a688df5e025175191e3b02e5631c02207f5555ecfc"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleFontMetrics.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleFontMetrics.cs",
+      "sha256": "929c453ccc3c58d4542de8c354ae8ac7e7aa0ac8e8f16d68e3b050d19d7cfdda",
+      "canonicalSha256": "38c5119d914244830355024afe1b19d0d50ccc0dc71866f74d4dcecf22989e38"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleFontMetrics.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleFontMetrics.cs.meta",
+      "sha256": "e175c1fad456573f121f6969897617a84d28e99f4cd89dfcdf56bff3371f00ff",
+      "guid": "b588330daaa9bbf44a646244d4689f5a",
+      "canonicalSha256": "e175c1fad456573f121f6969897617a84d28e99f4cd89dfcdf56bff3371f00ff"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleFrameRails.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleFrameRails.cs",
+      "sha256": "60216958a553f690574c004947dfab73a4260d7ec7a229804203e09737841518",
+      "canonicalSha256": "60216958a553f690574c004947dfab73a4260d7ec7a229804203e09737841518"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleFrameRails.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleFrameRails.cs.meta",
+      "sha256": "0e8f1fdb65bedea7c80cca58279c5112378aaea03361ecefcaf368c2645ec685",
+      "guid": "f9524b4767a8482cbbad195d494590cf",
+      "canonicalSha256": "0e8f1fdb65bedea7c80cca58279c5112378aaea03361ecefcaf368c2645ec685"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleGroundProjection.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleGroundProjection.cs",
+      "sha256": "a5bfcdc14f08f31b0b5ad2e3443a6d6d2e436f62aebdfbfd32ff867ec4ff785c",
+      "canonicalSha256": "a5bfcdc14f08f31b0b5ad2e3443a6d6d2e436f62aebdfbfd32ff867ec4ff785c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleGroundProjection.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleGroundProjection.cs.meta",
+      "sha256": "7a15aa3873789307dbeb78b4c0fa03386e12aa7f8f054319a217d70289974a63",
+      "guid": "fb1a3ed3620036948b0b94a43ba17373",
+      "canonicalSha256": "7a15aa3873789307dbeb78b4c0fa03386e12aa7f8f054319a217d70289974a63"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleImageRotation.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleImageRotation.cs",
+      "sha256": "9ad251698eabb64cb4adc6d0668ea6c900e01118c6a1ae0b0c4172d2714609cf",
+      "canonicalSha256": "9ad251698eabb64cb4adc6d0668ea6c900e01118c6a1ae0b0c4172d2714609cf"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleImageRotation.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleImageRotation.cs.meta",
+      "sha256": "d2355c28a7162f4424d3d6736e7d5c817acb9616ff1bbc624f1c6ff34cdc6668",
+      "guid": "1a9b3f42960d45e18b370abb428b2702",
+      "canonicalSha256": "5d92c493d643e1158b4a1f76033eedc50ca8f8896fb65e4262e4078bce1eb438"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleKeyboardInput.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleKeyboardInput.cs",
+      "sha256": "8334f71f5c485040641393e649244832dd92b00ed8d11b12ac0ce2957e09636d",
+      "canonicalSha256": "9473d0167ded7792233ac0fa2f909f5c960464289db0c50ad337e2e227077d0b"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleKeyboardInput.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleKeyboardInput.cs.meta",
+      "sha256": "fefadf5fa66a11cfa13962dad64c1ba5408ee6b9c691e3bae081c3977ec78021",
+      "guid": "9baedf93559d4494b9f11574c73d8ab0",
+      "canonicalSha256": "0df46b9bc941937bd96ade6f5ea69a072d15c34d651683bb41e9a0420e924d63"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleNativeTarget.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleNativeTarget.cs",
+      "sha256": "dd7b2afee5f9a79ecc999acf307847030bd6ea3e191d00ce53fa9606d95a8058",
+      "canonicalSha256": "ded2e8815671c181223f24fb985f0b5f84011778017864075525bd4376c740d5"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleNativeTarget.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleNativeTarget.cs.meta",
+      "sha256": "214e12cb0948f05c360f73824afd55a4ba2059b16053f33878e92ef52c95368e",
+      "guid": "d0d6e8fdeebfca54f922e3fd29829e36",
+      "canonicalSha256": "214e12cb0948f05c360f73824afd55a4ba2059b16053f33878e92ef52c95368e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleNodeInput.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleNodeInput.cs",
+      "sha256": "ed9677248c639a0459d0f0c7040969d1f37d98965d1f7e5753bfcdb3602c321a",
+      "canonicalSha256": "0474184c715c87507dd46bd0d4dc1e43b226801d0f41e261478f3e46ecfc339b"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleNodeInput.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleNodeInput.cs.meta",
+      "sha256": "63daead907ddd2b537da49cf4848b28b5c310bec6f6e838353b4b6280c6e669f",
+      "guid": "a46ad93400a201648bfd4a9cb0ab10f4",
+      "canonicalSha256": "63daead907ddd2b537da49cf4848b28b5c310bec6f6e838353b4b6280c6e669f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleRoundedImage.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleRoundedImage.cs",
+      "sha256": "a561a94431fbc184cc632fd6f547c84f7d006a652c4a5f8808c3ebf96b32c83e",
+      "canonicalSha256": "a561a94431fbc184cc632fd6f547c84f7d006a652c4a5f8808c3ebf96b32c83e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleRoundedImage.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleRoundedImage.cs.meta",
+      "sha256": "07d94967a189caf91dfb377ddbddc067a2684329f7b336422b742d5e6c158b37",
+      "guid": "c9a78ff91677407bbb9b6d4b0c75bef7",
+      "canonicalSha256": "8423993880667e665262d25fb0a2d2cd13302efbee567d1684400ebf3aaa93f6"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleSurfaceView.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleSurfaceView.cs",
+      "sha256": "ec49dcb0cf7d30af4bc874321ca4ca1722232451babbb15fa6ae1cb3ea0cba85",
+      "canonicalSha256": "ec49dcb0cf7d30af4bc874321ca4ca1722232451babbb15fa6ae1cb3ea0cba85"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleSurfaceView.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleSurfaceView.cs.meta",
+      "sha256": "12fb76eaa75412e1b661880fc6a6223cac8b665e0d596273a993bb17d1c80b9f",
+      "guid": "998e6ce6a6ae438fb41a73906c15990f",
+      "canonicalSha256": "9dd680c04e1fa406e8d6a0275d27b97a68cd6d417f4f89febd4b3c072671930c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleTextInput.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleTextInput.cs",
+      "sha256": "89a0f116d9b163580b233d1b56232fd35c4d97954c33efe5e23412e976b49653",
+      "canonicalSha256": "89a0f116d9b163580b233d1b56232fd35c4d97954c33efe5e23412e976b49653"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleTextInput.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleTextInput.cs.meta",
+      "sha256": "3cc19be303a288e112f3170997d3d056775ee2064ad7bfc3fe74ef765f26d788",
+      "guid": "6bab2eb424594fde8dc328a30ccddfe5",
+      "canonicalSha256": "3cc19be303a288e112f3170997d3d056775ee2064ad7bfc3fe74ef765f26d788"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleTiledImage.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleTiledImage.cs",
+      "sha256": "433dac17a537128d2decf5d4d5e8d246a4252290c107a2323e8e1f23f5d9c731",
+      "canonicalSha256": "433dac17a537128d2decf5d4d5e8d246a4252290c107a2323e8e1f23f5d9c731"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleTiledImage.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleTiledImage.cs.meta",
+      "sha256": "596be314e159d1e695298fcbe66a50b932202e9623dbb95459da8f9293457806",
+      "guid": "4c190ebd98da4e1e83fa669fb08ea88a",
+      "canonicalSha256": "596be314e159d1e695298fcbe66a50b932202e9623dbb95459da8f9293457806"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleWorldRegistry.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleWorldRegistry.cs",
+      "sha256": "342c25dde9b7bfb732e203393907741fb79031bc6d72e057a5105b4287b85525",
+      "canonicalSha256": "342c25dde9b7bfb732e203393907741fb79031bc6d72e057a5105b4287b85525"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleWorldRegistry.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleWorldRegistry.cs.meta",
+      "sha256": "473947ebb68bb57e31807fb1380cb5f4047e39fbdd351f37a4e3de7e3e10abcd",
+      "guid": "acaeb0c129254a54080d09c0000bb0b9",
+      "canonicalSha256": "473947ebb68bb57e31807fb1380cb5f4047e39fbdd351f37a4e3de7e3e10abcd"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleWorldView.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleWorldView.cs",
+      "sha256": "90b0210f869407c57884d56204f21336ce1f2b687438003ce4a532c160dfe6e3",
+      "canonicalSha256": "90b0210f869407c57884d56204f21336ce1f2b687438003ce4a532c160dfe6e3"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/CapsuleWorldView.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/CapsuleWorldView.cs.meta",
+      "sha256": "7c8bfb730904f5fcd8e22aa610de66a15176a2ca4c469ef6aa6cff8d40fcd7d2",
+      "guid": "c96d26a753b848bc1f15c309063cce15",
+      "canonicalSha256": "7c8bfb730904f5fcd8e22aa610de66a15176a2ca4c469ef6aa6cff8d40fcd7d2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/NativeUiWidget.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/NativeUiWidget.cs",
+      "sha256": "005ebb08091a58e13edf6a2f20d2d2444a2290d0a20b0e0244e5522fc0469bc3",
+      "canonicalSha256": "8e74fb1024aa350a1b294e8dd920ddb622b39e17372249b65e6611bc980dcc23"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/NativeUiWidget.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/NativeUiWidget.cs.meta",
+      "sha256": "19e38265286bf1706ab57bced5490c65cf080455ec9e05da65748b999ff2f25f",
+      "guid": "2e8c9efe8f9fe7b44abdfe7f4a5465fd",
+      "canonicalSha256": "19e38265286bf1706ab57bced5490c65cf080455ec9e05da65748b999ff2f25f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Resources.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Resources.meta",
+      "sha256": "c3d098ec38d56ec6b65f806879f9ccfffd73584a964556cde5c466647d5a915d",
+      "guid": "7d7521581dc40554aab58f662cfb6b17",
+      "canonicalSha256": "c3d098ec38d56ec6b65f806879f9ccfffd73584a964556cde5c466647d5a915d"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Resources/CapsuleAlphaAware.shader",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Resources/CapsuleAlphaAware.shader",
+      "sha256": "b7eca19f7c53cff5c35ac49507880e808f4699b8c92ec4a4efc0e6cad7a2679f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Resources/CapsuleAlphaAware.shader.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Resources/CapsuleAlphaAware.shader.meta",
+      "sha256": "a6d62a9229aaddfb69c8dbbf76ee509e68d88a57068a097e255a8caefefa687a",
+      "guid": "73f20c2a341c35e46a299d5b26fba7c8",
+      "canonicalSha256": "a6d62a9229aaddfb69c8dbbf76ee509e68d88a57068a097e255a8caefefa687a"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Resources/CapsuleSoftLight.shader",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Resources/CapsuleSoftLight.shader",
+      "sha256": "c428fa83d7b777cd6ea9ff68774942c72377698786b94f6e1669da09a37030dc"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/Resources/CapsuleSoftLight.shader.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/Resources/CapsuleSoftLight.shader.meta",
+      "sha256": "ba8c8482a48aacf30bd09a69dcf74e79e4c79551898f3364b42e73b30265d898",
+      "guid": "6f7ea293955ca9441b6d2f5fb72f724a",
+      "canonicalSha256": "ba8c8482a48aacf30bd09a69dcf74e79e4c79551898f3364b42e73b30265d898"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/UnityUiImageDecoder.cs",
+      "target": "unity/Packages/com.capsule.unity/Runtime/UnityUiImageDecoder.cs",
+      "sha256": "471198fdaa38d2d41385fb2ee8a9e9f055a2538a9dc90b6f263b7d6532de833e",
+      "canonicalSha256": "471198fdaa38d2d41385fb2ee8a9e9f055a2538a9dc90b6f263b7d6532de833e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Unity/UnityUiImageDecoder.cs.meta",
+      "target": "unity/Packages/com.capsule.unity/Runtime/UnityUiImageDecoder.cs.meta",
+      "sha256": "9561d1cbcecd57645baadd3773bff883b1206a784643611f71964d02491ef179",
+      "guid": "34322e175e3c42845a05e3699e71718f",
+      "canonicalSha256": "9561d1cbcecd57645baadd3773bff883b1206a784643611f71964d02491ef179"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime.meta",
+      "sha256": "773078925fb547d866bc41c77b7ad69a9f0be58aa0a76999f937f51d27cde62f",
+      "guid": "6120ede3595f97c42a9c0e30f692c3c2",
+      "canonicalSha256": "773078925fb547d866bc41c77b7ad69a9f0be58aa0a76999f937f51d27cde62f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Capsule.Wasmtime.asmdef",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Capsule.Wasmtime.asmdef",
+      "sha256": "c6a576cb18d91caf5cb7889551f8fba52397249013b6df20b0d0deb912fdcc21"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Capsule.Wasmtime.asmdef.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Capsule.Wasmtime.asmdef.meta",
+      "sha256": "b71be769e935e5d1ca0205dd1907de2e9576f6bac6cb9a3a6695977b40c925f0",
+      "guid": "6ea73a7142fad1944adf5b5e9a43a1e0",
+      "canonicalSha256": "b71be769e935e5d1ca0205dd1907de2e9576f6bac6cb9a3a6695977b40c925f0"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Diagnostics.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Diagnostics.meta",
+      "sha256": "4b4b776cbb22bc66ccb2d66b96e23a5026a327cf40e9f5ecc0210c291759fc9f",
+      "guid": "f4d6afdfd85e57748be408caa6fe976f",
+      "canonicalSha256": "4b4b776cbb22bc66ccb2d66b96e23a5026a327cf40e9f5ecc0210c291759fc9f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Plugins.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Plugins.meta",
+      "sha256": "d30ed21948bf997fdbab23b17d07b4eb3822897bd475d660cc33c9e4779cb89f",
+      "guid": "decd97b633c8b024ca81d8d348f3d8ce",
+      "canonicalSha256": "d30ed21948bf997fdbab23b17d07b4eb3822897bd475d660cc33c9e4779cb89f"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Plugins/x86_64.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64.meta",
+      "sha256": "719effbe6fc8e1e6b84254740e60d20ebf89d5868039775a428dc2d0272cba66",
+      "guid": "f623b5da2edc6804b9e17cf16e3e7192",
+      "canonicalSha256": "719effbe6fc8e1e6b84254740e60d20ebf89d5868039775a428dc2d0272cba66"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Plugins/x86_64/portable_ui_wasmtime.dll",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/portable_ui_wasmtime.dll",
+      "sha256": "1f17251756f41283b483ee6813fcece2788eb8b33f39b0e06477cb35f50bf25a"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Plugins/x86_64/portable_ui_wasmtime.dll.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/portable_ui_wasmtime.dll.meta",
+      "sha256": "bd2bc8ed83da16b595e5d729b0504ad9226bdde192e61fa648e078a12f740899",
+      "guid": "24fe34c06bf697a43925143e0fa0c153",
+      "canonicalSha256": "bd2bc8ed83da16b595e5d729b0504ad9226bdde192e61fa648e078a12f740899"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Plugins/x86_64/wasmtime.dll",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/wasmtime.dll",
+      "sha256": "19b3880fbb92f1826c58ac9f5e2a472692b5fc3d012a1a7a41983ccf77544607"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Plugins/x86_64/wasmtime.dll.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/wasmtime.dll.meta",
+      "sha256": "8dbcae3619a9b0b7e3603b1a52c49d091bc09b1a3879de5eec0bb04ff9b6e97c",
+      "guid": "43b36d54e3e828f43823eb56c29b6509",
+      "canonicalSha256": "8dbcae3619a9b0b7e3603b1a52c49d091bc09b1a3879de5eec0bb04ff9b6e97c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Wasmtime-LICENSE.txt",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Wasmtime-LICENSE.txt",
+      "sha256": "a6c48161a09acc75a0e25503bab66a731eb5fba5392ed4bb4743e4ba5085327a"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/Wasmtime-LICENSE.txt.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/Wasmtime-LICENSE.txt.meta",
+      "sha256": "a64ced0aa82253e93e3c13f01d38ac9e035cdceade8c4711ccd441d0479bdc63",
+      "guid": "913d7ddb20fcf3f4794560bd3c891be6",
+      "canonicalSha256": "a64ced0aa82253e93e3c13f01d38ac9e035cdceade8c4711ccd441d0479bdc63"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/WasmtimeUiGuest.cs",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/WasmtimeUiGuest.cs",
+      "sha256": "0c04cbc9ab728d08113fb4b2ce4732dda426e39ec32cdea66e6dcd8a68b05e61",
+      "canonicalSha256": "18dc5da989498066f3df1abfe6955289381a47b4f13825786013490b1f633e9c"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Wasmtime/WasmtimeUiGuest.cs.meta",
+      "target": "unity/Packages/com.capsule.wasmtime/Runtime/WasmtimeUiGuest.cs.meta",
+      "sha256": "857936dafc09602f727cd187c125bc64f50abd7627422529ca8305fefce1e60b",
+      "guid": "856fe790eff133847a0b4dbf8bd432f3",
+      "canonicalSha256": "857936dafc09602f727cd187c125bc64f50abd7627422529ca8305fefce1e60b"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime.meta",
+      "sha256": "66f3eb02e947926cf46cb9e245b3f38d3ad27453a486a43ff145f10b434f2edc",
+      "guid": "bd78f483a48c01946b1f621bd814a876",
+      "canonicalSha256": "66f3eb02e947926cf46cb9e245b3f38d3ad27453a486a43ff145f10b434f2edc"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Capsule.Yoga.asmdef",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Capsule.Yoga.asmdef",
+      "sha256": "54fc6ba733bb6c7d67d78e6c7f1fb9def562cf8d80cff6c334e1d9737ae73f76"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Capsule.Yoga.asmdef.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Capsule.Yoga.asmdef.meta",
+      "sha256": "3abdd655750b000f0206e9d6ad0727607fdf6d38f29f4c09c39591a6196ba32d",
+      "guid": "8106f84db0a73b646b374a2c91f9765e",
+      "canonicalSha256": "3abdd655750b000f0206e9d6ad0727607fdf6d38f29f4c09c39591a6196ba32d"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/NativeYoga.cs",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/NativeYoga.cs",
+      "sha256": "63ed9cb5759804c9054b355d8aea629576c2da10729a3a9defbc76297e99abae",
+      "canonicalSha256": "63ed9cb5759804c9054b355d8aea629576c2da10729a3a9defbc76297e99abae"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/NativeYoga.cs.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/NativeYoga.cs.meta",
+      "sha256": "a18de0f050a7c348ab7eb3c9bc6e81cae432a799ce625f15801885029ce8b75d",
+      "guid": "ef836f372694c484a8cae208f2e534fe",
+      "canonicalSha256": "a18de0f050a7c348ab7eb3c9bc6e81cae432a799ce625f15801885029ce8b75d"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins.meta",
+      "sha256": "6febfa22b25fa0963171493813604dd6655821d554ac0b643e6f073ed2b1dd28",
+      "guid": "f863cff59f6c2fb40936854839ad2500",
+      "canonicalSha256": "6febfa22b25fa0963171493813604dd6655821d554ac0b643e6f073ed2b1dd28"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64.meta",
+      "sha256": "9051744d3ddac440adc92fbac4c180d698328d41efc716542bf2f6c18ca9ea4e",
+      "guid": "4eaec15795b20e84e9990c97199efd18",
+      "canonicalSha256": "9051744d3ddac440adc92fbac4c180d698328d41efc716542bf2f6c18ca9ea4e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64/LICENSE.yoga.txt",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/LICENSE.yoga.txt",
+      "sha256": "f08a94bfb0bdc1d7f1cb59badaf0f8c551b10db871185622dbf1fd036affa9cb"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64/LICENSE.yoga.txt.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/LICENSE.yoga.txt.meta",
+      "sha256": "bfe181b327ef73b67303c1046b6845e6fc78f3537aaeba8edab37b977b83951d",
+      "guid": "f0fc02cf40facb943888b362f4fbc0ff",
+      "canonicalSha256": "bfe181b327ef73b67303c1046b6845e6fc78f3537aaeba8edab37b977b83951d"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64/portable_ui_yoga.dll",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/portable_ui_yoga.dll",
+      "sha256": "7e7815f2304d6402f79cdc720880ed835dc162416fab1db28f3f147c3366ea43"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64/portable_ui_yoga.dll.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/portable_ui_yoga.dll.meta",
+      "sha256": "ef3abd25cf5d55e424cd0da30bd81139392dcad89533b128c2f0eec1ab2c9fd2",
+      "guid": "9b9ccac5b8f943ecb9b2beeb4d123233",
+      "canonicalSha256": "ef3abd25cf5d55e424cd0da30bd81139392dcad89533b128c2f0eec1ab2c9fd2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64/provenance.json",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/provenance.json",
+      "sha256": "a1ac060a0dd5605fad0be88ebee40cda596df40e2c776f3f75406230c06719ea"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/Plugins/x86_64/provenance.json.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/provenance.json.meta",
+      "sha256": "243555f856bd91a3b6ba09a98230ec37cbf5de848bc2b401ab0b907d4c8131c9",
+      "guid": "e5794428e7acfa043b4395f10074f437",
+      "canonicalSha256": "243555f856bd91a3b6ba09a98230ec37cbf5de848bc2b401ab0b907d4c8131c9"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/YogaCoordinator.cs",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/YogaCoordinator.cs",
+      "sha256": "949f35ce59e8bfba6738a87c538d1cd9f42272d4506d723fe8f2ce91b92ff40e",
+      "canonicalSha256": "949f35ce59e8bfba6738a87c538d1cd9f42272d4506d723fe8f2ce91b92ff40e"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/YogaCoordinator.cs.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/YogaCoordinator.cs.meta",
+      "sha256": "dae5cf0dbda00eae17e556b7c4c868e044b23c82bc49d92fe55657f829e9ce11",
+      "guid": "80b37faa44bfc6b4abfe40a05f328c48",
+      "canonicalSha256": "dae5cf0dbda00eae17e556b7c4c868e044b23c82bc49d92fe55657f829e9ce11"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/YogaTextMetrics.cs",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/YogaTextMetrics.cs",
+      "sha256": "d5de52cc5afdedbf55f3fff38b66bc7c2ac450b170b5906067d7096ad4d6208f",
+      "canonicalSha256": "333594fa4848cf0ad7fe9ec9ce5fac05ae161dfc914f53a699dac237325df1ee"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/YogaTextMetrics.cs.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/YogaTextMetrics.cs.meta",
+      "sha256": "702088a74ef3f995c935fa36fc3cd22d3af3fbc27a91ad13a26bd5599ba44869",
+      "guid": "8d8b02daaf531f149b299c6c817a00a4",
+      "canonicalSha256": "702088a74ef3f995c935fa36fc3cd22d3af3fbc27a91ad13a26bd5599ba44869"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/YogaUiGuest.cs",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/YogaUiGuest.cs",
+      "sha256": "b1651a52a3e24ad47609dfe656dc2b8b468117347ea52ace2d5389964f97fdd2",
+      "canonicalSha256": "b1651a52a3e24ad47609dfe656dc2b8b468117347ea52ace2d5389964f97fdd2"
+    },
+    {
+      "source": "client/Assets/Host/Capsule/Yoga/YogaUiGuest.cs.meta",
+      "target": "unity/Packages/com.capsule.yoga/Runtime/YogaUiGuest.cs.meta",
+      "sha256": "2ba6604315082965fb90ae4198dd62cf14ddd730131bdff7177746603b91f41b",
+      "guid": "473cada2dc6fb6e4b8c80a510457ceba",
+      "canonicalSha256": "2ba6604315082965fb90ae4198dd62cf14ddd730131bdff7177746603b91f41b"
+    }
+  ],
+  "neutralFixture": {
+    "source": "tools/capsule-native-tests/fixture/main.tsx",
+    "bundle": "tools/capsule-native-tests/fixture/compiled/bundle.js",
+    "sha256": "e63276e59efb43195b15716018a42b12b89249b3047dfa4e711c24f952c43393",
+    "generation": "Captured from the same neutral compiler fixture used by the Host ownership baseline; compiler extraction is a separate stage."
+  },
+  "lineEndings": "Only .cs/.meta may undergo Git CRLF/LF translation, checked by canonical digest. Original byte hashes retained; all runtime resource hashes remain exact."
+}

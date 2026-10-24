@@ -1,0 +1,13 @@
+{
+  "name": "com.capsule.wasmtime",
+  "version": "0.1.0",
+  "displayName": "Capsule Wasmtime",
+  "description": "Capsule Wasmtime guest and Windows native runtime.",
+  "unity": "6000.6",
+  "dependencies": {
+    "com.capsule.core": "0.1.0",
+    "com.capsule.package": "0.1.0"
+  },
+  "unityRelease": "3f1",
+  "license": "Apache-2.0"
+}
