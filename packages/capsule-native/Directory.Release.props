@@ -1,8 +1,6 @@
 <Project>
   <PropertyGroup>
     <Version>0.1.0</Version>
-    <PackageVersion>$(Version)</PackageVersion>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>Capsule Contributors</Authors>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/ctxshift/capsule</RepositoryUrl>
@@ -10,9 +8,6 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
-    <IsPackable>true</IsPackable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)../../LICENSE" Pack="true" PackagePath="licenses/" />
-  </ItemGroup>
 </Project>

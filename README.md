@@ -3,9 +3,10 @@
 Capsule provides portable addon runtime libraries and a Unity presentation adapter.
 This repository contains the native package candidate, React authoring SDK,
 feature infrastructure, compiler/workshop and reusable RPG/MMO/skill packages.
-Coordinated release feeds remain a separate stage.
+The engine plugin is the installation entry point: npm supplies JS/TS tooling,
+and GitHub Releases supplies engine bundles. See the [release plan](docs/releases.md).
 No game integration, game artwork, backend or remote registry is required for the
-portable checks below. No publication destination is configured.
+portable checks below. Candidate creation does not publish a release.
 
 First-party code is Apache-2.0. Bundled upstream components retain their original
 licenses; see [third-party notices](THIRD-PARTY.md).
@@ -36,8 +37,8 @@ It does not start an engine host. UI projects use public `@capsule/react`,
 `@capsule/features` and `@capsule/workshop` exports. The compiler CLI accepts
 explicit source/project/manifest/output paths; see the
 [counter example](examples/addons/capsule-counter/README.md).
-Authoring is a source workspace candidate; packed release installation
-is not yet established. The [authoring import map](docs/provenance/authoring-import.json)
+Packed authoring and engine candidates use the [release workflow](docs/releases.md).
+The [authoring import map](docs/provenance/authoring-import.json)
 records the reviewed sources and adaptations; filtered authoring history is
 retained as a merge parent. [Verification](docs/verification/authoring.json)
 distinguishes browser/compiler/native proofs from in-game live reload.

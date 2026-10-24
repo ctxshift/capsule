@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../capsule-native/Directory.Pack.props" />
+  <Import Project="../../capsule-native/Directory.Release.props" />
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <LangVersion>8.0</LangVersion>
     <Nullable>disable</Nullable>
-    <PackageId>SkillSystem.Features</PackageId>
     <AssemblyName>SkillSystem.Features</AssemblyName>
     <Description>Reusable skill progression and training contracts and native provider interfaces.</Description>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>

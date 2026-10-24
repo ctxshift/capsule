@@ -44,3 +44,11 @@ run = "bun run build:sdk"
 description = "Run the neutral React UI workshop and browser preview"
 raw = true
 run = "bun run dev:demo"
+
+[tasks.release-build]
+description = "Build a committed npm and GitHub engine candidate; pass --output"
+run = "bun run release:build"
+
+[tasks.release-verify]
+description = "Verify packed npm and direct DLL consumers; pass --artifacts"
+run = "bun run release:verify"

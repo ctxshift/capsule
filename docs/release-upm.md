@@ -1,0 +1,7 @@
+# Packed UPM consumer verification
+
+Run `pwsh -NoProfile -File tools/release/verify-upm.ps1 -Artifacts <absolute-directory>` against a directory containing all eight `com.capsule.*-0.1.0.tgz` archives. The verifier copies those archives into a new temporary Unity 6000.6.3f1 project outside the source checkout. Its package manifest installs only the tarballs plus the pinned Unity uGUI, Input System, Newtonsoft, Test Framework, and Pipeline dependencies. An EditMode test assembly references all eight packaged Capsule assemblies and checks their public contract types. The verifier asks `agent-unity test-headless` to import and run this probe, retaining the temporary project and logs under `.local/release-upm/`.
+
+The script never targets an existing source project or Editor. A passing result requires a nonzero EditMode test count from the new consumer. The smoke test proves UPM import, C# compilation, package dependency closure, and assembly identity; it does not prove Player rendering or gameplay.
+
+On the current helper installation, headless validation is blocked before Unity starts: `agent-unity` reports the new, closed temporary project as already open. A direct process check found no Editor for that temporary project, and `unity status` reported no instances. The helper's retained `pipeline list` snapshot nevertheless marked the temporary project as running. The script preserves this failure and does not bypass the helper's editor-ownership guard. Re-run it after that discovery issue is resolved to obtain actual import and EditMode evidence.

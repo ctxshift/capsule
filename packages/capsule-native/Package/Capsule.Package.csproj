@@ -2,7 +2,6 @@
   <PropertyGroup>
     <AssemblyName>Capsule.Package</AssemblyName>
     <RootNamespace>Capsule.Package</RootNamespace>
-    <PackageId>Capsule.Package</PackageId>
     <Description>Capsule package loading, manifests, themes and images.</Description>
     <CapsuleAllowNewtonsoft>true</CapsuleAllowNewtonsoft>
     <CapsuleAllowCore>true</CapsuleAllowCore>

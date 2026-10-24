@@ -58,7 +58,8 @@ find an unpublished Capsule package in Unity's public registry. Check the host's
 manifest/lockfile, preserve package `.meta` files and native importer settings,
 and do not commit machine-specific local paths. The planned attach/detach workflow
 will manage temporary overrides and restore the pinned release set; it is not
-available yet. No supported release feed or remote install URL is configured.
+available yet. The [release workflow](releases.md) builds a GitHub Unity bundle
+containing all eight embedded packages; install that compatible set together.
 
 Hosts using reusable contracts can also install `com.capsule.features.rpg`,
 `com.capsule.features.mmo` and `com.capsule.features.skill-system` from disk.

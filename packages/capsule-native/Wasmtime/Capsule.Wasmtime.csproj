@@ -2,18 +2,11 @@
   <PropertyGroup>
     <AssemblyName>Capsule.Wasmtime</AssemblyName>
     <RootNamespace>Capsule.Wasmtime</RootNamespace>
-    <PackageId>Capsule.Wasmtime</PackageId>
     <Description>Capsule Wasmtime guest and Windows x64 native runtime.</Description>
     <CapsuleAllowCore>true</CapsuleAllowCore>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Core/Capsule.Core.csproj" />
     <Compile Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/WasmtimeUiGuest.cs" Link="Wasmtime/%(Filename)%(Extension)" />
-    <None Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/wasmtime.dll" Pack="true" PackagePath="runtimes/win-x64/native/wasmtime.dll" />
-    <None Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/portable_ui_wasmtime.dll" Pack="true" PackagePath="runtimes/win-x64/native/portable_ui_wasmtime.dll" />
-    <None Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/Carrier/CapsuleQuickJs.bytes" Pack="true" PackagePath="contentFiles/any/any/Capsule/Wasmtime/Carrier/CapsuleQuickJs.bytes" />
-    <None Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/Resources/*.txt" Pack="true" PackagePath="contentFiles/any/any/Capsule/Wasmtime/Resources/" />
-    <None Include="../../../unity/Packages/com.capsule.wasmtime/Runtime/Wasmtime-LICENSE.txt" Pack="true" PackagePath="licenses/Wasmtime-LICENSE.txt" />
-    <None Include="../../../unity/Packages/com.capsule.wasmtime/ThirdPartyNotices/*.txt" Pack="true" PackagePath="licenses/" />
   </ItemGroup>
 </Project>
