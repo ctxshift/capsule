@@ -67,7 +67,7 @@ test('owned atomic TSX publication and shared-root hot reload', async () => {
   await fs.writeFile(source, valid + 'const invalid: number="text";');
   const type = await worker.compile();
   check(
-    !type.success && type.error.includes('app.tsx:'),
+    !type.success && type.error?.includes('app.tsx:'),
     'source-located type error',
   );
   check(
@@ -146,7 +146,7 @@ test('owned atomic TSX publication and shared-root hot reload', async () => {
     output: join(root, 'unwatched'),
   }).compile();
   check(
-    !escaped.success && escaped.error.includes('watched source roots'),
+    !escaped.success && escaped.error?.includes('watched source roots'),
     'unwatched import rejected',
   );
   const relocated = join(root, 'source', 'moved.tsx');
@@ -165,7 +165,7 @@ test('owned atomic TSX publication and shared-root hot reload', async () => {
   const browserApi = await worker.compile();
   check(
     !browserApi.success &&
-      browserApi.error.includes("Cannot find name 'window'"),
+      browserApi.error?.includes("Cannot find name 'window'"),
     'unsupported browser API rejected',
   );
   console.log(
