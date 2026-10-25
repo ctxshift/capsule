@@ -71,6 +71,12 @@ A native DLL change requires a safe Editor restart because Windows retains loade
 libraries. Keep carrier, SDK and native versions compatible. A compiler/SDK build
 does not establish compatibility with an arbitrary older native runtime.
 
+Local source imports also include package test metadata. Capsule's independent
+test scripts use their own asset GUIDs so they can coexist with a consuming
+project's tests. Preserve runtime, shader and resource GUIDs during migration;
+do not reuse consumer test-script GUIDs for independent package tests. Detect
+collisions before attachment rather than letting Unity rewrite source metadata.
+
 ## First-run settings and resources
 
 **Input System:** installing the package does not enable its native backends.
