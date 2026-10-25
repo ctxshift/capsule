@@ -6,6 +6,30 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.capsule.features.mmo": {
+      "version": "file:com.capsule.features.mmo",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.capsule.core": "0.1.0"
+      }
+    },
+    "com.capsule.features.rpg": {
+      "version": "file:com.capsule.features.rpg",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.capsule.core": "0.1.0"
+      }
+    },
+    "com.capsule.features.skill-system": {
+      "version": "file:com.capsule.features.skill-system",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.capsule.core": "0.1.0"
+      }
+    },
     "com.capsule.package": {
       "version": "file:com.capsule.package",
       "depth": 0,
@@ -24,6 +48,7 @@
         "com.unity.inputsystem": "1.19.0",
         "com.unity.ugui": "2.6.0",
         "com.capsule.package": "0.1.0",
+        "com.capsule.wasmtime": "0.1.0",
         "com.capsule.yoga": "0.1.0"
       }
     },

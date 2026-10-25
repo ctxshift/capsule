@@ -1,0 +1,22 @@
+{
+  "name": "Capsule.Unity.Development",
+  "rootNamespace": "Capsule.Unity.Development",
+  "references": [
+    "Capsule.Core",
+    "Capsule.Package",
+    "Capsule.Yoga",
+    "Capsule.Wasmtime",
+    "Capsule.Unity",
+    "Unity.ugui",
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "UNITY_EDITOR || DEVELOPMENT_BUILD"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Newtonsoft.Json.dll"
+  ]
+}

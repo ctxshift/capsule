@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "sha256": {
+    "Packages/com.capsule.wasmtime/Runtime/Carrier/CapsuleQuickJs.bytes": "0C5DFA49D0797B3599057D7B1428FA9C42E75542CC09F163CBE69D9DBCCFA5B7",
+    "Packages/com.capsule.wasmtime/Runtime/Resources/CapsuleReactSdk.txt": "AE0AA87E7464D4DC0E7308BF0B88E7C9A05D94D58FE630297F78B911B7CC996C",
+    "Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/wasmtime.dll": "19B3880FBB92F1826C58AC9F5E2A472692B5FC3D012A1A7A41983CCF77544607",
+    "Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/portable_ui_wasmtime.dll": "1F17251756F41283B483EE6813FCECE2788EB8B33F39B0E06477CB35F50BF25A",
+    "Packages/com.capsule.yoga/Runtime/Plugins/x86_64/portable_ui_yoga.dll": "7E7815F2304D6402F79CDC720880ED835DC162416FAB1DB28F3F147C3366EA43"
+  }
+}

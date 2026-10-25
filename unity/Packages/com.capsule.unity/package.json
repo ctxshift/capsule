@@ -9,6 +9,7 @@
     "com.unity.inputsystem": "1.19.0",
     "com.unity.ugui": "2.6.0",
     "com.capsule.package": "0.1.0",
+    "com.capsule.wasmtime": "0.1.0",
     "com.capsule.yoga": "0.1.0"
   },
   "unityRelease": "3f1",
