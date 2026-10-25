@@ -1,0 +1,8 @@
+{
+  "name": "Capsule.Unity.EditorSetupTests",
+  "rootNamespace": "Capsule.Unity.Editor.Tests",
+  "references": ["Capsule.Unity.Editor", "Capsule.Unity.Development", "Unity.TextMeshPro"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "includePlatforms": ["Editor"]
+}

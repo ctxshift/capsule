@@ -1,0 +1,11 @@
+{
+  "name": "Capsule.Unity.Editor",
+  "rootNamespace": "Capsule.Unity.Editor",
+  "references": [
+    "Capsule.Core", "Capsule.Package", "Capsule.Wasmtime", "Capsule.Yoga",
+    "Capsule.Unity", "Capsule.Unity.Development", "Unity.ugui", "Unity.TextMeshPro",
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false
+}
