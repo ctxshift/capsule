@@ -1,9 +1,8 @@
 # Set up Capsule in a Unity project
 
-This guide records the working native package setup and first-run problems
-observed during validation. The native libraries are real UPM packages; an Editor
-setup wizard is not implemented yet. Authoring/compiler distribution, reusable
-game features and release feeds are separate stages.
+Install the compatible native UPM package set, then open **Capsule > Setup**.
+The plugin checks the Unity project, creates or connects an external React UI
+project and manages its development server. No project changes happen on import.
 
 The intended everyday workflow is a running game plus a React UI development
 server, with edits live-reloading in the game. See [UI development](ui-development.md)
@@ -122,13 +121,51 @@ account, economy or world outcomes and must not add a hardcoded game UI fallback
 The neutral fixtures demonstrate adapter/lifecycle behavior, not a production
 game host, live backend binding or an OS IME session. The extracted authoring
 workspace supplies the [UI development entry point](ui-development.md); its
-browser preview and native proofs do not yet establish rendered game live reload.
+browser preview is supplemented by the rendered development-host fixture in [the verification record](verification/unity-development.json).
 
-## Proposed plugin setup automation
+## Connect a React UI project
 
-Add an Editor-only **Capsule > Setup** entry and the same callable API for CI to
-`com.capsule.unity`. Keep runtime assemblies free of Editor dependencies and do
-not mutate projects automatically on import.
+1. Open **Capsule > Setup** and refresh the checks. Resolve missing packages or
+   incompatible resources first. Import TMP Essentials using its explicit action;
+   examples are unnecessary. Enable Input System or Both in Player Settings and
+   complete Unity's restart if requested. Choose Linear color space explicitly and enable **Run In Background** so editing React does not suspend the game.
+2. Set the Bun executable and an absolute **Project folder** outside the Unity
+   project. Choose **Create React project** for a new empty folder, or
+   **Connect / inspect** for a project with `capsule.project.json`. Creation will
+   not overwrite a nonempty unrelated folder or regenerate an existing project.
+3. Choose **Install project dependencies**, then **Start development server**.
+   Wait for the ready endpoint and choose **Use ready endpoint for host**.
+4. Assign a TMP font and leave **Starter demo provider** enabled for the generated
+   counter. Choose **Create disabled development host**, enable the resulting
+   component, and enter Play Mode. Save the scene yourself if you want to retain it.
+5. Edit the external project's `src/main.tsx`, `theme.json` or declared images.
+   Accepted revisions replace the UI in the running game. Invalid edits retain
+   the last working UI; fix the edit to resume. Use **Stop owned server** to stop
+   the process started by this window.
+
+Bun must be installed separately. Before npm publication, set **Tooling entry
+override** to the checkout's `packages/capsule-workshop/src/project-cli.ts` and
+**Local package archives** to a compatible local release directory. These machine
+paths stay in EditorPrefs. Leave both empty when using the published packages.
+See [authoring commands](ui-development.md#current-authoring-entry-point).
+
+The starter provider only demonstrates request 7 and observation 7. It is explicit
+and is disabled by default on a newly added runtime component. The initial host
+supports Box, ClipBox, Button, Text and Image; other widgets and game feature
+providers require further integration. It rejects unsupported publications.
+Guest replacement resets React component state and replays retained host
+observations. This is whole-generation reload, not React Fast Refresh.
+
+The host is available in the Editor and Development Builds, uses an explicit
+loopback HTTP origin, and owns only surfaces/events it creates. Native library,
+carrier or embedded SDK changes require rebuilding/restarting as appropriate.
+Production games still supply their authoritative providers and admission policy.
+
+## Setup automation boundaries
+
+`CapsuleSetupChecks.ReadCurrent` and `Evaluate` expose structured readiness;
+`CapsuleSetupHost.Create` adds a disabled host with Undo. They preserve existing
+scenes and do not save them. Runtime assemblies have no Editor dependencies.
 
 The setup command should validate package closure, versions, native importers and
 carrier/SDK/native identity; inspect input and restart requirements; detect TMP

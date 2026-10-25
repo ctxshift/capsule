@@ -1,0 +1,30 @@
+{
+  "name": "Capsule.Unity.DevelopmentTests",
+  "rootNamespace": "Capsule.Tests",
+  "references": [
+    "Capsule.Core",
+    "Capsule.Package",
+    "Capsule.Yoga",
+    "Capsule.Wasmtime",
+    "Capsule.Unity",
+    "Capsule.Unity.Development",
+    "Capsule.Unity.Editor",
+    "Unity.ugui",
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_EDITOR"
+  ],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Newtonsoft.Json.dll"
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-25",
+  "sourceMode": "integration working tree",
+  "sourceBase": "5912833e3557747f9a370df387e4e4c6755eb314",
+  "sourceFiles": [
+    {
+      "file": "unity/Packages/com.capsule.unity/Runtime/Development/CapsuleDevelopmentHost.cs",
+      "sha256": "a267a128058d56cc277befd0427836c97422db5f94d0960fccf1929933bebbb4"
+    },
+    {
+      "file": "unity/Packages/com.capsule.unity/Editor/CapsuleSetupChecks.cs",
+      "sha256": "03f041631b5a2accd96e55a96298aa771e6f1b72d11cb95dc1a30710805558d1"
+    },
+    {
+      "file": "unity/Packages/com.capsule.unity/Tests/Development/CapsuleDevelopmentLiveReloadTests.cs",
+      "sha256": "6af732422e0305b887977540b5e3f61cccb016bdd12a4d08432a419cc2f266a9"
+    }
+  ],
+  "platform": "Windows x64",
+  "unity": "6000.6.3f1",
+  "renderer": "native uGUI and TextMeshPro in a graphics-enabled connected Editor",
+  "tooling": "local packed npm archives, external React project, Bun",
+  "npm": [
+    {
+      "name": "@capsule-sdk/features",
+      "sha256": "c4e04f82f97ab767f9e97bcee9b7f0949e8ec62609eb7c07d46e1c849c60a2f3"
+    },
+    {
+      "name": "@capsule-sdk/react",
+      "sha256": "08bec796ce9ba52dd0eab097f18939427f60010718d9f35e2d914adb322a881b"
+    },
+    {
+      "name": "@capsule-sdk/workshop",
+      "sha256": "b5ebb5e5b98ff378f6c6909b6a055daff53ca837a6317f7cf1106bf678d2fbe3"
+    },
+    {
+      "name": "@capsule-sdk/rpg-features",
+      "sha256": "ac22740816c0ba58e537bab0636ce5ec70c6f24a30ec8d532d7dc245b875f5c4"
+    },
+    {
+      "name": "@capsule-sdk/mmo-features",
+      "sha256": "82c6f5b134da7b6128ca8d99469103252db9891fa53b70810f0cf5ab51d4a219"
+    },
+    {
+      "name": "@capsule-sdk/skill-system-features",
+      "sha256": "a78c1138cdb2a515747d82edcd25ac7a0524b28ccd6c80227ea7b22c58300c91"
+    },
+    {
+      "name": "@capsule-sdk/example-inventory",
+      "sha256": "0ba31a636fb2c5eb2210c217c177a06ce7db2a98fa1b635ce8bccd7e0cf19207"
+    },
+    {
+      "name": "@capsule-sdk/react-tools",
+      "sha256": "facf628f6bf0b755b55419602674164207f29d02b71ae180fa9655f1a963b4b8"
+    }
+  ],
+  "checks": {
+    "setup": {
+      "passed": 7,
+      "skipped": 2,
+      "skipReason": "Fresh-only cases run separately in a dedicated consumer"
+    },
+    "freshDiagnostics": {
+      "passed": 1
+    },
+    "freshTmpImport": {
+      "passed": 1,
+      "examplesImported": false
+    },
+    "host": {
+      "passed": 12
+    },
+    "existingSetupAndSettings": {
+      "passed": 1
+    },
+    "renderedDevelopment": {
+      "passed": 1,
+      "skipped": 0,
+      "sameEditorProcess": true,
+      "syntheticNativePointerRequests": 6,
+      "allElementsPresentOnFirstReplacementFrame": true,
+      "tsxThemeAndImageReload": true,
+      "lastGoodOnInvalidTsxAndTheme": true,
+      "disconnectReconnect": true,
+      "ownedServerAndYogaRetired": true
+    }
+  },
+  "timing": {
+    "targetMilliseconds": 200,
+    "targetMet": false,
+    "firstCompleteSnapshotActivationMilliseconds": 284.357,
+    "warmPreparationMilliseconds": 30.854,
+    "tsxSaveThroughScreenshotMilliseconds": 1669.7867,
+    "notes": [
+      "Single Editor samples, not percentiles or a Player performance guarantee.",
+      "First activation measures component enable through complete native snapshot promotion, before screenshot capture.",
+      "Warm preparation excludes compilation and fetching.",
+      "Save-through-screenshot includes compilation, transport, render and capture overhead."
+    ]
+  },
+  "stages": [
+    {
+      "step": "initial",
+      "revision": "eb0743d5ab90d94918e9344a4437178a8817eab09393def00a54c1230c9ee9a2",
+      "prepareMilliseconds": 125.4555
+    },
+    {
+      "step": "text-layout",
+      "revision": "8d646dbf43f03c2f3d879392c6ae5bf6abd78dd1f1b3f4660f813365732d6f06",
+      "editToRenderedMilliseconds": 1669.7867,
+      "prepareMilliseconds": 30.854
+    },
+    {
+      "step": "theme",
+      "revision": "aec698e95793ecc8d0de6e511b00c6ddbed6ae8b1ec26451501df27327ee3b8d"
+    },
+    {
+      "step": "art",
+      "revision": "a363e602588b73ee64e2b3b245389978e3f7afd17b86b78b38ae62e05d8e723b"
+    },
+    {
+      "step": "invalid-tsx",
+      "retainedRevision": "a363e602588b73ee64e2b3b245389978e3f7afd17b86b78b38ae62e05d8e723b",
+      "diagnosticSeen": true
+    },
+    {
+      "step": "tsx-recovered",
+      "revision": "85ccc63d7966e2193c543a375eea256f9d25ceb38b507fba9a0273f0a7027155"
+    },
+    {
+      "step": "invalid-theme",
+      "retainedRevision": "85ccc63d7966e2193c543a375eea256f9d25ceb38b507fba9a0273f0a7027155",
+      "diagnosticSeen": true
+    },
+    {
+      "step": "theme-recovered",
+      "revision": "5bf5f5d7cb424e3bde7638f991a1482f49a17c0c89cc20d761152cf589fd7f11"
+    },
+    {
+      "step": "disconnected",
+      "retainedRevision": "5bf5f5d7cb424e3bde7638f991a1482f49a17c0c89cc20d761152cf589fd7f11",
+      "diagnosticSeen": true
+    },
+    {
+      "step": "reconnected",
+      "revision": "bc6f29bbebfebb557f77d780eb62485cdc8003abe5c832be800f10627e57f5ef"
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "unity-development/01-initial.png",
+      "sha256": "7d38f8341a99043120e8c203a0abd5ee204749674ec0227810321980ef6a409e"
+    },
+    {
+      "file": "unity-development/02-text-layout.png",
+      "sha256": "75f0036c983de54d8dba8e9ae247d470dc8679da2084dc6b7d148cab57510a73"
+    },
+    {
+      "file": "unity-development/03-theme.png",
+      "sha256": "00debb714f0a36cfc18449bf33e31a08fed7e8d350c3f2bc3cca81470699fb36"
+    },
+    {
+      "file": "unity-development/04-art.png",
+      "sha256": "7afe3af58126acedf663d9176ea804a7266ba13c51b4539ce486db32db4fc66d"
+    },
+    {
+      "file": "unity-development/05-tsx-recovered.png",
+      "sha256": "8aabb0cfa896b4d963590f9fd1abc7a9b9b80aa941f6b635fb311c21a3e7fabf"
+    },
+    {
+      "file": "unity-development/06-reconnected.png",
+      "sha256": "a9610fbb1fb6f25f505f3658959e52c353b1be543d6007e3852bfb3b3bdebcfb"
+    }
+  ],
+  "limits": [
+    "Neutral starter provider; no authoritative game backend integration claimed.",
+    "New plugin setup and rendering were tested from the source UPM packages; npm tooling was consumed from local archives.",
+    "No new immutable engine bundle, standalone Player or published npm installation proof is claimed.",
+    "Input focus policy is fixture-owned during synthetic input and restored afterward."
+  ]
+}

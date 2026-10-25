@@ -29,6 +29,37 @@ optional. Neither an external checkout path nor a server address is hardcoded.
 
 ## Current authoring entry point
 
+The workshop also exports `@capsule-sdk/workshop/project`: `initProject`,
+`inspectProject` and `startProject`. Its `capsule-workshop` command supports
+`init`, `inspect` and `dev` with `--project <external-ui-folder>`. Initialization
+creates a neutral React starter only in a new or empty directory; repeating it
+on an existing Capsule project preserves source edits. Existing projects can be
+connected through `capsule.project.json` without regenerating their source.
+
+The private project's package scripts run the same compiler/workshop path as
+other addons. The engine endpoint is `/capsule/dev/v1/package`, with a versioned
+envelope, SDK hash, accepted publication hash, theme, metrics and compiler
+diagnostics. `/capsule/dev/v1/status` reports readiness without local source paths.
+Compilation or theme errors preserve the last-good publication and image set.
+The server binds loopback; release players do not use this development endpoint.
+
+Before the npm packages are published, run the source entry from a configured
+Capsule checkout:
+
+```powershell
+bun packages/capsule-workshop/src/project-cli.ts init --project <external-ui-folder> --packages <local-release-directory>
+bun install --cwd <external-ui-folder>
+bun packages/capsule-workshop/src/project-cli.ts dev --project <external-ui-folder>
+```
+
+`--packages` is an explicit local candidate option: it verifies the eight npm
+tarball hashes and copies them into ignored `.capsule/packages`, with relative
+development overrides. Normal published initialization uses exact npm versions.
+The development server builds the matching SDK from the UI project's declared
+tooling and keeps its generated publication outside the source root. `--watch-stdin`
+allows the Unity plugin to shut down only the server process it owns by closing
+its input stream. CLI scaffolding beyond this starter remains separate work.
+
 From the Capsule repository root:
 
 ```powershell
@@ -65,8 +96,9 @@ replacements without implementing and testing that policy.
 
 Compiler tests, browser reload tests and standalone native lifecycle tests cover
 parts of this chain. They must not be reported as the complete in-game live reload
-demonstration. The extracted neutral Unity consumer still needs the development
-host connection and an automated rendered demonstration.
+demonstration. The Unity plugin now supplies the opt-in development connection
+and a rendered native demonstration; see [Unity setup](unity-setup.md#connect-a-react-ui-project)
+and [retained evidence](verification/unity-development.json).
 
 ## Reload boundaries
 
@@ -75,3 +107,25 @@ libraries, carrier, embedded SDK, C# or engine packages can require recompilatio
 deployment or restart. Local Capsule source attach/detach supports developing
 those libraries; it does not substitute for live authoring of the game's UI.
 Keep compatibility checks at both boundaries.
+
+## Complete presentation and latency
+
+Aim for about **200 ms to a complete, usable UI**, rather than exposing elements
+as they finish loading. The host prepares a replacement's theme, images and full
+snapshot before activation; the previous generation remains visible and usable
+until promotion. The rendered fixture checks text, panel, image and button in
+the first replacement frame.
+
+Measure separate boundaries: component enable to first complete snapshot,
+replacement preparation after publication has arrived, and source save through
+compilation to rendered replacement. The retained Windows Editor sample measured
+about **284 ms** for first activation, **31 ms** for warm preparation and **1.67 s**
+for TSX save through captured replacement. The last measurement includes compiler,
+watcher, transport, rendering and screenshot capture; it is not a native rendering
+measurement. These single samples are not percentile guarantees. The 200 ms cold
+startup target is **not yet met**; compiler turnaround also needs improvement.
+
+Enable **Run In Background** in Unity Player Settings to keep the game updating
+while a code editor has focus. Input focus policy remains the game's choice;
+the automated fixture uses isolated input settings for synthetic pointer events
+and restores the original settings after the run.
