@@ -38,3 +38,8 @@ resolution, resource integrity and asset identity. It does not establish rendere
 appearance, Player builds, native runtime execution inside Unity, input setup,
 TextMeshPro Essentials installation or in-game UI live reload. Those require their
 own focused engine/plugin and development-workflow acceptance.
+
+The [recorded candidate proof](verification/unity-release.json) pins the tested
+source commit, ZIP and manifest hashes, helper revision, reproducibility inventory
+and observed counts. It is a point-in-time attestation for that candidate; rerun
+the verifier for changed bundle payloads before promoting a different set.

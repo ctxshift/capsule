@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "sourceRevision": "ffaf794e216664d1030f98017d45b8fdb5c34fc3",
+  "version": "0.1.0",
+  "distribution": {
+    "published": false,
+    "npmScope": "@capsule-sdk",
+    "engine": "unity",
+    "bundle": "engines/capsule-unity-0.1.0.zip",
+    "bundleSha256": "ae32c3ca62e07e9fc7899356197f0215deedf00607d3a3471b2f15ce494c2292",
+    "releaseManifestSha256": "c0d3a1ea849f68d1516a698ee4d699ce96910add44aebd51227d67bfca9a41ab",
+    "compatibilityIdentity": "746bda467694101cfe8e254d00b0368390bda921e700f13660ed8245fea52b73"
+  },
+  "tools": {
+    "unityEditor": "6000.6.3f1",
+    "unityCli": "1.0.0-beta.13",
+    "agentUnity": "0.1.0",
+    "agentUnityRevision": "be25d302a1318b3a3d36dccd9a4c1906054b5fe4",
+    "agentUnitySha256": "8fb9e972077c2dd9de94b8fa37364e50ebd2f9b3884d3b84b67463f55623bf08"
+  },
+  "reproducibility": {
+    "independentSnapshots": 2,
+    "identicalFiles": 64,
+    "inventorySha256": "773323c6953f439aac4d5e00a5187df9f11677bcbe188754428a962dbbf51cd5"
+  },
+  "portable": {
+    "packedCompilerSdkAndFeatures": "passed",
+    "directManagedFeatureCodecs": "passed",
+    "nativeSmokeChecks": 21,
+    "nativeLifecycleChecks": 48
+  },
+  "unity": {
+    "installation": "fresh-external-project-from-engine-zip",
+    "existingProjectSettingsOrLibraryCopied": false,
+    "sourceLinks": false,
+    "tests": {
+      "total": 97,
+      "passed": 97,
+      "failed": 0,
+      "skipped": 0,
+      "inconclusive": 0
+    },
+    "assemblies": 8,
+    "embeddedPackages": 8,
+    "resources": 5,
+    "nativePluginImporters": 3,
+    "runtimeAssetGuids": 80,
+    "nunitSha256": "3ce43057f33cadb55442abadbba4fbd398aee1b0a95f4e5a64ab4b39d8e1cf1e",
+    "temporaryEditorExited": true
+  },
+  "diagnostics": {
+    "compilationErrors": 0,
+    "shutdownWarnings": [
+      "Mono thread abort diagnostics",
+      "Debugger listener unavailable"
+    ],
+    "testOutcomeUnaffected": true
+  },
+  "notEstablished": [
+    "Player build or rendering",
+    "Unity-host native runtime execution",
+    "Plugin setup and TMP Essentials automation",
+    "In-game development server live reload",
+    "Registry or marketplace publication"
+  ]
+}
