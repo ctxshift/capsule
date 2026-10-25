@@ -1,5 +1,9 @@
 {
   "name": "@capsule-sdk/react-tools",
+  "exports": {
+    ".": "./scripts/build.mjs",
+    "./sdk": "./scripts/build.mjs"
+  },
   "private": true,
   "version": "0.1.0",
   "dependencies": {

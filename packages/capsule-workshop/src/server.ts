@@ -44,6 +44,10 @@ export async function startWorkshop(options: WorkshopOptions) {
     hash: string;
     theme: ReturnType<typeof parseTheme>;
     metrics: unknown;
+    addonId: string;
+    apiVersion: number;
+    features: unknown[];
+    sdkSha256: string;
   } | null = null;
   const images = new Map<string, Map<string, Uint8Array>>();
   let result: Awaited<ReturnType<typeof worker.compile>> | null = null;
@@ -114,7 +118,12 @@ export async function startWorkshop(options: WorkshopOptions) {
         if (result.success) {
           const manifest = JSON.parse(
             await readFile(resolve(output, 'addon.json'), 'utf8'),
-          ) as { assets: { key: string; kind: string; path: string }[] };
+          ) as {
+            id: string;
+            apiVersion: number;
+            features?: unknown[];
+            assets: { key: string; kind: string; path: string }[];
+          };
           const override = manifest.assets.find(
             (asset) =>
               asset.key === 'ui-theme-overrides' && asset.kind === 'data',
@@ -143,11 +152,28 @@ export async function startWorkshop(options: WorkshopOptions) {
           const digest = createHash('sha256')
             .update(bundle)
             .update(sdk)
+            .update(
+              JSON.stringify({
+                addonId: manifest.id,
+                apiVersion: manifest.apiVersion,
+                features: manifest.features ?? [],
+              }),
+            )
             .update(JSON.stringify(theme))
             .update(JSON.stringify(metrics));
           for (const [key, bytes] of art) digest.update(key).update(bytes);
           const hash = digest.digest('hex');
-          publication = { bundle, sdk, hash, theme, metrics };
+          publication = {
+            bundle,
+            sdk,
+            hash,
+            theme,
+            metrics,
+            addonId: manifest.id,
+            apiVersion: manifest.apiVersion,
+            features: manifest.features ?? [],
+            sdkSha256: createHash('sha256').update(sdk).digest('hex'),
+          };
           images.set(hash, art);
           while (images.size > 2) images.delete(images.keys().next().value!);
         }
@@ -216,13 +242,36 @@ export async function startWorkshop(options: WorkshopOptions) {
                 response.end(bytes);
                 return;
               }
-              if (path === '/portable-ui/package') {
+              if (path === '/capsule/dev/v1/status') {
+                response.setHeader('Content-Type', 'application/json');
+                response.setHeader('Cache-Control', 'no-store');
+                response.end(
+                  JSON.stringify({
+                    schemaVersion: 1,
+                    ready: publication !== null,
+                    addonId: publication?.addonId ?? null,
+                    hash: publication?.hash ?? null,
+                    compiler: result,
+                  }),
+                );
+                return;
+              }
+              if (
+                path === '/portable-ui/package' ||
+                path === '/capsule/dev/v1/package'
+              ) {
                 if (!publication)
                   throw Error('No successful addon publication');
                 response.setHeader('Content-Type', 'application/json');
                 response.setHeader('Cache-Control', 'no-store');
                 response.end(
-                  JSON.stringify({ ...publication, compiler: result }),
+                  JSON.stringify({
+                    ...publication,
+                    ...(path === '/capsule/dev/v1/package'
+                      ? { schemaVersion: 1, requires: {} }
+                      : {}),
+                    compiler: result,
+                  }),
                 );
                 return;
               }
@@ -274,6 +323,14 @@ export async function startWorkshop(options: WorkshopOptions) {
   ];
   server.watcher.add(watchedRoots);
   server.watcher.on('all', (_event, path) => {
+    const outputPart = relative(output, path);
+    if (
+      path === runtimeStatus ||
+      (!outputPart.startsWith('..') && !isAbsolute(outputPart)) ||
+      path.startsWith(output + '.stage-') ||
+      path.startsWith(output + '.previous-')
+    )
+      return;
     const watched = watchedRoots.some((root) => {
       const part = relative(root, path);
       return !part.startsWith('..') && !isAbsolute(part);

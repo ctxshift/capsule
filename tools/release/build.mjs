@@ -60,6 +60,7 @@ export function packNpm(source, output, work, revision) {
         directory: plan.path,
       },
       exports: original.exports,
+      ...(original.bin ? { bin: original.bin } : {}),
       ...(original.dependencies
         ? { dependencies: { ...original.dependencies } }
         : {}),
