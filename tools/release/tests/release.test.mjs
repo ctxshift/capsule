@@ -24,6 +24,22 @@ import {
 import { checkArtifacts } from '../verify.mjs';
 import { release } from '../config.mjs';
 import { compareCandidates } from '../reproduce.mjs';
+import { prepareUnity } from '../prepare-unity.mjs';
+
+test('Unity consumer preparation preserves existing directories', () => {
+  const root = mkdtempSync(join(tmpdir(), 'capsule-consumer-preservation-'));
+  try {
+    writeFileSync(join(root, 'user-file.txt'), 'preserve');
+    assert.throws(
+      () => prepareUnity(join(root, 'missing-artifacts'), root),
+      /scratch must be empty/,
+    );
+    assert.equal(readFileSync(join(root, 'user-file.txt'), 'utf8'), 'preserve');
+    assert.deepEqual(readdirSync(root), ['user-file.txt']);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 test('release npm packages belong to the selected distribution scope', () => {
   const root = resolve(import.meta.dirname, '../../..');

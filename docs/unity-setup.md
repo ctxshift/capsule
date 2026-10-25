@@ -19,7 +19,7 @@ established by this candidate. Ordinary integration does not require rebuilding
 Wasmtime, QuickJS or Yoga.
 
 Open this repository's `unity/` project for the verified reference consumer.
-It embeds all five packages, retains TMP Essentials, enables native input and
+It embeds all eight packages, retains TMP Essentials, enables native input and
 uses Linear color space. It has no Host scenes, art, backend or game bootstrap.
 
 Run from the repository root with the official Unity CLI/Pipeline and

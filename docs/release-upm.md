@@ -1,7 +1,40 @@
-# Packed UPM consumer verification
+# Unity bundle installation verification
 
-Run `pwsh -NoProfile -File tools/release/verify-upm.ps1 -Artifacts <absolute-directory>` against a directory containing all eight `com.capsule.*-0.1.0.tgz` archives. The verifier copies those archives into a new temporary Unity 6000.6.3f1 project outside the source checkout. Its package manifest installs only the tarballs plus the pinned Unity uGUI, Input System, Newtonsoft, Test Framework, and Pipeline dependencies. An EditMode test assembly references all eight packaged Capsule assemblies and checks their public contract types. The verifier asks `agent-unity test-headless` to import and run this probe, retaining the temporary project and logs under `.local/release-upm/`.
+Use a Windows host with Unity 6000.6.3f1, official Unity CLI/Pipeline and
+`agent-unity`. From the repository root, pass the complete candidate directory:
 
-The script never targets an existing source project or Editor. A passing result requires a nonzero EditMode test count from the new consumer. The smoke test proves UPM import, C# compilation, package dependency closure, and assembly identity; it does not prove Player rendering or gameplay.
+```powershell
+pwsh -NoProfile -File tools/release/verify-upm.ps1 -Artifacts <absolute-release-directory>
+```
 
-On the current helper installation, headless validation is blocked before Unity starts: `agent-unity` reports the new, closed temporary project as already open. A direct process check found no Editor for that temporary project, and `unity status` reported no instances. The helper's retained `pipeline list` snapshot nevertheless marked the temporary project as running. The script preserves this failure and does not bypass the helper's editor-ownership guard. Re-run it after that discovery issue is resolved to obtain actual import and EditMode evidence.
+The verifier validates the release manifest, archive hashes, UPM closure and Unity
+ZIP payload equivalence before creating a new external temporary project. It
+copies the ZIP's eight embedded `Packages/com.capsule.*` directories into the
+consumer, with no source links, `Library` or existing project settings. The project
+declares pinned Unity uGUI, Input System, Newtonsoft, Test Framework and Pipeline
+dependencies. Registry access is needed for these external dependencies.
+
+An Editor test assembly checks all eight public assemblies and their embedded
+package paths/versions, imported carrier/SDK resources, Windows x64 plugin bytes
+and importer settings, and preserved runtime asset GUIDs. The current candidate
+executes 97 cases: one assembly check, eight packages, five resources, three native
+plugins and 80 GUIDs. Expected counts are derived from the verified candidate;
+every case must execute and pass, with zero failures, skips or inconclusive cases.
+
+The supported helper runs closed-project headless tests and retains NUnit XML,
+CLI output and Editor diagnostics under `.local/release-upm/`. `consumer.json` and
+`verification.json` identify the exact source revision, bundle/manifest hashes,
+temporary project and observed counts. Keep these local logs for diagnosis; only
+portable summaries belong in tracked verification records.
+
+Some CLI versions infer a running instance when `pipeline list` executes inside
+a Unity project directory. Use a helper that runs unscoped discovery from a neutral
+directory, while preserving its explicit project match and Unity lockfile guards.
+An inventory error must not be bypassed by directly launching a second Editor.
+
+The verifier never targets an existing project or closes a user's Editor. Passing
+these tests establishes fresh package import, compilation, embedded dependency
+resolution, resource integrity and asset identity. It does not establish rendered
+appearance, Player builds, native runtime execution inside Unity, input setup,
+TextMeshPro Essentials installation or in-game UI live reload. Those require their
+own focused engine/plugin and development-workflow acceptance.

@@ -88,8 +88,10 @@ notices, manifests and archives. Run the frozen packed consumer and direct DLL
 checks. `release:reproduce` performs those steps in two external snapshots with
 fresh Bun and managed dependency caches, then records a relative-path inventory
 in `reproducibility.json`. Run the [fresh Unity consumer gate](release-upm.md) through `agent-unity`;
-portable verification alone does not approve an engine release. The current helper
-discovery mismatch blocks that gate and must be resolved before promotion.
+portable verification alone does not approve an engine release. The verifier checks
+the actual GitHub Unity ZIP as embedded packages in a fresh external project and
+requires every expected EditMode check to pass. Preserve the source identity and
+bundle hash with the verification record before promotion.
 
 Candidate CI retains artifacts and logs only. It does not publish packages, create
 release tags, upload GitHub release assets or submit marketplaces. Before a real
