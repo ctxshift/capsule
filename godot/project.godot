@@ -1,0 +1,15 @@
+config_version=5
+
+[application]
+config/name="Capsule Godot Consumer"
+run/main_scene="res://demo.tscn"
+
+[display]
+window/size/viewport_width=800
+window/size/viewport_height=480
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+
+[editor_plugins]
+enabled=PackedStringArray("res://addons/capsule/plugin.cfg")

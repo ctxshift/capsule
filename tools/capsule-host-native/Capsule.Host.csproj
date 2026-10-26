@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../packages/capsule-native/Directory.Release.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>capsule_host</AssemblyName>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PublishAot>true</PublishAot>
+    <NativeLib>Shared</NativeLib>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <CapsuleAllowCore>true</CapsuleAllowCore>
+    <CapsuleAllowNewtonsoft>true</CapsuleAllowNewtonsoft>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../packages/capsule-native/Core/Capsule.Core.csproj" />
+    <ProjectReference Include="../../packages/capsule-native/Package/Capsule.Package.csproj" />
+    <ProjectReference Include="../../packages/capsule-native/Wasmtime/Capsule.Wasmtime.csproj" />
+    <ProjectReference Include="../../packages/capsule-native/Yoga/Capsule.Yoga.csproj" />
+  </ItemGroup>
+</Project>

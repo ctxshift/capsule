@@ -5,7 +5,9 @@ then edit React/TSX, theme and addon assets by hand or with an agent. Successful
 changes must appear in the running game without rebuilding or restarting it.
 The UI source can live in its own codebase. Unity is the first native adapter;
 other engines, including Godot, should consume the same authoring/compiler
-contract through their own adapters. A Godot adapter is not implemented here.
+contract through their own adapters. The initial standard Godot/GDScript
+development adapter uses that same protocol; see [Godot setup](godot-setup.md)
+for its tested platform, current controls and remaining production gates.
 
 ## Development loop
 

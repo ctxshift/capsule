@@ -56,3 +56,11 @@ run = "bun run release:verify"
 [tasks.release-reproduce]
 description = "Build twice and compare complete candidates; pass --output"
 run = "bun run release:reproduce"
+
+[tasks.godot-build]
+description = "Build the standard Godot Windows x64 addon; pass --output"
+run = "node tools/capsule-godot/build.mjs"
+
+[tasks.godot-verify]
+description = "Run the real Godot React development proof; pass --godot and --output"
+run = "bun tools/capsule-godot/verify.ts"

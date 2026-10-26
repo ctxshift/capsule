@@ -1,6 +1,7 @@
 # Capsule
 
-Capsule provides portable addon runtime libraries and a Unity presentation adapter.
+Capsule provides portable addon runtime libraries, a Unity presentation adapter
+and an initial Godot development adapter.
 This repository contains the native package candidate, React authoring SDK,
 feature infrastructure, compiler/workshop and reusable RPG/MMO/skill packages.
 The engine plugin is the installation entry point: npm supplies JS/TS tooling,
@@ -13,6 +14,8 @@ licenses; see [third-party notices](THIRD-PARTY.md).
 
 See the [Unity setup guide](docs/unity-setup.md) for existing-project integration,
 first-run resource/settings checks and the proposed Editor setup automation.
+See the [Godot setup guide](docs/godot-setup.md) for the standard Godot/GDScript
+addon, Windows x64 candidate bundle and running-game React development loop.
 See [contributing](CONTRIBUTING.md) for pinned mise tools and the Capsule Bees
 tracker, and [game features](docs/game-features.md) for contracts and generators.
 See [UI development](docs/ui-development.md) for the primary workflow: a running
@@ -66,6 +69,10 @@ distinguishes browser/compiler/native proofs from in-game live reload.
 - `unity/Packages/com.capsule.features.*`: canonical generated native contracts.
 - `tools`: neutral managed/native test runners and pinned native build recipes.
 - `unity`: minimal Unity 6000.6.3f1 consumer of the embedded packages.
+- `godot`: standard Godot 4.7 consumer, editor connection plugin and native Controls.
+- `tools/capsule-host-native`: process-lifetime NativeAOT host of the same portable
+  sessions, Wasmtime guest and Yoga coordinator; no separately installed .NET runtime.
+- `tools/capsule-godot`: pinned GDExtension build, checked installation and real-engine proof.
 
 The [import map](docs/provenance/native-import.json) records source revision,
 original paths, byte hashes and preserved GUIDs. Native-only history was imported

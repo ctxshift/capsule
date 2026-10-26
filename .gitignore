@@ -13,3 +13,4 @@ unity/*.slnx
 
 **/node_modules/
 **/dist/
+godot/.godot/

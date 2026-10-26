@@ -19,8 +19,10 @@ Browser preview and portable runtime checks do not establish in-game live reload
 
 No Capsule NuGet packages are needed or generated. External .NET dependencies
 still restore through their existing build-time package references. Engine users
-receive the required libraries inside their bundle. Godot and Unreal plugins are
-future work; a runtime ZIP is not a substitute for an adapter.
+receive the required libraries inside their bundle. The initial Godot development
+addon has a [separate candidate build and engine proof](godot-setup.md); it is not
+yet included in the general release promotion gate. Unreal remains future work;
+a runtime ZIP is not a substitute for an adapter.
 
 The owned npm namespace is `@capsule-sdk`: `features`, `react`, `react-tools`,
 `workshop`, `rpg-features`, `mmo-features` and `skill-system-features` use that scope.

@@ -10,6 +10,8 @@ licenses for bundled upstream components or installed Unity dependencies.
 | Yoga | 3.2.1 | `com.capsule.yoga/Runtime/Plugins/x86_64/LICENSE.yoga.txt` and provenance JSON |
 | React / reconciler / scheduler in SDK bundles | 18.3.1 / 0.29.2 / 0.23.2 | Three notices under `com.capsule.wasmtime/ThirdPartyNotices` |
 | Newtonsoft.Json | NuGet 13.0.2 / Unity package 3.2.2 | Installed through declared package dependencies; retain its distribution notices when packing |
+| godot-cpp | Pinned revision in the Godot builder | MIT license copied as `godot-cpp-LICENSE.md` in the Godot addon |
+| .NET NativeAOT runtime | 10.0.12 | NativeAOT runtime pack's license and third-party notices copied into the Godot addon; no installed runtime required |
 | Unity uGUI/TextMeshPro | 2.6.0 | Installed package's `LICENSE.md`, copied to `docs/licenses/Unity-uGUI-LICENSE.md`, uses Unity Companion License for Unity-dependent projects |
 | Liberation Sans in the neutral TMP consumer | Included TMP Essentials font | `unity/Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt` |
 

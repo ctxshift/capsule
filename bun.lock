@@ -134,6 +134,13 @@
         "vitest": "4.0.18",
       },
     },
+    "tools/capsule-godot": {
+      "name": "capsule-godot-tools",
+      "devDependencies": {
+        "@types/node": "25.0.3",
+        "typescript": "5.9.3",
+      },
+    },
     "tools/capsule-react": {
       "name": "@capsule-sdk/react-tools",
       "version": "0.1.0",
@@ -192,9 +199,9 @@
 
     "@babel/types": ["@babel/types@7.29.11", "", { "dependencies": { "@babel/helper-string-parser": "^7.29.11", "@babel/helper-validator-identifier": "^7.29.7" } }, "sha512-WCsemW40Cpc6gouC1SrY6PBaZ+oLRlEVY9XBvZBI7il/HyUrb2nJ505wE1MHEFyDZNnrWDEuy4jL50WVHfTTSQ=="],
 
-    "@capsule-sdk/example-inventory": ["@capsule-sdk/example-inventory@workspace:packages/inventory-feature"],
-
     "@capsule-sdk/example-counter": ["@capsule-sdk/example-counter@workspace:examples/addons/capsule-counter"],
+
+    "@capsule-sdk/example-inventory": ["@capsule-sdk/example-inventory@workspace:packages/inventory-feature"],
 
     "@capsule-sdk/features": ["@capsule-sdk/features@workspace:packages/capsule-features"],
 
@@ -427,6 +434,8 @@
     "callsites": ["callsites@3.1.0", "", {}, "sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ=="],
 
     "caniuse-lite": ["caniuse-lite@1.0.30001819", "", {}, "sha512-LFUqIIAwpzsIuevnKnsR9qnStBcgzPShTX61lBwN9uFkkf8o8zLiebEjbW8AYtZiF+1YKDWfdt/pWDtMuG8Xwg=="],
+
+    "capsule-godot-tools": ["capsule-godot-tools@workspace:tools/capsule-godot"],
 
     "chai": ["chai@6.3.0", "", {}, "sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg=="],
 
