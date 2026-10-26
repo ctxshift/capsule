@@ -177,8 +177,24 @@ sessions close individually and the library remains loaded for the process.
 
 ## Verify a candidate
 
+Native dependencies, immutable resource verification and carrier preparation run
+when the runtime extension initializes, before the game scene starts. UI startup
+still includes game provider setup, publication transfer and the first complete
+frame. `enginePreloadMs` and full process-launch timing are separate measurements;
+first-use native library loading can take substantially longer than UI activation.
+The initial viewport is installed before addon evaluation, avoiding a visible
+first-frame resize. Poll deadlines use wall time, and pending activation does not
+start redundant publication requests.
+
+The native publication query uses `?native=1` to omit the duplicate concatenated
+bundle and remote SDK source. It retains entry/modules, images, requirements and
+the SDK digest, which must match the process-owned SDK. Resource files are pinned
+for the process lifetime; changing the native runtime or SDK requires a restart.
+
 The native host exposes ABI version 1 through `capsule_abi_version`,
 `capsule_create`, `capsule_exchange`, `capsule_free` and `capsule_destroy`.
+`capsule_prepare` optionally prepares verified immutable engine resources and
+the shared carrier before scene setup; it creates no addon session.
 The extension checks the version and pins one native library location per
 process. Native JSON requests are bounded to 8 MiB; development HTTP publications
 are separately limited to 900,000 bytes. Source and SDK
@@ -214,7 +230,28 @@ authoring dependencies are explicit inside the temporary UI project.
 
 The verifier accepts an executable path as an argument; no local installation
 path is stored in tracked configuration. Its elapsed samples include compilation,
-polling and capture scheduling and do not establish a 200 ms startup guarantee.
+polling and capture scheduling and do not establish a startup guarantee.
 The [retained engine record](verification/godot-development.json) and
 [unmodified capture](verification/godot-development.png) describe the tested
 working-tree candidate, its archive/resource hashes and explicit limits.
+
+## Benchmark compiled activation
+
+First run the candidate verifier with `--providers`. It freezes two actual compiled
+publications and their image bytes in the proof directory. Then run:
+
+```powershell
+bun tools/capsule-godot/benchmark.ts --godot "<godot-console-executable>" --proof "<proof-directory>" --output "<fresh-benchmark-directory>" --samples 20
+```
+
+The benchmark uses a memory-backed loopback server with no compiler running,
+fresh game processes and frame-post-draw timestamps. Its latency-only fixture
+avoids per-frame GPU texture readbacks; the functional verifier keeps its pixel
+checks. It reports startup/reload percentiles and maxima, plugin preparation and
+full process launch. `--cold-images` additionally exercises replacement after
+clearing decoded image reuse while preserving the active surface. `--budget`
+sets the reload budget; `--startup-budget` records an independent caller-selected
+startup tolerance. A missed startup budget remains visible even when reload passes.
+The [neutral latency record](verification/godot-latency.json) retains the tested
+candidate/resource identities, sample counts, distributions and explicit timing
+boundaries. It does not establish a deadline for every workload or full game boot.

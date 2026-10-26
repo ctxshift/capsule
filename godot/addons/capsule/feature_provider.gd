@@ -13,10 +13,13 @@ func bind(host: Control) -> void:
 	_host = weakref(host)
 
 func descriptor() -> Dictionary:
-	var value := definition.duplicate(true)
-	value["grants"] = Array(grants)
-	for member in value.get("states", {}):
-		value.states[member]["initial"] = Marshalls.raw_to_base64(_states.get(member, PackedByteArray()))
+	# Schemas stay with the game codec; the native registry consumes identity and permissions.
+	var value := {"name": definition.get("name", ""), "version": definition.get("version", ""), "fingerprint": definition.get("fingerprint", ""), "dependencies": definition.get("dependencies", {}).duplicate(), "grants": Array(grants), "states": {}, "requests": {}}
+	for member in definition.get("states", {}):
+		var state: Dictionary = definition.states[member]
+		value.states[member] = {"permission": state.get("permission", ""), "delivery": state.get("delivery", "latest"), "initial": Marshalls.raw_to_base64(_states.get(member, PackedByteArray()))}
+	for member in definition.get("requests", {}):
+		value.requests[member] = {"permission": definition.requests[member].get("permission", "")}
 	return value
 
 func publish_state(member: String, payload: PackedByteArray) -> bool:

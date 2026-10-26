@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "engine": {
+    "name": "Godot",
+    "version": "4.7.2.stable.official.ed1daf0bf",
+    "edition": "standard",
+    "platform": "windows-x86_64",
+    "renderer": "Compatibility"
+  },
+  "candidate": {
+    "archive": "capsule-godot-win-x64-0.1.0.zip",
+    "sha256": "9be23134a96f711bd90a305fbe17081eb576c096497c68e5622b4272ce82a1b4",
+    "sourceBaseRevision": "d09b8f84e029050a97d46c7482d63310c417d76c",
+    "workingTreeCandidate": true,
+    "nativeAbi": 1,
+    "compiledCarrier": {
+      "schemaVersion": 1,
+      "target": "x86_64-pc-windows-msvc",
+      "runtimeVersion": "48.0.2",
+      "runtimeSha256": "19b3880fbb92f1826c58ac9f5e2a472692b5fc3d012a1a7a41983ccf77544607",
+      "sourceSha256": "0c5dfa49d0797b3599057d7b1428fa9c42e75542cc09f163cbe69d9dbccfa5b7",
+      "compiledSha256": "0ac822d77cc5223e1e9c9d449785697cf71a3f92025be0e57a49f44ad74794f5"
+    },
+    "payload": {
+      "addons/capsule/bin/capsule_godot.dll": "997a00e57d2c34129874e59c160ac0874b2a212ce551a4a443d0e2caf6be7f09",
+      "addons/capsule/bin/capsule_host.dll": "03428bdb26ec4d3e1b8b14912dfd1462c12bc71a9137fb3fb6c9ad7fd90851b5",
+      "addons/capsule/bin/CapsuleQuickJs.bytes": "0c5dfa49d0797b3599057d7b1428fa9c42e75542cc09f163cbe69d9dbccfa5b7",
+      "addons/capsule/bin/CapsuleQuickJs.cwasm": "0ac822d77cc5223e1e9c9d449785697cf71a3f92025be0e57a49f44ad74794f5",
+      "addons/capsule/bin/CapsuleQuickJs.precompiled.json": "918b50fa9c907cd8a53ca4018b9b0ca827294506b5af538d38e03b34154e1594",
+      "addons/capsule/bin/CapsuleReactSdk.txt": "ae0aa87e7464d4dc0e7308bf0b88e7c9a05d94d58fe630297f78b911b7cc996c",
+      "addons/capsule/bin/portable_ui_wasmtime.dll": "5f4238de3cf8925776d4f4915824ab3a039eccacfa89cf0f4391f830d75a9535",
+      "addons/capsule/bin/portable_ui_yoga.dll": "7e7815f2304d6402f79cdc720880ed835dc162416fab1db28f3f147c3366ea43",
+      "addons/capsule/bin/wasmtime.dll": "19b3880fbb92f1826c58ac9f5e2a472692b5fc3d012a1a7a41983ccf77544607",
+      "addons/capsule/capsule.gdextension": "f2643ce37d644d07589c590b6e8021f1d202ae9e58ef9aaff670e9e77ca38de0",
+      "addons/capsule/capsule.gdextension.uid": "8e07eb4d46dfec23a4f9d6a25bb2818f3b57909877c2c7b6fc9ef0ab9d358c0c",
+      "addons/capsule/development_host.gd": "0a2ed44485d2081b3da395e0867a7f9fe07bbd63f0dd49f3c1b23e441c225b20",
+      "addons/capsule/development_host.gd.uid": "4a97d91800ac9d7a4c52b602b8b77140aa7de2f2f07571c30eef19695606888b",
+      "addons/capsule/feature_codec.gd": "4d17b561b45a78998c92b8a5577f4cc281045be37e22b15f915e133cc9e5689d",
+      "addons/capsule/feature_provider.gd": "49163f29337720ed6c8bfd63cac4d5af8f404ee44cf4b350a9e49bc157e07a3c",
+      "addons/capsule/godot-cpp-LICENSE.md": "26a5b210d90760156ce886267ce9df235787dcc6cebfd7ecd95ef5b6fdcc95bf",
+      "addons/capsule/LICENSE": "50e6751797c50dedd75ef1b8a0d9e42f5f8472e9fbce91f34718e9f97b0c780a",
+      "addons/capsule/notices/DotNet-LICENSE.txt": "d7a68596ab69b06f51ca278a6545148e4269a9381c26d597c13df5d88e08cf5b",
+      "addons/capsule/notices/DotNet-THIRD-PARTY-NOTICES.txt": "6d15e10a101c6bfff2ab4429ed061bf76c456fc4b23ad6b03e0d0f8377148a21",
+      "addons/capsule/notices/Newtonsoft-LICENSE.md": "b98a397897ff55f76cddc380041507a95a896b2946e0188703bf0496793d6516",
+      "addons/capsule/notices/QuickJS-LICENSE.txt": "53457ad029723be6a273ecba41b90ed76cccdb62fe8139d8ee2365983b47f6e4",
+      "addons/capsule/notices/React-LICENSE.txt": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "addons/capsule/notices/Reconciler-LICENSE.txt": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "addons/capsule/notices/Scheduler-LICENSE.txt": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "addons/capsule/notices/Wasmtime-LICENSE.txt": "a6c48161a09acc75a0e25503bab66a731eb5fba5392ed4bb4743e4ba5085327a",
+      "addons/capsule/notices/Yoga-LICENSE.txt": "f08a94bfb0bdc1d7f1cb59badaf0f8c551b10db871185622dbf1fd036affa9cb",
+      "addons/capsule/plugin.cfg": "1e33aecee37145cd72f6043f1a223f482aa5608bfe5a95db5a01c77707eb03fb",
+      "addons/capsule/plugin.gd": "dbebd49348f6dd1d0e1b57c30f62ffd0dda38bcb1157a72778d10246a8bdf2e3",
+      "addons/capsule/plugin.gd.uid": "9b1deea3f4ea3525bc2961092fcb67680a4941ee2503ae03ee3d66bdcd5ca3bb",
+      "addons/capsule/THIRD-PARTY.md": "e65bed31644d1a8f89be0e01b7b1a06526252897fb93b64f0998688ce87d4115"
+    }
+  },
+  "result": {
+    "neutralLatencyPassed": true,
+    "samples": 20,
+    "budgetMs": 300,
+    "compilerDuringMeasurement": false,
+    "gpuReadbackDuringMeasurement": false,
+    "timingBoundary": "SceneTree setup / ready publication to frame_post_draw; engine plugin initialization and full process launch reported separately",
+    "startupMs": {
+      "min": 122.27099999999996,
+      "p50": 137.21,
+      "p95": 165.16,
+      "max": 194.80500000000006
+    },
+    "reloadMs": {
+      "min": 40,
+      "p50": 91,
+      "p95": 106,
+      "max": 108
+    },
+    "enginePreloadMs": {
+      "min": 11.3495,
+      "p50": 12.86,
+      "p95": 15.41,
+      "max": 52.3776
+    },
+    "processToFrameMs": {
+      "min": 1053,
+      "p50": 1109,
+      "p95": 1257,
+      "max": 1304
+    },
+    "initialViewportCorrect": true,
+    "nativeLifecycleSteps": 9,
+    "providerCodecImageThemeFixtures": true,
+    "managedProviderRuntimeChecks": 28,
+    "sharedFeatureChecks": 62,
+    "carrierRepeatedCompilationMatched": true
+  },
+  "limits": [
+    "Neutral feature-provider fixture; workload-specific results are separate.",
+    "Engine/plugin initialization and full application launch are outside the UI activation budget and are reported separately.",
+    "Frame-post-draw is not a hardware display timestamp.",
+    "First-use startup variance and authoring compiler turnaround remain separate work.",
+    "No production Godot export or complete release-set reproducibility/promotion claim."
+  ]
+}

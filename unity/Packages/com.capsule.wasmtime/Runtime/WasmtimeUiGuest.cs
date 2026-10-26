@@ -19,6 +19,7 @@ namespace Capsule.Wasmtime
     {
         public const ulong AddonExecutionFuel = 200000000;
         readonly ulong executionFuel;
+        readonly int initialViewportWidth, initialViewportHeight;
         public const string QuickJsSha256 = "0C5DFA49D0797B3599057D7B1428FA9C42E75542CC09F163CBE69D9DBCCFA5B7";
         const string Library = "portable_ui_wasmtime";
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)] delegate int HostCallback(IntPtr data, int op, long a, long b, long c, long d, IntPtr memory, ulong size);
@@ -79,13 +80,15 @@ namespace Capsule.Wasmtime
             if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
             return operationMetrics[index];
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null, ulong executionFuel = AddonExecutionFuel, byte[] trustedCompiledCarrier = null)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null, ulong executionFuel = AddonExecutionFuel, byte[] trustedCompiledCarrier = null, int initialViewportWidth = 0, int initialViewportHeight = 0)
         {
             if (hostCallsPerInvocation != UiHostBridgeContract.MaxCallsPerInvocation && hostCallsPerInvocation != UiHostBridgeContract.ExtendedCallsPerInvocation)
                 throw new ArgumentOutOfRangeException(nameof(hostCallsPerInvocation));
             HostCallsPerInvocation = hostCallsPerInvocation;
             if (executionFuel == 0) throw new ArgumentOutOfRangeException(nameof(executionFuel));
             this.executionFuel = executionFuel;
+            if (initialViewportWidth < 0 || initialViewportHeight < 0 || initialViewportWidth > 8192 || initialViewportHeight > 8192 || (initialViewportWidth == 0) != (initialViewportHeight == 0)) throw new ArgumentOutOfRangeException("Initial viewport bounds.");
+            this.initialViewportWidth = initialViewportWidth; this.initialViewportHeight = initialViewportHeight;
             if (source == null || source.Length > 65536 || sdk == null || sdk.Length > 524288) throw new ArgumentException("Source quota");
             using (var sha = SHA256.Create()) if (BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != QuickJsSha256) throw new ArgumentException("Pinned carrier changed");
             scriptModules = scriptModules ?? Array.Empty<byte[]>();
@@ -109,17 +112,7 @@ namespace Capsule.Wasmtime
             SupportsScheduling = scheduling;
             grant = activation.Grant;
             Session = new UiSession(activation.ConsumeOwner(), theme, layoutNodeLimit, surfaceAdmission);
-            lock (BootstrapLock)
-            {
-                if (!bootstrapped)
-                {
-                    // The host verifies the compiled engine artifact before supplying it.
-                    int result = trustedCompiledCarrier == null ? pui_bootstrap(carrier, carrier.Length) :
-                        pui_bootstrap_cached(carrier, carrier.Length, trustedCompiledCarrier, trustedCompiledCarrier.Length);
-                    if (result != 0) throw new InvalidOperationException(Marshal.PtrToStringAnsi(pui_bootstrap_error()));
-                    bootstrapped = true;
-                }
-            }
+            Bootstrap(carrier, trustedCompiledCarrier);
             self = GCHandle.Alloc(this);
             native = pui_create_with_host_call_limit(Callback, GCHandle.ToIntPtr(self), hostCallsPerInvocation);
             if (native == IntPtr.Zero)
@@ -128,6 +121,23 @@ namespace Capsule.Wasmtime
                 throw new InvalidOperationException(Marshal.PtrToStringAnsi(pui_bootstrap_error()));
             }
 
+        }
+        public static void PrepareCarrier(byte[] carrier, byte[] trustedCompiledCarrier = null)
+        {
+            using (var sha = SHA256.Create()) if (carrier == null || BitConverter.ToString(sha.ComputeHash(carrier)).Replace("-", "") != QuickJsSha256) throw new ArgumentException("Pinned carrier changed");
+            Bootstrap(carrier, trustedCompiledCarrier);
+        }
+        static void Bootstrap(byte[] carrier, byte[] trustedCompiledCarrier)
+        {
+            lock (BootstrapLock)
+            {
+                if (bootstrapped) return;
+                // Only trusted host code supplies verified serialized engine artifacts.
+                int result = trustedCompiledCarrier == null ? pui_bootstrap(carrier, carrier.Length) :
+                    pui_bootstrap_cached(carrier, carrier.Length, trustedCompiledCarrier, trustedCompiledCarrier.Length);
+                if (result != 0) throw new InvalidOperationException(Marshal.PtrToStringAnsi(pui_bootstrap_error()));
+                bootstrapped = true;
+            }
         }
 #if UNITY_5_3_OR_NEWER
         [AOT.MonoPInvokeCallback(typeof(HostCallback))]
@@ -360,6 +370,7 @@ namespace Capsule.Wasmtime
             }
             InitializationTrace?.Invoke("Host SDK eval begin");
             if (!Evaluate(sdk, "portable_ui_bootstrap", 200000000, out error)) return false;
+            if (initialViewportWidth > 0 && !SetViewport(initialViewportWidth, initialViewportHeight, out error)) return false;
             InitializationTrace?.Invoke("Addon eval begin");
             ulong start = TotalCallFuel;
             foreach (var module in modules)

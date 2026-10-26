@@ -6,13 +6,17 @@ var last_command := 0
 var status_key := ""
 var completed_command := 0
 var started := Time.get_ticks_msec()
+var first_texts: Array[String] = []
+var latency_only := false
 
 func _initialize() -> void:
-	_run.call_deferred()
+	_run()
 
 func _run() -> void:
 	var endpoint := ""
 	for argument in OS.get_cmdline_user_args():
+		if argument == "--latency-only":
+			latency_only = true
 		if argument.begins_with("--endpoint="):
 			endpoint = argument.trim_prefix("--endpoint=")
 		if argument.begins_with("--proof-dir="):
@@ -24,8 +28,9 @@ func _run() -> void:
 	host = load("res://addons/capsule/development_host.gd").new()
 	host.endpoint = endpoint
 	_configure_host()
-	root.add_child(host)
+	host.publication_activated.connect(_publication)
 	root.size = Vector2i(800, 480)
+	root.add_child(host)
 	print("CAPSULE_GODOT_PID " + str(OS.get_process_id()))
 
 func _configure_host() -> void:
@@ -33,6 +38,12 @@ func _configure_host() -> void:
 
 func _request_count() -> int:
 	return host.demo_requests
+
+func _publication(_revision: String) -> void:
+	if first_texts.is_empty():
+		for node in host.rendered_nodes:
+			if node.kind == "Text":
+				first_texts.append(str(node.text))
 
 func _process(_delta: float) -> bool:
 	if not is_instance_valid(host):
@@ -49,14 +60,15 @@ func _process(_delta: float) -> bool:
 			var color: Color = label.get_theme_color("font_color")
 			text_color = [color.r8, color.g8, color.b8, color.a8]
 	var image_color: Array = []
-	for picture in host.find_children("*", "TextureRect", true, false):
-		var color: Color = picture.texture.atlas.get_image().get_pixel(0, 0)
-		image_color = [color.r8, color.g8, color.b8, color.a8]
+	if not latency_only:
+		for picture in host.find_children("*", "TextureRect", true, false):
+			var color: Color = picture.texture.atlas.get_image().get_pixel(0, 0)
+			image_color = [color.r8, color.g8, color.b8, color.a8]
 	var status := {"pid": OS.get_process_id(), "revision": host.active_revision, "generation": host.generation,
 		"error": host.last_error, "requests": _request_count(), "texts": texts,
-		"nodes": host.rendered_nodes.size(), "command": completed_command, "imageColor": image_color, "textColor": text_color,
-		"elapsedMs": Time.get_ticks_msec() - started}
-	var key := JSON.stringify([status.revision, status.generation, status.error, status.requests, status.texts, status.command, status.imageColor, status.textColor])
+		"nodes": host.rendered_nodes.size(), "command": completed_command, "imageColor": image_color, "textColor": text_color, "firstTexts": first_texts, "presentation": host.presentation_metrics,
+		"elapsedMs": Time.get_ticks_msec() - started, "startedAtTicksMs": started}
+	var key := JSON.stringify([status.revision, status.generation, status.error, status.requests, status.texts, status.command, status.imageColor, status.textColor, status.presentation])
 	if key != status_key:
 		status_key = key
 		var output := FileAccess.open(proof_dir.path_join("status.json"), FileAccess.WRITE)
@@ -75,6 +87,8 @@ func _process(_delta: float) -> bool:
 
 func _command(command: Dictionary) -> void:
 	match command.action:
+		"clear-image-cache":
+			host._content_images.clear()
 		"click":
 			var buttons := host.find_children("*", "Button", true, false)
 			if buttons.is_empty():

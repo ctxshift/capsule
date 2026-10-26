@@ -103,6 +103,15 @@ test(
       );
       expect(first.entryBundle).toBe(first.bundle);
       expect(first.scriptModules).toEqual([]);
+      const native = await (
+        await fetch(server.endpoint + '/capsule/dev/v1/package?native=1')
+      ).json();
+      expect(native.bundle).toBeUndefined();
+      expect(native.sdk).toBeUndefined();
+      expect(native.hash).toBe(first.hash);
+      expect(native.sdkSha256).toBe(first.sdkSha256);
+      expect(native.entryBundle).toBe(first.entryBundle);
+      expect(native.scriptModules).toEqual(first.scriptModules);
       expect(first.theme.surfaces[0].key).toBe('panel');
       expect(
         (

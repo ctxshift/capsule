@@ -21,6 +21,16 @@ public static unsafe class Exports
     static string createError;
     [UnmanagedCallersOnly(EntryPoint = "capsule_abi_version", CallConvs = new[] { typeof(CallConvCdecl) })]
     public static int AbiVersion() => 1;
+    [UnmanagedCallersOnly(EntryPoint = "capsule_prepare", CallConvs = new[] { typeof(CallConvCdecl) })]
+    public static int Prepare(byte* resources, int length)
+    {
+        try {
+            var prepared = RuntimeResources.Load(Read(resources, length, 32768));
+            WasmtimeUiGuest.PrepareCarrier(prepared.Carrier, prepared.Compiled);
+            return 0;
+        }
+        catch (Exception error) { createError = error.Message; return -1; }
+    }
     [UnmanagedCallersOnly(EntryPoint = "capsule_create", CallConvs = new[] { typeof(CallConvCdecl) })]
     public static nint Create(byte* config, int length)
     {
@@ -74,6 +84,8 @@ public sealed class DevelopmentSession : IDisposable
     readonly int nodeLimit, hostCalls;
     readonly bool firstParty;
     readonly string expectedAddon;
+    readonly string sdkIdentity;
+    int viewportWidth, viewportHeight, candidateViewportWidth, candidateViewportHeight, activeViewportWidth, activeViewportHeight;
     UiFeatureSession candidateFeatures, activeFeatures;
     UiAsyncCompletion pending;
     UiThemeSnapshot candidatePolicy, activePolicy;
@@ -89,18 +101,17 @@ public sealed class DevelopmentSession : IDisposable
     {
         long started = Stopwatch.GetTimestamp();
         this.demo = demo;
-        carrier = File.ReadAllBytes(Path.Combine(resources, "CapsuleQuickJs.bytes"));
-        sdk = File.ReadAllBytes(Path.Combine(resources, "CapsuleReactSdk.txt"));
+        var resourceSet = RuntimeResources.Load(resources);
+        carrier = resourceSet.Carrier; sdk = resourceSet.Sdk; compiledCarrier = resourceSet.Compiled; sdkIdentity = resourceSet.SdkIdentity;
         startupTimings["resourcesMs"] = Milliseconds(started);
-        started = Stopwatch.GetTimestamp();
-        compiledCarrier = CompiledCarrier.Read(resources, carrier);
-        startupTimings["compiledVerificationMs"] = Milliseconds(started);
         started = Stopwatch.GetTimestamp();
         config ??= new JObject();
         providers = new FeatureProviders(config["providers"] as JArray);
         startupTimings["providersMs"] = Milliseconds(started);
         firstParty = (bool?)config["firstParty"] == true;
         expectedAddon = (string)config["addonId"];
+        viewportWidth = (int?)config["width"] ?? 0; viewportHeight = (int?)config["height"] ?? 0;
+        if (viewportWidth < 0 || viewportHeight < 0 || viewportWidth > 8192 || viewportHeight > 8192 || (viewportWidth == 0) != (viewportHeight == 0)) throw new ArgumentException("Initial viewport bounds.");
         nodeLimit = firstParty ? UiSession.ExtendedLayoutNodes : UiSession.DefaultLayoutNodes;
         hostCalls = firstParty ? UiHostBridgeContract.ExtendedCallsPerInvocation : UiHostBridgeContract.MaxCallsPerInvocation;
         themeLimits = firstParty ? new UiThemeLimits(4096, 256, 4096) : UiThemeLimits.Default;
@@ -125,7 +136,12 @@ public sealed class DevelopmentSession : IDisposable
                 return new JObject { ["accepted"] = accepted };
             case 5:
                 var viewport = JObject.Parse(request);
-                return new JObject { ["accepted"] = session.EnqueueViewport(session.ActiveGeneration, (int)viewport["width"], (int)viewport["height"]) };
+                int width = (int)viewport["width"], height = (int)viewport["height"];
+                if (width < 1 || height < 1 || width > 8192 || height > 8192) throw new ArgumentException("Viewport bounds.");
+                viewportWidth = width; viewportHeight = height;
+                bool queued = width == activeViewportWidth && height == activeViewportHeight || session.EnqueueViewport(session.ActiveGeneration, width, height);
+                if (queued) { activeViewportWidth = width; activeViewportHeight = height; }
+                return new JObject { ["accepted"] = queued };
             case 6: providers.Publish(JObject.Parse(request)); return new JObject { ["accepted"] = true };
             case 7: return new JObject { ["accepted"] = providers.Resolve(JObject.Parse(request)) };
             default: throw new ArgumentOutOfRangeException(nameof(command));
@@ -145,10 +161,10 @@ public sealed class DevelopmentSession : IDisposable
         if (expectedAddon != null && addon != expectedAddon) throw new ArgumentException("Addon identity does not match host configuration.");
         var modules = new List<byte[]>();
         foreach (string module in value["scriptModules"] as JArray ?? new JArray()) modules.Add(Encoding.UTF8.GetBytes(module));
-        if (!Hex(hash) || !Hex(sdkHash) || string.IsNullOrEmpty(addon) || addon.Length > 96 || source == null || suppliedSdk == null ||
-            Encoding.UTF8.GetByteCount(source) > 65536 || Encoding.UTF8.GetByteCount(suppliedSdk) > 524288 ||
-            !string.Equals(Hash(Encoding.UTF8.GetBytes(suppliedSdk)), sdkHash, StringComparison.OrdinalIgnoreCase) ||
-            !string.Equals(Hash(sdk), sdkHash, StringComparison.OrdinalIgnoreCase))
+        if (!Hex(hash) || !Hex(sdkHash) || string.IsNullOrEmpty(addon) || addon.Length > 96 || source == null ||
+            Encoding.UTF8.GetByteCount(source) > 65536 || suppliedSdk != null && (Encoding.UTF8.GetByteCount(suppliedSdk) > 524288 ||
+            !string.Equals(Hash(Encoding.UTF8.GetBytes(suppliedSdk)), sdkHash, StringComparison.OrdinalIgnoreCase)) ||
+            !string.Equals(sdkIdentity, sdkHash, StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("Development identity, source quota or SDK compatibility failed.");
         if (hash == activeHash || hash == candidateHash || hash == failedHash) return;
         if (pending != null || candidateHash != null) return;
@@ -179,6 +195,7 @@ public sealed class DevelopmentSession : IDisposable
         var initial = new Queue<(ushort, UiObservationPayload)>();
         featureSession.PumpSegments((topic, payload) => { initial.Enqueue((topic, payload)); return true; });
         var timings = new ConcurrentDictionary<string, double>();
+        int initialWidth = viewportWidth, initialHeight = viewportHeight;
         timings["admissionMs"] = Milliseconds(loadStarted);
         try
         {
@@ -187,7 +204,8 @@ public sealed class DevelopmentSession : IDisposable
                 var guest = new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
                 layout => new WasmtimeUiGuest(carrier, sdk, Encoding.UTF8.GetBytes(source), activation, policy, layout, new InitialObservations(initial, observations), actions,
                     scheduling: true, hostCallsPerInvocation: hostCalls, layoutNodeLimit: nodeLimit, scriptModules: modules.ToArray(),
-                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel, trustedCompiledCarrier: compiledCarrier), layoutNodeLimit: nodeLimit);
+                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel, trustedCompiledCarrier: compiledCarrier,
+                    initialViewportWidth: initialWidth, initialViewportHeight: initialHeight), layoutNodeLimit: nodeLimit);
                 timings["guestFactoryMs"] = Milliseconds(factoryStarted);
                 guest.InitializationTrace = stage => timings[stage] = Milliseconds(factoryStarted);
                 return guest;
@@ -195,6 +213,7 @@ public sealed class DevelopmentSession : IDisposable
         }
         catch { featureSession.Dispose(); throw; }
         candidateTimings = timings;
+        candidateViewportWidth = initialWidth; candidateViewportHeight = initialHeight;
         candidateFeatures?.Dispose(); candidateFeatures = featureSession;
         candidateHash = hash; candidatePolicy = policy; candidateTheme = (JObject)themeJson.DeepClone(); candidateOwner = activation.OwnerNonce; error = null;
     }
@@ -253,6 +272,7 @@ public sealed class DevelopmentSession : IDisposable
             if (item.Candidate)
             {
                 activeHash = candidateHash; activePolicy = candidatePolicy; activeTheme = candidateTheme; activeOwner = candidateOwner;
+                activeViewportWidth = candidateViewportWidth; activeViewportHeight = candidateViewportHeight;
                 activeFeatures?.Dispose(); activeFeatures = candidateFeatures; candidateFeatures = null;
                 candidateHash = null;
             }

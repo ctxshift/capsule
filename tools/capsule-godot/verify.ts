@@ -2,20 +2,14 @@ import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import {
-  cp,
-  mkdir,
-  readFile,
-  writeFile,
-  symlink,
-  rename,
-} from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile, symlink } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createServer } from 'node:net';
 import { defineFeature, s } from '@capsule-sdk/features';
 import { descriptor } from '@capsule-sdk/features/codegen';
+import { writeCommand } from './commands';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const { values } = parseArgs({
@@ -86,11 +80,12 @@ if (values.providers) {
   await writeFile(themeFile, initialTheme);
 }
 let initialSource = `import React from 'react';
-import {Box,Button,Text,Image,render,useObservation} from '@capsule-sdk/react';
-function App(){const count=useObservation(7,1,b=>new DataView(b.buffer,b.byteOffset,b.byteLength).getUint16(0,true),0);return <Box x={48} y={48} width={440} height={230} direction="column" gap={12}>
+import {Box,Button,Text,Image,render,useObservation,useViewport} from '@capsule-sdk/react';
+function App(){const viewport=useViewport();const count=useObservation(7,1,b=>new DataView(b.buffer,b.byteOffset,b.byteLength).getUint16(0,true),0);return <Box x={48} y={48} width={440} height={230} direction="column" gap={12}>
 <Text width={420} height={28} style="paragraph">Capsule initial</Text>
 <Image width={32} height={32} asset="neutral"/>
 <Text width={420} height={28} style="paragraph">{\`Requests: \${count}\`}</Text>
+<Text width={420} height={28} style="paragraph">{\`Viewport: \${viewport.width}x\${viewport.height}\`}</Text>
 <Button width={240} height={42} onActivate={e=>e.request(7,new Uint8Array([1,0]))}><Text width={220} height={24} style="paragraph">Send request</Text></Button>
 </Box>}render(<App/>,{layout:'yoga'});`;
 if (values.providers) {
@@ -239,6 +234,7 @@ type Status = {
   error: string;
   requests: number;
   texts: string[];
+  firstTexts: string[];
   nodes: number;
   command: number;
   elapsedMs: number;
@@ -256,15 +252,24 @@ let processExit: Promise<number | null> | undefined;
 let player: ReturnType<typeof spawn> | undefined;
 const steps: unknown[] = [];
 async function sendCommand(sequence: number, action: string) {
-  const temporary = join(output, 'command.json.tmp');
-  await writeFile(temporary, JSON.stringify({ sequence, action }));
-  await rename(temporary, join(output, 'command.json'));
+  await writeCommand(output, sequence, action);
 }
 try {
   if (values.providers) {
     const publication = await (
       await fetch(endpoint + '/capsule/dev/v1/package')
     ).json();
+    await writeFile(
+      join(output, 'publication-initial.json'),
+      JSON.stringify(publication),
+    );
+    await mkdir(join(output, 'replay-images'));
+    for (const asset of publication.theme.assets) {
+      await cp(
+        join(ui, asset.path),
+        join(output, 'replay-images', `${asset.image ?? asset.key}.png`),
+      );
+    }
     const style = publication.theme.text[0];
     for (let index = 0; index < 80; index++)
       publication.theme.text.push({ ...style, key: `neutral-font-${index}` });
@@ -293,7 +298,12 @@ try {
     'Fresh project import',
   );
   if (values.providers) {
-    for (const fixture of ['feature_codec', 'images', 'theme_admission']) {
+    for (const fixture of [
+      'feature_codec',
+      'images',
+      'provider_descriptor',
+      'theme_admission',
+    ]) {
       const codec = spawn(
         values.godot,
         ['--headless', '--path', game, '--script', `res://tests/${fixture}.gd`],
@@ -347,6 +357,10 @@ try {
   );
   // The Windows console launcher owns a separate Godot game process.
   assert(Number.isSafeInteger(first.pid) && first.pid > 0);
+  assert(
+    first.firstTexts.includes('Viewport: 800x480'),
+    'The first admitted snapshot must already use the initial viewport',
+  );
   steps.push({ step: 'initial', ...first });
   let sequence = 0;
   async function command(action: string) {
@@ -381,6 +395,12 @@ try {
       : false;
   });
   assert.equal(replacement.pid, first.pid);
+  await writeFile(
+    join(output, 'publication-reloaded.json'),
+    JSON.stringify(
+      await (await fetch(endpoint + '/capsule/dev/v1/package')).json(),
+    ),
+  );
   steps.push({
     step: 'tsx-reload',
     saveToObservedMs: Date.now() - savedAt,

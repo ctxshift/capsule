@@ -281,9 +281,15 @@ export async function startWorkshop(options: WorkshopOptions) {
                   throw Error('No successful addon publication');
                 response.setHeader('Content-Type', 'application/json');
                 response.setHeader('Cache-Control', 'no-store');
+                const native =
+                  path === '/capsule/dev/v1/package' &&
+                  new URL(request.url!, 'http://localhost').searchParams.get(
+                    'native',
+                  ) === '1';
                 response.end(
                   JSON.stringify({
                     ...publication,
+                    ...(native ? { bundle: undefined, sdk: undefined } : {}),
                     ...(path === '/capsule/dev/v1/package'
                       ? { schemaVersion: 1, requires: {} }
                       : {}),

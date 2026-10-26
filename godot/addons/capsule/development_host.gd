@@ -17,7 +17,7 @@ var presentation_metrics: Array = []
 var _runtime: RefCounted
 var _http: HTTPRequest
 var _fetching := false
-var _next_poll := 0.0
+var _next_poll_us := 0
 var _candidate_revision := ""
 var _candidate_images: Dictionary = {}
 var _active_images: Dictionary = {}
@@ -25,6 +25,7 @@ var _active: Control
 var _providers: Dictionary = {}
 var _request_providers: Dictionary = {}
 var _preparing := false
+var _pending_native_candidate := false
 var _source_images: Dictionary = {}
 var _started_us := 0
 var _open_ms := 0.0
@@ -34,6 +35,12 @@ var _image_decode_ms := 0.0
 var _candidate_image_hashes: Dictionary = {}
 var _active_image_hashes: Dictionary = {}
 var _content_images: Dictionary = {}
+
+class ImageBatch:
+	extends RefCounted
+	signal finished
+	var remaining := 0
+	var failed := false
 
 func register_provider(provider: RefCounted) -> bool:
 	if _runtime != null or not provider.definition is Dictionary or not provider.definition.has("name"):
@@ -91,7 +98,7 @@ func _ready() -> void:
 	var provider_descriptors: Array = []
 	for provider in _providers.values():
 		provider_descriptors.append(provider.descriptor())
-	var configuration := {"resources": resources, "demo": enable_demo_provider, "providers": provider_descriptors, "firstParty": first_party_profile}
+	var configuration := {"resources": resources, "demo": enable_demo_provider, "providers": provider_descriptors, "firstParty": first_party_profile, "width": int(get_viewport_rect().size.x), "height": int(get_viewport_rect().size.y)}
 	if not admitted_addon_id.is_empty():
 		configuration["addonId"] = admitted_addon_id
 	var open_started := Time.get_ticks_usec()
@@ -106,20 +113,25 @@ func _ready() -> void:
 	_http.body_size_limit = 900000
 	_http.max_redirects = 0
 	add_child(_http)
+	get_viewport().size_changed.connect(_viewport_changed)
 
-func _process(delta: float) -> void:
+func _viewport_changed() -> void:
+	if _runtime:
+		_call(5, {"width": int(get_viewport_rect().size.x), "height": int(get_viewport_rect().size.y)})
+
+func _process(_delta: float) -> void:
 	if not _runtime or not _http or _preparing or _fetching:
 		return
 	var result := _call(2)
 	if result.get("error"):
 		_error(str(result.error))
+		_pending_native_candidate = false
 	demo_requests = int(result.get("requests", demo_requests))
 	if result.has("nodes"):
 		_present(result)
 		return
-	_next_poll -= delta
-	if _next_poll <= 0 and not _fetching:
-		_next_poll = 0.1
+	if not _pending_native_candidate and Time.get_ticks_usec() >= _next_poll_us and not _fetching:
+		_next_poll_us = Time.get_ticks_usec() + 50000
 		_fetch_publication()
 
 func _call(command: int, request: Dictionary = {}) -> Dictionary:
@@ -142,7 +154,7 @@ func _call_json(command: int, request: String) -> Dictionary:
 	return response
 
 func _download(path: String, limit: int) -> PackedByteArray:
-	var owned := path != "/capsule/dev/v1/package"
+	var owned := path.get_slice("?", 0) != "/capsule/dev/v1/package"
 	var request := HTTPRequest.new() if owned else _http
 	if owned:
 		request.use_threads = true
@@ -165,7 +177,7 @@ func _download(path: String, limit: int) -> PackedByteArray:
 func _fetch_publication() -> void:
 	_fetching = true
 	var fetch_started := Time.get_ticks_usec()
-	var bytes := await _download("/capsule/dev/v1/package", 900000)
+	var bytes := await _download("/capsule/dev/v1/package?native=1", 900000)
 	var received := Time.get_ticks_usec()
 	if not is_inside_tree():
 		return
@@ -191,6 +203,7 @@ func _fetch_publication() -> void:
 		_candidate_revision = revision
 		_error(str(result.error))
 	else:
+		_pending_native_candidate = true
 		_candidate_metrics = {"fetchStartedUs": fetch_started, "receivedUs": received, "queuedUs": Time.get_ticks_usec(), "downloadMs": (received - fetch_started) / 1000.0, "parseMs": (native_started - received) / 1000.0, "nativeCallMs": (Time.get_ticks_usec() - native_started) / 1000.0}
 		_candidate_revision = revision
 		_candidate_images = {}
@@ -220,11 +233,12 @@ func _prepare_images(result: Dictionary) -> Dictionary:
 	var job_list := jobs.values()
 	for offset in range(0, job_list.size(), 8):
 		var end := mini(offset + 8, job_list.size())
-		var batch := {"remaining": end - offset, "failed": false}
+		var batch := ImageBatch.new()
+		batch.remaining = end - offset
 		for index in range(offset, end):
 			_prepare_source(result, job_list[index], sources, hashes, batch)
-		while int(batch.remaining) > 0:
-			await get_tree().process_frame
+		if batch.remaining > 0:
+			await batch.finished
 		if batch.failed:
 			return {}
 	for key in wanted:
@@ -236,7 +250,7 @@ func _prepare_images(result: Dictionary) -> Dictionary:
 		images[key] = texture
 	return images
 
-func _prepare_source(result: Dictionary, recipe: Dictionary, sources: Dictionary, hashes: Dictionary, batch: Dictionary) -> void:
+func _prepare_source(result: Dictionary, recipe: Dictionary, sources: Dictionary, hashes: Dictionary, batch: ImageBatch) -> void:
 	var digest := str(hashes.get(str(recipe.get("image", recipe.key)), ""))
 	var cached: Dictionary = {}
 	if not digest.is_empty() and not _valid_digest(digest):
@@ -251,7 +265,9 @@ func _prepare_source(result: Dictionary, recipe: Dictionary, sources: Dictionary
 		batch.failed = true
 	else:
 		sources[str(recipe.path)] = cached
-	batch.remaining = int(batch.remaining) - 1
+	batch.remaining -= 1
+	if batch.remaining == 0:
+		batch.finished.emit()
 
 static func _valid_digest(value: String) -> bool:
 	if value.length() != 64:
@@ -304,6 +320,8 @@ func _trim_content_images() -> void:
 
 func _present(result: Dictionary) -> void:
 	_preparing = true
+	if result.candidate:
+		_pending_native_candidate = false
 	var preparation_started := Time.get_ticks_usec()
 	_image_download_ms = 0.0
 	_image_decode_ms = 0.0
@@ -400,6 +418,7 @@ func _present(result: Dictionary) -> void:
 
 func _record_presentation(result: Dictionary, preparation_started: int, controls_started: int, download_ms: float, decode_ms: float) -> void:
 	var metrics := {"revision": str(result.revision), "candidate": result.candidate, "native": result.get("timings", {}), "openMs": _open_ms, "imagesMs": (controls_started - preparation_started) / 1000.0, "imageDownloadMs": download_ms, "imageDecodeMs": decode_ms, "controlsMs": (Time.get_ticks_usec() - controls_started) / 1000.0}
+	metrics["enginePreloadMs"] = _runtime.get_preload_milliseconds() if _runtime.has_method("get_preload_milliseconds") else 0.0
 	if result.candidate:
 		metrics.merge(_candidate_metrics)
 		metrics["nativeWaitMs"] = (preparation_started - int(_candidate_metrics.queuedUs)) / 1000.0
@@ -407,6 +426,7 @@ func _record_presentation(result: Dictionary, preparation_started: int, controls
 	if not is_inside_tree():
 		return
 	metrics["hostToFrameMs"] = (Time.get_ticks_usec() - _started_us) / 1000.0
+	metrics["frameAtTicksUs"] = Time.get_ticks_usec()
 	metrics["presentedAtUnixMs"] = Time.get_unix_time_from_system() * 1000.0
 	if result.candidate:
 		metrics["receivedToFrameMs"] = (Time.get_ticks_usec() - int(metrics.receivedUs)) / 1000.0

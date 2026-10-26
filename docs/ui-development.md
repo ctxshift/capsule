@@ -112,8 +112,9 @@ Keep compatibility checks at both boundaries.
 
 ## Complete presentation and latency
 
-Aim for about **200 ms to a complete, usable UI**, rather than exposing elements
-as they finish loading. The host prepares a replacement's theme, images and full
+Target about **300 ms to a complete, usable UI**, with a separately measured
+**under 300 ms from a compiled publication to its replacement frame**. Prepare
+the complete surface instead of exposing elements as they finish loading. The host prepares a replacement's theme, images and full
 snapshot before activation; the previous generation remains visible and usable
 until promotion. The rendered fixture checks text, panel, image and button in
 the first replacement frame.
@@ -124,8 +125,10 @@ compilation to rendered replacement. The retained Windows Editor sample measured
 about **284 ms** for first activation, **31 ms** for warm preparation and **1.67 s**
 for TSX save through captured replacement. The last measurement includes compiler,
 watcher, transport, rendering and screenshot capture; it is not a native rendering
-measurement. These single samples are not percentile guarantees. The 200 ms cold
-startup target is **not yet met**; compiler turnaround also needs improvement.
+measurement. These historical single samples are not percentile guarantees and
+do not establish the current budgets. Report repeated startup and reload
+distributions separately from engine/plugin initialization and full process
+launch. Compiler turnaround is a separate part of the edit-to-visible workflow.
 
 Enable **Run In Background** in Unity Player Settings to keep the game updating
 while a code editor has focus. Input focus policy remains the game's choice;
