@@ -23,6 +23,8 @@ var _active_images: Dictionary = {}
 var _active: Control
 var _providers: Dictionary = {}
 var _request_providers: Dictionary = {}
+var _preparing := false
+var _source_images: Dictionary = {}
 
 func register_provider(provider: RefCounted) -> bool:
 	if _runtime != null or not provider.definition is Dictionary or not provider.definition.has("name"):
@@ -93,7 +95,7 @@ func _ready() -> void:
 	add_child(_http)
 
 func _process(delta: float) -> void:
-	if not _runtime or not _http:
+	if not _runtime or not _http or _preparing or _fetching:
 		return
 	var result := _call(2)
 	if result.get("error"):
@@ -101,13 +103,17 @@ func _process(delta: float) -> void:
 	demo_requests = int(result.get("requests", demo_requests))
 	if result.has("nodes"):
 		_present(result)
+		return
 	_next_poll -= delta
 	if _next_poll <= 0 and not _fetching:
 		_next_poll = 0.1
 		_fetch_publication()
 
 func _call(command: int, request: Dictionary = {}) -> Dictionary:
-	var response = _parse(_runtime.exchange(command, JSON.stringify(request)))
+	return _call_json(command, JSON.stringify(request))
+
+func _call_json(command: int, request: String) -> Dictionary:
+	var response = _parse(_runtime.exchange(command, request))
 	if not response is Dictionary:
 		return {"error": "Invalid Capsule native response."}
 	for token in response.get("cancelledRequests", []):
@@ -151,38 +157,64 @@ func _fetch_publication() -> void:
 			_error("")
 		_fetching = false
 		return
-	var images: Dictionary = {}
-	var total := 0
-	for recipe in publication.get("theme", {}).get("assets", []):
-		var data := await _download("/portable-ui/art/" + revision.uri_encode() + "/" + str(recipe.key).uri_encode(), 4194304)
-		if not is_inside_tree():
-			return
-		total += data.size()
-		var image := Image.new()
-		if total > 16777216 or data.is_empty() or image.load_png_from_buffer(data) != OK:
-			_error("Capsule image preparation failed.")
-			_fetching = false
-			return
-		var texture := AtlasTexture.new()
-		texture.atlas = ImageTexture.create_from_image(image)
-		var rect: Array = recipe.rect
-		texture.region = Rect2(rect[0], rect[1], rect[2], rect[3])
-		images[str(recipe.key)] = texture
-	var result := _call(1, publication)
+	# Forward original JSON so integer contract fields do not become decimal tokens.
+	var result := _call_json(1, bytes.get_string_from_utf8())
 	if result.get("error"):
 		_candidate_revision = revision
 		_error(str(result.error))
 	else:
 		_candidate_revision = revision
-		_candidate_images = images
+		_candidate_images = {}
 	_fetching = false
 
+func _prepare_images(result: Dictionary) -> Dictionary:
+	var images: Dictionary = (_candidate_images if result.candidate else _active_images).duplicate()
+	var recipes: Dictionary = {}
+	for recipe in result.theme.get("assets", []):
+		recipes[str(recipe.key)] = recipe
+	var sources: Dictionary = _source_images.get(str(result.revision), {})
+	_source_images[str(result.revision)] = sources
+	for node in result.nodes:
+		if node.kind != "Image" or images.has(str(node.asset)):
+			continue
+		var recipe: Dictionary = recipes.get(str(node.asset), {})
+		if recipe.is_empty():
+			return {}
+		var source: String = str(recipe.path)
+		if not sources.has(source):
+			var data := await _download("/portable-ui/art/" + str(result.revision).uri_encode() + "/" + str(recipe.get("image", recipe.key)).uri_encode(), 4194304)
+			if data.size() < 24 or data.slice(0, 8).hex_encode() != "89504e470d0a1a0a":
+				return {}
+			# Bound decoded allocation before calling the PNG decoder.
+			var width := (int(data[16]) << 24) | (int(data[17]) << 16) | (int(data[18]) << 8) | int(data[19])
+			var height := (int(data[20]) << 24) | (int(data[21]) << 16) | (int(data[22]) << 8) | int(data[23])
+			var decoded := width * height * 4
+			var total := data.size()
+			for cached in sources.values():
+				decoded += int(cached.decoded)
+				total += int(cached.encoded)
+			if width <= 0 or height <= 0 or width > 8192 or height > 8192 or decoded > (268435456 if first_party_profile else 67108864) or total > (67108864 if first_party_profile else 16777216):
+				return {}
+			var image := Image.new()
+			if image.load_png_from_buffer(data) != OK or image.get_width() != int(recipe.width) or image.get_height() != int(recipe.height):
+				return {}
+			sources[source] = {"texture": ImageTexture.create_from_image(image), "encoded": data.size(), "decoded": width * height * 4}
+		var texture := AtlasTexture.new()
+		texture.atlas = sources[source].texture
+		var rect: Array = recipe.rect
+		texture.region = Rect2(rect[0], rect[1], rect[2], rect[3])
+		images[str(node.asset)] = texture
+	return images
+
 func _present(result: Dictionary) -> void:
+	_preparing = true
+	var images := await _prepare_images(result)
+	if not is_inside_tree():
+		return
 	var candidate := Control.new()
 	candidate.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	candidate.visible = false
 	add_child(candidate)
-	var images: Dictionary = _candidate_images if result.candidate else _active_images
 	var controls: Dictionary = {}
 	var prepared := true
 	for node in result.nodes:
@@ -237,7 +269,10 @@ func _present(result: Dictionary) -> void:
 	var acknowledgment := _call(3, {"sequence": str(result.sequence), "accepted": prepared})
 	if not prepared or acknowledgment.get("error"):
 		candidate.queue_free()
+		if result.candidate:
+			_source_images.erase(str(result.revision))
 		_error(str(acknowledgment.get("error", "Godot presentation rejected.")))
+		_preparing = false
 		return
 	if is_instance_valid(_active):
 		_active.get_parent().remove_child(_active)
@@ -247,12 +282,17 @@ func _present(result: Dictionary) -> void:
 	generation = str(result.generation)
 	rendered_nodes = result.nodes
 	if result.candidate:
-		_active_images = _candidate_images
+		_active_images = images
+		_candidate_images = {}
+		_source_images = {str(result.revision): _source_images.get(str(result.revision), {})}
 		active_revision = str(result.revision)
 		_candidate_revision = ""
 		_call(5, {"width": int(get_viewport_rect().size.x), "height": int(get_viewport_rect().size.y)})
 		publication_activated.emit(active_revision)
+	else:
+		_active_images = images
 	_error("")
+	_preparing = false
 
 func _activate(handle: String, owner_generation: String) -> void:
 	_call(4, {"handle": handle, "generation": owner_generation})

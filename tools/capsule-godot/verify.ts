@@ -78,7 +78,13 @@ await symlink(
 );
 const source = join(ui, 'src/main.tsx');
 const themeFile = join(ui, 'theme.json');
-const initialTheme = await readFile(themeFile, 'utf8');
+let initialTheme = await readFile(themeFile, 'utf8');
+if (values.providers) {
+  const theme = JSON.parse(initialTheme);
+  theme.assets[0].rotation = 90; // Preserve integer-only contract fields across Godot JSON admission.
+  initialTheme = JSON.stringify(theme, null, 2);
+  await writeFile(themeFile, initialTheme);
+}
 let initialSource = `import React from 'react';
 import {Box,Button,Text,Image,render,useObservation} from '@capsule-sdk/react';
 function App(){const count=useObservation(7,1,b=>new DataView(b.buffer,b.byteOffset,b.byteLength).getUint16(0,true),0);return <Box x={48} y={48} width={440} height={230} direction="column" gap={12}>
@@ -255,6 +261,18 @@ async function sendCommand(sequence: number, action: string) {
   await rename(temporary, join(output, 'command.json'));
 }
 try {
+  if (values.providers) {
+    const publication = await (
+      await fetch(endpoint + '/capsule/dev/v1/package')
+    ).json();
+    const style = publication.theme.text[0];
+    for (let index = 0; index < 80; index++)
+      publication.theme.text.push({ ...style, key: `neutral-font-${index}` });
+    await writeFile(
+      join(game, 'theme-admission.json'),
+      JSON.stringify(publication),
+    );
+  }
   const importer = spawn(
     values.godot,
     [
@@ -275,22 +293,18 @@ try {
     'Fresh project import',
   );
   if (values.providers) {
-    const codec = spawn(
-      values.godot,
-      [
-        '--headless',
-        '--path',
-        game,
-        '--script',
-        'res://tests/feature_codec.gd',
-      ],
-      { windowsHide: true, stdio: 'inherit' },
-    );
-    assert.equal(
-      await new Promise((done) => codec.once('close', done)),
-      0,
-      'Feature wire codec conformance',
-    );
+    for (const fixture of ['feature_codec', 'images', 'theme_admission']) {
+      const codec = spawn(
+        values.godot,
+        ['--headless', '--path', game, '--script', `res://tests/${fixture}.gd`],
+        { windowsHide: true, stdio: 'inherit' },
+      );
+      assert.equal(
+        await new Promise((done) => codec.once('close', done)),
+        0,
+        `${fixture} conformance`,
+      );
+    }
   }
   player = spawn(
     values.godot,

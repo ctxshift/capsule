@@ -140,7 +140,7 @@ public sealed class DevelopmentSession : IDisposable
         if (hash == activeHash || hash == candidateHash || hash == failedHash) return;
         if (pending != null || candidateHash != null) return;
         var themeJson = value["theme"] as JObject ?? throw new ArgumentException("Theme missing.");
-        var theme = new UiControlTheme(themeJson.ToString(), themeLimits);
+        var theme = new UiControlTheme(themeJson.ToString(Newtonsoft.Json.Formatting.None), themeLimits);
         var styles = new List<string>(theme.StyleKeys);
         var assets = new List<string>();
         foreach (var asset in theme.CopyAssets()) assets.Add(asset.Key);
@@ -152,7 +152,7 @@ public sealed class DevelopmentSession : IDisposable
         foreach (var pair in raw["pairs"] as JArray ?? new JArray()) pairs.Add(YogaFontMetrics.PairKey((int)pair["first"], (int)pair["second"]), (float)pair["value"]);
         var fonts = new Dictionary<string, YogaFontMetrics>(StringComparer.Ordinal);
         foreach (var key in theme.TextKeys) fonts.Add(key, new YogaFontMetrics(advances, pairs, theme.TextNumber(key, "lineHeight")));
-        var metrics = new YogaTextCatalog(fonts);
+        var metrics = new YogaTextCatalog(fonts, themeLimits.TextStyles);
         var registry = new UiAddonRegistry();
         var grant = demo ? new UiCapabilityGrant(new[] { new UiObservationCapability(7, 1) }, new ushort[] { 7 }, null) : new UiCapabilityGrant(null, null, null);
         var requirements = new List<UiFeatureRequirement>();
@@ -169,7 +169,8 @@ public sealed class DevelopmentSession : IDisposable
         {
             session.RequestLoad((output, observations, actions) => new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
                 layout => new WasmtimeUiGuest(carrier, sdk, Encoding.UTF8.GetBytes(source), activation, policy, layout, new InitialObservations(initial, observations), actions,
-                    scheduling: true, hostCallsPerInvocation: hostCalls, layoutNodeLimit: nodeLimit, scriptModules: modules.ToArray()), layoutNodeLimit: nodeLimit));
+                    scheduling: true, hostCallsPerInvocation: hostCalls, layoutNodeLimit: nodeLimit, scriptModules: modules.ToArray(),
+                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel), layoutNodeLimit: nodeLimit));
         }
         catch { featureSession.Dispose(); throw; }
         candidateFeatures?.Dispose(); candidateFeatures = featureSession;

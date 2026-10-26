@@ -122,6 +122,17 @@ permission to bypass server-owned rules. The host's optional `admitted_addon_id`
 pins a game-selected addon identity. Enable `first_party_profile` only in trusted
 game composition to select the shared extended runtime quotas; packages cannot
 enable it themselves.
+This trusted profile also disables guest fuel metering, matching a game-owned
+script's execution trust. Community addons retain the shared metered budget.
+The selected text catalog limit follows the profile's theme limit.
+
+Image preparation follows the current snapshot instead of downloading the entire
+theme art library. Atlas recipes reuse one decoded source texture per publication.
+Preparation still completes before a replacement is shown. Community sessions
+allow 16 MiB encoded and 64 MiB decoded image data per revision; trusted sessions
+allow 64 MiB encoded and 256 MiB decoded. Each download is limited to 4 MiB, and
+PNG dimensions are checked before decoding. These are resource ceilings, not a
+startup latency guarantee. Full image recipe rendering remains separate work.
 
 Current native presentation supports Box, ClipBox, Text, Image and Button.
 Layout uses the shared Yoga coordinator and worker lifecycle. Buttons use Godot's
@@ -163,6 +174,9 @@ wire values. Run the engine-independent boundary checks with
 The [provider verification record](verification/godot-feature-providers.json)
 and [native capture](verification/godot-feature-providers.png) retain the neutral
 provider candidate's hashes, checks and remaining production limitations.
+The [publication preparation record](verification/godot-publication-preparation.json)
+adds referenced-image caching, source aliases, dimension limits, integer-token
+preservation and community/trusted extended-theme admission checks.
 
 The fixture creates a fresh game and a separate React project, uses the real
 workshop CLI as an owned child process, imports the plugin, and starts a normal
