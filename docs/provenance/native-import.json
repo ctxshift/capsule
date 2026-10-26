@@ -412,8 +412,10 @@
     {
       "source": "client/Assets/Host/Capsule/Package/UiFeatureSession.cs",
       "target": "unity/Packages/com.capsule.package/Runtime/UiFeatureSession.cs",
-      "sha256": "fdba4039f2d45a665fc7c2cd473901d8b6966851e7e10759abb2e300f30d121e",
-      "canonicalSha256": "fdba4039f2d45a665fc7c2cd473901d8b6966851e7e10759abb2e300f30d121e"
+      "sha256": "c1d7fd7095974f0513b148ca1c951e0df43dcaedb0de6b821fca6b266fe9dbcd",
+      "canonicalSha256": "c1d7fd7095974f0513b148ca1c951e0df43dcaedb0de6b821fca6b266fe9dbcd",
+      "originalImportSha256": "fdba4039f2d45a665fc7c2cd473901d8b6966851e7e10759abb2e300f30d121e",
+      "adaptation": "Serialize feature metadata with explicit JSON tokens for native AOT hosts, preserving the versioned wire format."
     },
     {
       "source": "client/Assets/Host/Capsule/Package/UiFeatureSession.cs.meta",

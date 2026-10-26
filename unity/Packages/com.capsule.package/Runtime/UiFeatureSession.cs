@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Capsule.Package
 {
@@ -42,7 +43,7 @@ namespace Capsule.Package
             this.epoch = epoch;
             if (orderedCapacity < 1) throw new ArgumentOutOfRangeException(nameof(orderedCapacity));
             this.orderedCapacity = orderedCapacity;
-            var descriptors = new List<object>();
+            var descriptors = new JArray();
             try
             {
                 ushort id = 0;
@@ -89,10 +90,13 @@ namespace Capsule.Package
                             ? provider.Request(name, bytes, cancellation.Token) : Task.FromException<byte[]>(new InvalidOperationException("Feature permission retired")));
                         requestKeys.Add(entry.Key + "/" + name, key);
                     }
-                    descriptors.Add(new { id, name = definition.Name, version = definition.Version, fingerprint = definition.Fingerprint,
-                        states, deliveries, requests = operations });
+                    var stateIds = new JObject(); foreach (var item in states) stateIds.Add(item.Key, item.Value);
+                    var stateDeliveries = new JObject(); foreach (var item in deliveries) stateDeliveries.Add(item.Key, item.Value);
+                    var operationIds = new JObject(); foreach (var item in operations) operationIds.Add(item.Key, item.Value);
+                    descriptors.Add(new JObject { ["id"] = id, ["name"] = definition.Name, ["version"] = definition.Version,
+                        ["fingerprint"] = definition.Fingerprint, ["states"] = stateIds, ["deliveries"] = stateDeliveries, ["requests"] = operationIds });
                 }
-                metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = descriptors }));
+                metadata = Encoding.UTF8.GetBytes(new JObject { ["epoch"] = epoch, ["features"] = descriptors }.ToString(Formatting.None));
             }
             catch { Dispose(); throw; }
         }
@@ -153,7 +157,8 @@ namespace Capsule.Package
                 retired = true; cancellation.Cancel();
                 foreach (var subscription in subscriptions) subscription.Dispose(); subscriptions.Clear();
                 dirty.Clear(); ordered.Clear(); pending.Clear(); stateFrames.Clear(); resultFrames.Clear();
-                metadata = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(new { epoch, features = new object[0], reason = overflow ? "ordered-overflow" : "retired" }));
+                metadata = Encoding.UTF8.GetBytes(new JObject { ["epoch"] = epoch, ["features"] = new JArray(),
+                    ["reason"] = overflow ? "ordered-overflow" : "retired" }.ToString(Formatting.None));
             }
             if (metadata != null) { if (!publish(MetadataTopic, UiObservationPayload.Owned(metadata))) return; metadata = null; }
             while (ordered.Count != 0)

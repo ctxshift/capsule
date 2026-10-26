@@ -64,7 +64,11 @@
     "packages/capsule-workshop": {
       "name": "@capsule-sdk/workshop",
       "version": "0.1.0",
+      "bin": {
+        "capsule-workshop": "./src/project-cli.ts",
+      },
       "dependencies": {
+        "@capsule-sdk/features": "workspace:*",
         "@capsule-sdk/react": "workspace:*",
         "@jridgewell/trace-mapping": "0.3.31",
         "esbuild": "0.25.12",
@@ -137,6 +141,7 @@
     "tools/capsule-godot": {
       "name": "capsule-godot-tools",
       "devDependencies": {
+        "@capsule-sdk/features": "workspace:*",
         "@types/node": "25.0.3",
         "typescript": "5.9.3",
       },

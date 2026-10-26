@@ -14,6 +14,8 @@ import { resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createServer } from 'node:net';
+import { defineFeature, s } from '@capsule-sdk/features';
+import { descriptor } from '@capsule-sdk/features/codegen';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const { values } = parseArgs({
@@ -21,6 +23,7 @@ const { values } = parseArgs({
     godot: { type: 'string' },
     output: { type: 'string' },
     addon: { type: 'string' },
+    providers: { type: 'boolean', default: false },
   },
 });
 if (!values.godot || !values.output)
@@ -76,7 +79,7 @@ await symlink(
 const source = join(ui, 'src/main.tsx');
 const themeFile = join(ui, 'theme.json');
 const initialTheme = await readFile(themeFile, 'utf8');
-const initialSource = `import React from 'react';
+let initialSource = `import React from 'react';
 import {Box,Button,Text,Image,render,useObservation} from '@capsule-sdk/react';
 function App(){const count=useObservation(7,1,b=>new DataView(b.buffer,b.byteOffset,b.byteLength).getUint16(0,true),0);return <Box x={48} y={48} width={440} height={230} direction="column" gap={12}>
 <Text width={420} height={28} style="paragraph">Capsule initial</Text>
@@ -84,6 +87,58 @@ function App(){const count=useObservation(7,1,b=>new DataView(b.buffer,b.byteOff
 <Text width={420} height={28} style="paragraph">{\`Requests: \${count}\`}</Text>
 <Button width={240} height={42} onActivate={e=>e.request(7,new Uint8Array([1,0]))}><Text width={220} height={24} style="paragraph">Send request</Text></Button>
 </Box>}render(<App/>,{layout:'yoga'});`;
+if (values.providers) {
+  const energy = defineFeature({
+    name: '@capsule-example/energy',
+    version: '1.0.0',
+    dependencies: {},
+    states: {
+      State: {
+        schema: s.record('EnergyState', { count: s.u32 }),
+        permission: 'energy.read',
+        delivery: 'latest',
+      },
+    },
+    requests: {
+      Add: {
+        input: s.record('EnergyAdd', { amount: s.u32 }),
+        output: s.record('EnergyResult', { accepted: s.bool }),
+        permission: 'energy.add',
+      },
+    },
+  });
+  const definition = descriptor(energy);
+  await writeFile(join(game, 'provider.json'), JSON.stringify(definition));
+  await writeFile(
+    join(ui, 'feature.ts'),
+    `import {defineFeature} from '@capsule-sdk/features';export const energy=defineFeature(${JSON.stringify(energy)});export const fingerprint=${JSON.stringify(definition.fingerprint)};`,
+  );
+  const manifest = JSON.parse(await readFile(join(ui, 'addon.json'), 'utf8'));
+  manifest.features = [
+    {
+      name: energy.name,
+      range: '1.0.*',
+      contractVersion: '1.0.0',
+      fingerprint: definition.fingerprint,
+      permissions: ['energy.read', 'energy.add'],
+      optional: false,
+    },
+  ];
+  await writeFile(join(ui, 'addon.json'), JSON.stringify(manifest));
+  initialSource = initialSource
+    .replace(
+      "import React from 'react';",
+      "import React,{useSyncExternalStore} from 'react';import {createAddonFeatures} from '@capsule-sdk/features/addon';import {observe,requestReadOnly} from '@capsule-sdk/react';import {energy,fingerprint} from '../feature';const features=createAddonFeatures(observe,requestReadOnly);const connection=features.connect(energy,'1.0.*',fingerprint);const subscribe=(notify:()=>void)=>connection.subscribe('State',notify);",
+    )
+    .replace(
+      'useObservation(7,1,b=>new DataView(b.buffer,b.byteOffset,b.byteLength).getUint16(0,true),0)',
+      "(useSyncExternalStore(subscribe,()=>connection.snapshot('State')).value?.count??0)",
+    )
+    .replace(
+      'e.request(7,new Uint8Array([1,0]))',
+      "connection.request('Add',{amount:1},e)",
+    );
+}
 await writeFile(source, initialSource);
 const portProbe = createServer();
 await new Promise<void>((done) => portProbe.listen(0, '127.0.0.1', done));
@@ -219,6 +274,24 @@ try {
     0,
     'Fresh project import',
   );
+  if (values.providers) {
+    const codec = spawn(
+      values.godot,
+      [
+        '--headless',
+        '--path',
+        game,
+        '--script',
+        'res://tests/feature_codec.gd',
+      ],
+      { windowsHide: true, stdio: 'inherit' },
+    );
+    assert.equal(
+      await new Promise((done) => codec.once('close', done)),
+      0,
+      'Feature wire codec conformance',
+    );
+  }
   player = spawn(
     values.godot,
     [
@@ -229,7 +302,9 @@ try {
       '--position',
       '60,60',
       '--script',
-      'res://tests/development.gd',
+      values.providers
+        ? 'res://tests/providers.gd'
+        : 'res://tests/development.gd',
       '--',
       `--endpoint=${endpoint}`,
       `--proof-dir=${output}`,

@@ -23,10 +23,16 @@ func _run() -> void:
 		return
 	host = load("res://addons/capsule/development_host.gd").new()
 	host.endpoint = endpoint
-	host.enable_demo_provider = true
+	_configure_host()
 	root.add_child(host)
 	root.size = Vector2i(800, 480)
 	print("CAPSULE_GODOT_PID " + str(OS.get_process_id()))
+
+func _configure_host() -> void:
+	host.enable_demo_provider = true
+
+func _request_count() -> int:
+	return host.demo_requests
 
 func _process(_delta: float) -> bool:
 	if not is_instance_valid(host):
@@ -47,7 +53,7 @@ func _process(_delta: float) -> bool:
 		var color: Color = picture.texture.atlas.get_image().get_pixel(0, 0)
 		image_color = [color.r8, color.g8, color.b8, color.a8]
 	var status := {"pid": OS.get_process_id(), "revision": host.active_revision, "generation": host.generation,
-		"error": host.last_error, "requests": host.demo_requests, "texts": texts,
+		"error": host.last_error, "requests": _request_count(), "texts": texts,
 		"nodes": host.rendered_nodes.size(), "command": completed_command, "imageColor": image_color, "textColor": text_color,
 		"elapsedMs": Time.get_ticks_msec() - started}
 	var key := JSON.stringify([status.revision, status.generation, status.error, status.requests, status.texts, status.command, status.imageColor, status.textColor])

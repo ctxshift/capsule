@@ -72,6 +72,7 @@ test(
         ['@capsule-sdk/react', 'packages/capsule-react'],
         ['@capsule-sdk/workshop', 'packages/capsule-workshop'],
         ['@capsule-sdk/react-tools', 'tools/capsule-react'],
+        ['@capsule-sdk/features', 'packages/capsule-features'],
         ['react', 'tools/capsule-react/node_modules/react'],
       ]) {
         const target = await realpath(repositoryPath(path));
@@ -79,6 +80,11 @@ test(
         await mkdir(dirname(link), { recursive: true });
         await symlink(target, link, 'junction');
       }
+      const starter = await readFile(join(root, 'src/main.tsx'), 'utf8');
+      const source =
+        "import {codec} from '@capsule-sdk/features/codec';import {s} from '@capsule-sdk/features';const value=codec(s.u32).decode(new Uint8Array([1,0,0,0]));\n" +
+        starter.replace('Capsule UI', 'Capsule UI {value}');
+      await writeFile(join(root, 'src/main.tsx'), source);
       server = await startProject(root);
       const get = async () =>
         await (
@@ -89,6 +95,8 @@ test(
       expect(first.addonId).toBe('example.capsule');
       expect(first.compiler.success).toBe(true);
       expect(first.sdkSha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(first.entryBundle).toBe(first.bundle);
+      expect(first.scriptModules).toEqual([]);
       expect(first.theme.surfaces[0].key).toBe('panel');
       expect(
         (
@@ -103,7 +111,6 @@ test(
       expect(status.source).toBeUndefined();
       expect(status.output).toBeUndefined();
       expect(status.ready).toBe(true);
-      const source = await readFile(join(root, 'src/main.tsx'), 'utf8');
       const until = async (predicate: (p: typeof first) => boolean) => {
         const deadline = Date.now() + 10000;
         while (Date.now() < deadline) {

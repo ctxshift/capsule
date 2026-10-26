@@ -24,6 +24,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@capsule-sdk/features": "workspace:*",
     "@capsule-sdk/react": "workspace:*",
     "@jridgewell/trace-mapping": "0.3.31",
     "esbuild": "0.25.12",

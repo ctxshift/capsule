@@ -1,0 +1,52 @@
+[
+  {
+    "schema": {
+      "kind": "record",
+      "name": "CodecVector",
+      "fields": {
+        "flag": {
+          "kind": "bool"
+        },
+        "amount": {
+          "kind": "u32"
+        },
+        "title": {
+          "kind": "text",
+          "maxBytes": 32
+        },
+        "entries": {
+          "kind": "list",
+          "element": {
+            "kind": "record",
+            "name": "Entry",
+            "fields": {
+              "id": {
+                "kind": "u32"
+              },
+              "ready": {
+                "kind": "bool"
+              }
+            }
+          },
+          "maxCount": 3
+        }
+      }
+    },
+    "value": {
+      "flag": true,
+      "amount": 4294967295,
+      "title": "Energy 🪄 é",
+      "entries": [
+        {
+          "id": 0,
+          "ready": false
+        },
+        {
+          "id": 16777216,
+          "ready": true
+        }
+      ]
+    },
+    "hex": "01ffffffff0e000000456e6572677920f09faa8420c3a90200000000000000000000000101"
+  }
+]

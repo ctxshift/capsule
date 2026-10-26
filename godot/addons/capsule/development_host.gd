@@ -6,6 +6,8 @@ signal diagnostic_changed(message: String)
 
 @export var endpoint: String = ""
 @export var enable_demo_provider: bool = false
+@export var first_party_profile: bool = false
+@export var admitted_addon_id: String = ""
 var active_revision: String = ""
 var generation: String = "0"
 var last_error: String = ""
@@ -19,6 +21,29 @@ var _candidate_revision := ""
 var _candidate_images: Dictionary = {}
 var _active_images: Dictionary = {}
 var _active: Control
+var _providers: Dictionary = {}
+var _request_providers: Dictionary = {}
+
+func register_provider(provider: RefCounted) -> bool:
+	if _runtime != null or not provider.definition is Dictionary or not provider.definition.has("name"):
+		return false
+	var key := str(provider.definition.name)
+	if _providers.has(key):
+		return false
+	_providers[key] = provider
+	provider.bind(self)
+	return true
+
+func publish_feature_state(feature: String, member: String, payload: PackedByteArray) -> bool:
+	if _runtime == null:
+		return true
+	return _call(6, {"feature": feature, "member": member, "payload": Marshalls.raw_to_base64(payload)}).get("accepted", false)
+
+func resolve_feature_request(token: String, payload: PackedByteArray, rejected: bool = false) -> bool:
+	if _runtime == null or not _request_providers.has(token):
+		return false
+	_request_providers.erase(token)
+	return _call(7, {"token": token, "payload": Marshalls.raw_to_base64(payload), "rejected": rejected}).get("accepted", false)
 
 static func valid_endpoint(value: String) -> bool:
 	var pattern := RegEx.new()
@@ -51,7 +76,13 @@ func _ready() -> void:
 		return
 	_runtime = ClassDB.instantiate("CapsuleRuntime")
 	var resources := ProjectSettings.globalize_path("res://addons/capsule/bin")
-	if not _runtime.open(resources.path_join("capsule_host.dll"), JSON.stringify({"resources": resources, "demo": enable_demo_provider})):
+	var provider_descriptors: Array = []
+	for provider in _providers.values():
+		provider_descriptors.append(provider.descriptor())
+	var configuration := {"resources": resources, "demo": enable_demo_provider, "providers": provider_descriptors, "firstParty": first_party_profile}
+	if not admitted_addon_id.is_empty():
+		configuration["addonId"] = admitted_addon_id
+	if not _runtime.open(resources.path_join("capsule_host.dll"), JSON.stringify(configuration)):
 		_error(str(_call(0).get("error", "Capsule runtime could not start.")))
 		set_process(false)
 		return
@@ -77,7 +108,19 @@ func _process(delta: float) -> void:
 
 func _call(command: int, request: Dictionary = {}) -> Dictionary:
 	var response = _parse(_runtime.exchange(command, JSON.stringify(request)))
-	return response if response is Dictionary else {"error": "Invalid Capsule native response."}
+	if not response is Dictionary:
+		return {"error": "Invalid Capsule native response."}
+	for token in response.get("cancelledRequests", []):
+		var provider = _request_providers.get(str(token))
+		_request_providers.erase(str(token))
+		if is_instance_valid(provider):
+			provider.request_cancelled.emit(str(token))
+	for invocation in response.get("featureRequests", []):
+		var provider = _providers.get(str(invocation.feature))
+		if is_instance_valid(provider):
+			_request_providers[str(invocation.token)] = provider
+			provider.request_received.emit(str(invocation.token), str(invocation.operation), Marshalls.base64_to_raw(str(invocation.payload)))
+	return response
 
 func _download(path: String, limit: int) -> PackedByteArray:
 	_http.body_size_limit = limit

@@ -24,8 +24,8 @@ public static unsafe class Exports
     {
         try
         {
-            var value = JObject.Parse(Read(config, length, 8192));
-            var session = new DevelopmentSession((string)value["resources"], (bool?)value["demo"] == true);
+            var value = JObject.Parse(Read(config, length, 8 * 1024 * 1024));
+            var session = new DevelopmentSession((string)value["resources"], (bool?)value["demo"] == true, value);
             return GCHandle.ToIntPtr(GCHandle.Alloc(session));
         }
         catch (Exception error) { createError = error.Message; return 0; }
@@ -37,7 +37,7 @@ public static unsafe class Exports
         {
             if (handle == 0) throw new InvalidOperationException(createError ?? "No Capsule host.");
             var host = (DevelopmentSession)GCHandle.FromIntPtr(handle).Target;
-            return Marshal.StringToCoTaskMemUTF8(host.Exchange(command, Read(request, length, 900000)).ToString(Newtonsoft.Json.Formatting.None));
+            return Marshal.StringToCoTaskMemUTF8(host.Exchange(command, Read(request, length, 8 * 1024 * 1024)).ToString(Newtonsoft.Json.Formatting.None));
         }
         catch (Exception error)
         {
@@ -67,6 +67,12 @@ public sealed class DevelopmentSession : IDisposable
     readonly UiAsyncHostSession session;
     readonly byte[] carrier, sdk;
     readonly bool demo;
+    readonly FeatureProviders providers;
+    readonly UiThemeLimits themeLimits;
+    readonly int nodeLimit, hostCalls;
+    readonly bool firstParty;
+    readonly string expectedAddon;
+    UiFeatureSession candidateFeatures, activeFeatures;
     UiAsyncCompletion pending;
     UiThemeSnapshot candidatePolicy, activePolicy;
     JObject candidateTheme, activeTheme;
@@ -74,16 +80,24 @@ public sealed class DevelopmentSession : IDisposable
     uint candidateOwner, activeOwner;
     string candidateHash, failedHash, activeHash, error;
     int requests;
-    public DevelopmentSession(string resources, bool demo)
+    public DevelopmentSession(string resources, bool demo, JObject config = null)
     {
         this.demo = demo;
         carrier = File.ReadAllBytes(Path.Combine(resources, "CapsuleQuickJs.bytes"));
         sdk = File.ReadAllBytes(Path.Combine(resources, "CapsuleReactSdk.txt"));
+        config ??= new JObject();
+        providers = new FeatureProviders(config["providers"] as JArray);
+        firstParty = (bool?)config["firstParty"] == true;
+        expectedAddon = (string)config["addonId"];
+        nodeLimit = firstParty ? UiSession.ExtendedLayoutNodes : UiSession.DefaultLayoutNodes;
+        hostCalls = firstParty ? UiHostBridgeContract.ExtendedCallsPerInvocation : UiHostBridgeContract.MaxCallsPerInvocation;
+        themeLimits = firstParty ? new UiThemeLimits(4096, 256, 4096) : UiThemeLimits.Default;
         session = new UiAsyncHostSession();
     }
     static string Hash(byte[] bytes) => Convert.ToHexString(SHA256.HashData(bytes));
     static bool Hex(string value) => value != null && value.Length == 64 && Array.TrueForAll(value.ToCharArray(), Uri.IsHexDigit);
-    JObject Status() => new() { ["error"] = error, ["revision"] = activeHash, ["generation"] = session.ActiveGeneration.ToString(), ["requests"] = requests };
+    JObject Status() => new() { ["error"] = error, ["revision"] = activeHash, ["generation"] = session.ActiveGeneration.ToString(), ["requests"] = requests,
+        ["featureRequests"] = providers.DrainRequests(), ["cancelledRequests"] = providers.DrainCancelled() };
     public JObject Exchange(int command, string request)
     {
         switch (command)
@@ -100,6 +114,8 @@ public sealed class DevelopmentSession : IDisposable
             case 5:
                 var viewport = JObject.Parse(request);
                 return new JObject { ["accepted"] = session.EnqueueViewport(session.ActiveGeneration, (int)viewport["width"], (int)viewport["height"]) };
+            case 6: providers.Publish(JObject.Parse(request)); return new JObject { ["accepted"] = true };
+            case 7: return new JObject { ["accepted"] = providers.Resolve(JObject.Parse(request)) };
             default: throw new ArgumentOutOfRangeException(nameof(command));
         }
     }
@@ -107,12 +123,15 @@ public sealed class DevelopmentSession : IDisposable
     {
         if ((int?)value["schemaVersion"] != 1 || (int?)value["apiVersion"] != 1 ||
             value["requires"] is not JObject requires || requires.Count != 0 ||
-            value["features"] is not JArray features || features.Count != 0)
+            value["features"] is not JArray features)
             throw new ArgumentException("Unsupported development package contract or required features.");
         if ((bool?)value["compiler"]?["success"] == false)
         { error = (string)value["compiler"]?["error"] ?? "Compilation failed."; return; }
         string hash = (string)value["hash"], sdkHash = (string)value["sdkSha256"];
-        string source = (string)value["bundle"], suppliedSdk = (string)value["sdk"], addon = (string)value["addonId"];
+        string source = (string)value["entryBundle"] ?? (string)value["bundle"], suppliedSdk = (string)value["sdk"], addon = (string)value["addonId"];
+        if (expectedAddon != null && addon != expectedAddon) throw new ArgumentException("Addon identity does not match host configuration.");
+        var modules = new List<byte[]>();
+        foreach (string module in value["scriptModules"] as JArray ?? new JArray()) modules.Add(Encoding.UTF8.GetBytes(module));
         if (!Hex(hash) || !Hex(sdkHash) || string.IsNullOrEmpty(addon) || addon.Length > 96 || source == null || suppliedSdk == null ||
             Encoding.UTF8.GetByteCount(source) > 65536 || Encoding.UTF8.GetByteCount(suppliedSdk) > 524288 ||
             !string.Equals(Hash(Encoding.UTF8.GetBytes(suppliedSdk)), sdkHash, StringComparison.OrdinalIgnoreCase) ||
@@ -121,7 +140,7 @@ public sealed class DevelopmentSession : IDisposable
         if (hash == activeHash || hash == candidateHash || hash == failedHash) return;
         if (pending != null || candidateHash != null) return;
         var themeJson = value["theme"] as JObject ?? throw new ArgumentException("Theme missing.");
-        var theme = new UiControlTheme(themeJson.ToString());
+        var theme = new UiControlTheme(themeJson.ToString(), themeLimits);
         var styles = new List<string>(theme.StyleKeys);
         var assets = new List<string>();
         foreach (var asset in theme.CopyAssets()) assets.Add(asset.Key);
@@ -136,14 +155,29 @@ public sealed class DevelopmentSession : IDisposable
         var metrics = new YogaTextCatalog(fonts);
         var registry = new UiAddonRegistry();
         var grant = demo ? new UiCapabilityGrant(new[] { new UiObservationCapability(7, 1) }, new ushort[] { 7 }, null) : new UiCapabilityGrant(null, null, null);
-        var registration = registry.Register(addon, UiAddonTrust.Community, grant);
-        var activation = registry.Activate(registration);
-        session.RequestLoad((output, observations, actions) => new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
-            layout => new WasmtimeUiGuest(carrier, sdk, Encoding.UTF8.GetBytes(source), activation, policy, layout, observations, actions, scheduling: true)));
+        var requirements = new List<UiFeatureRequirement>();
+        foreach (JObject requirement in features) requirements.Add(new((string)requirement["name"], (string)requirement["range"],
+            (string)requirement["contractVersion"], (string)requirement["fingerprint"], (bool?)requirement["optional"] == true,
+            ((JArray)requirement["permissions"] ?? new JArray()).Values<string>()));
+        var selection = providers.Registry.Select(requirements, providers.Grants);
+        var registration = registry.Register(addon, firstParty ? UiAddonTrust.FirstParty : UiAddonTrust.Community, grant);
+        var activation = registry.Activate(registration, selection);
+        var featureSession = new UiFeatureSession(selection, activation.OwnerNonce);
+        var initial = new Queue<(ushort, UiObservationPayload)>();
+        featureSession.PumpSegments((topic, payload) => { initial.Enqueue((topic, payload)); return true; });
+        try
+        {
+            session.RequestLoad((output, observations, actions) => new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
+                layout => new WasmtimeUiGuest(carrier, sdk, Encoding.UTF8.GetBytes(source), activation, policy, layout, new InitialObservations(initial, observations), actions,
+                    scheduling: true, hostCallsPerInvocation: hostCalls, layoutNodeLimit: nodeLimit, scriptModules: modules.ToArray()), layoutNodeLimit: nodeLimit));
+        }
+        catch { featureSession.Dispose(); throw; }
+        candidateFeatures?.Dispose(); candidateFeatures = featureSession;
         candidateHash = hash; candidatePolicy = policy; candidateTheme = (JObject)themeJson.DeepClone(); candidateOwner = activation.OwnerNonce; error = null;
     }
     JObject Poll()
     {
+        activeFeatures?.PumpSegments((topic, bytes) => session.EnqueueSegmentedObservation(session.ActiveGeneration, topic, 1, bytes, replaceable: false));
         if (pending == null && session.TryGetCompletion(out var completion))
         {
             pending = completion;
@@ -191,17 +225,20 @@ public sealed class DevelopmentSession : IDisposable
             if (item.Candidate)
             {
                 activeHash = candidateHash; activePolicy = candidatePolicy; activeTheme = candidateTheme; activeOwner = candidateOwner;
+                activeFeatures?.Dispose(); activeFeatures = candidateFeatures; candidateFeatures = null;
                 candidateHash = null;
             }
             if (item.Snapshot != null) lastSnapshot = item.Snapshot;
         }, out var failure);
         pending = null;
         if (outcome != UiAsyncApplyResult.Accepted)
-        { error = completing.Error ?? failure; if (completing.Candidate) { failedHash = candidateHash; candidateHash = null; } return; }
+        { error = completing.Error ?? failure; if (completing.Candidate) { failedHash = candidateHash; candidateHash = null; candidateFeatures?.Dispose(); candidateFeatures = null; } return; }
         error = null;
         if (demo && completing.Candidate) ObserveDemo();
         foreach (var action in completing.Actions)
         {
+            if (action.Capability == UiFeatureSession.Capability && activeFeatures != null) { activeFeatures.Dispatch(action.CopyPayload()); continue; }
+            if (action.Capability == UiFeatureSession.RecoveryCapability && activeFeatures != null) { activeFeatures.Recover(action.CopyPayload()); continue; }
             bool valid = false;
             foreach (var node in (sourceSnapshot ?? lastSnapshot).Nodes)
                 if (node.Handle == action.Handle && node.Kind == UiNodeKind.Button && node.Visible && (node.Events & UiEventMask.Activate) != 0) valid = true;
@@ -211,5 +248,18 @@ public sealed class DevelopmentSession : IDisposable
         }
     }
     void ObserveDemo() => session.EnqueueObservation(session.ActiveGeneration, 7, 1, new[] { (byte)requests, (byte)(requests >> 8) });
-    public void Dispose() => session.Dispose();
+    public void Dispose() { candidateFeatures?.Dispose(); activeFeatures?.Dispose(); providers.Dispose(); session.Dispose(); }
+    sealed class InitialObservations : IUiSegmentedObservationAdapter
+    {
+        readonly Queue<(ushort Topic, UiObservationPayload Payload)> initial;
+        readonly IUiObservationAdapter inner;
+        public InitialObservations(Queue<(ushort, UiObservationPayload)> initial, IUiObservationAdapter inner) { this.initial = initial; this.inner = inner; }
+        public bool TryDequeueSegments(out ushort topic, out ushort schema, out UiObservationPayload payload)
+        {
+            if (initial.Count != 0) { var item = initial.Dequeue(); topic = item.Topic; schema = 1; payload = item.Payload; return true; }
+            if (inner is IUiSegmentedObservationAdapter segmented) return segmented.TryDequeueSegments(out topic, out schema, out payload);
+            bool result = inner.TryDequeue(out topic, out schema, out var bytes); payload = result ? UiObservationPayload.Owned(bytes) : null; return result;
+        }
+        public bool TryDequeue(out ushort topic, out ushort schema, out byte[] bytes) { bool result = TryDequeueSegments(out topic, out schema, out var payload); bytes = result ? payload.AsContiguous() : null; return result; }
+    }
 }

@@ -4,7 +4,12 @@ import { createHash } from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import { resolve, dirname, join, relative, isAbsolute } from 'node:path';
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping';
-import { capsuleEntry, capsuleSourceRoot, reactTypes } from './sdk-paths.mjs';
+import {
+  capsuleEntry,
+  capsuleSourceRoot,
+  featureSourceRoot,
+  reactTypes,
+} from './sdk-paths.mjs';
 import { scriptChunks } from './script-chunks.mjs';
 import { validatePackageTheme } from './package-theme.ts';
 import { validateThemeReferences } from './theme-references.mjs';
@@ -71,6 +76,7 @@ export function compiler({
     ...new Set([
       root,
       capsuleSourceRoot,
+      featureSourceRoot,
       ...watchRoots.map((path) => resolve(path)),
     ]),
   ];

@@ -4,7 +4,7 @@ import { resolve, dirname, relative, isAbsolute } from 'node:path';
 import { createHash } from 'node:crypto';
 import { compiler } from './compiler.mjs';
 import { parseTheme, scopedTheme, themePath, type ThemeLimits } from './theme';
-import { capsuleSourceRoot } from './sdk-paths.mjs';
+import { capsuleSourceRoot, featureSourceRoot } from './sdk-paths.mjs';
 
 export interface WorkshopOptions {
   source: string;
@@ -26,6 +26,7 @@ export async function startWorkshop(options: WorkshopOptions) {
   const roots = [
     resolve(options.addonRoot),
     capsuleSourceRoot,
+    featureSourceRoot,
     ...(options.watchRoots ?? []),
   ];
   const worker = compiler({
@@ -40,6 +41,8 @@ export async function startWorkshop(options: WorkshopOptions) {
   });
   let publication: {
     bundle: string;
+    entryBundle: string;
+    scriptModules: string[];
     sdk: string;
     hash: string;
     theme: ReturnType<typeof parseTheme>;
@@ -146,7 +149,12 @@ export async function startWorkshop(options: WorkshopOptions) {
                 readFile(resolve(output, themePath(asset.path)), 'utf8'),
               ),
           );
-          scripts.push(await readFile(resolve(output, 'bundle.js'), 'utf8'));
+          const scriptModules = [...scripts];
+          const entryBundle = await readFile(
+            resolve(output, 'bundle.js'),
+            'utf8',
+          );
+          scripts.push(entryBundle);
           const bundle = scripts.join('\n');
           const sdk = await readFile(resolve(options.sdkFile), 'utf8');
           const digest = createHash('sha256')
@@ -165,6 +173,8 @@ export async function startWorkshop(options: WorkshopOptions) {
           const hash = digest.digest('hex');
           publication = {
             bundle,
+            entryBundle,
+            scriptModules,
             sdk,
             hash,
             theme,

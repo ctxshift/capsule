@@ -8,7 +8,7 @@ native library from Capsule's existing portable runtime.
 
 This is a development adapter for the running-game React workflow. Release
 exports do not connect to the workshop. Production package loading, the full
-control catalog, generated feature-provider integration and other platforms
+control catalog and other platforms
 remain separate acceptance gates. No marketplace listing or published Godot
 release is implied by a locally built candidate.
 
@@ -79,8 +79,49 @@ admission failures retain the last-good generation.
 
 For the neutral starter, enable **Enable Demo Provider** on the host. It grants
 only the example topic/action and counts requests; it is not a gameplay authority
-or a general feature-provider implementation. Leave it disabled in real game
-integration until an explicit game-owned provider adapter is implemented.
+or a general feature-provider implementation. Leave it disabled when registering
+game-owned feature providers.
+
+## Register game feature providers
+
+Create a `feature_provider.gd` instance for each feature implemented by the game.
+Set `definition` to its generated descriptor and `grants` to explicitly approved
+permissions. Register providers with `host.register_provider(provider)` before
+adding the host to the scene tree. The game supplies providers; UI publications
+cannot install providers or grant themselves permissions. Required contracts,
+versions, fingerprints and dependencies must match before a candidate can load.
+
+Publish initial state before registration. State is replayed into each accepted
+generation, including after React reload. `feature_codec.gd` encodes and decodes
+the shared bool, uint32, UTF-8 text, list and ordered-record schemas:
+
+```gdscript
+var codec = load("res://addons/capsule/feature_codec.gd")
+var provider = load("res://addons/capsule/feature_provider.gd").new()
+provider.definition = descriptor # Generated feature descriptor supplied by the game.
+provider.grants = PackedStringArray(["energy.read", "energy.add"])
+var initial = codec.encode(descriptor.states.State.schema, {"count": 0})
+assert(initial.ok)
+assert(provider.publish_state("State", initial.bytes))
+provider.request_received.connect(handle_request)
+assert(host.register_provider(provider))
+add_child(host)
+```
+
+`request_received(token, operation, payload)` delivers a bounded request on the
+Godot main thread. Decode against the operation's input schema, apply the game's
+rules, publish changed state, then call `resolve_request(token, encoded_result)`.
+Pass `true` as the third argument to reject a request. The token is opaque and
+single use. `request_cancelled(token)` lets asynchronous game logic abandon work
+when its UI generation retires. Replies for cancelled or already resolved tokens
+return `false`. The provider transport permits 64 outstanding requests and a
+4 MiB payload; schema-specific bounds should be much smaller.
+
+Keep game authority outside the addon. A successful transport request is not
+permission to bypass server-owned rules. The host's optional `admitted_addon_id`
+pins a game-selected addon identity. Enable `first_party_profile` only in trusted
+game composition to select the shared extended runtime quotas; packages cannot
+enable it themselves.
 
 Current native presentation supports Box, ClipBox, Text, Image and Button.
 Layout uses the shared Yoga coordinator and worker lifecycle. Buttons use Godot's
@@ -91,7 +132,7 @@ and focus-preserving incremental rendering are not established by this slice.
 The host rebuilds a complete tree on each accepted snapshot.
 
 React component-local state resets on generation replacement. Observations from
-the opt-in demo provider are replayed. Disconnecting the workshop preserves the
+registered providers are replayed. Disconnecting the workshop preserves the
 last-good UI and controls; restarting it on the same endpoint resumes polling.
 Native library, carrier or embedded SDK changes require a safe game/Editor
 restart. Never replace loaded DLLs. Godot does not unload the NativeAOT module;
@@ -102,7 +143,8 @@ sessions close individually and the library remains loaded for the process.
 The native host exposes ABI version 1 through `capsule_abi_version`,
 `capsule_create`, `capsule_exchange`, `capsule_free` and `capsule_destroy`.
 The extension checks the version and pins one native library location per
-process. JSON requests are bounded to 900,000 UTF-8 bytes; source and SDK
+process. Native JSON requests are bounded to 8 MiB; development HTTP publications
+are separately limited to 900,000 bytes. Source and SDK
 quotas remain those of the shared runtime. Native host calls and presentation
 acknowledgments belong to the Godot main thread. Guest execution and Yoga
 layout stay on the existing portable worker. This bridge is separate from
@@ -111,6 +153,16 @@ the guest's existing `portable_ui_v1` imports; no Godot API enters the guest.
 ```powershell
 bun tools/capsule-godot/verify.ts --godot <godot-console-executable> --output <fresh-proof-directory> --addon <unpacked-bundle>/addons/capsule
 ```
+
+Add `--providers` to exercise a generated neutral feature through the shared
+feature registry and GDScript game provider instead of the demo capability.
+This also checks the GDScript codec against TypeScript golden bytes and invalid
+wire values. Run the engine-independent boundary checks with
+`dotnet run --project tools/capsule-host-tests`; shared feature regressions use
+`dotnet run --project tools/capsule-feature-tests`.
+The [provider verification record](verification/godot-feature-providers.json)
+and [native capture](verification/godot-feature-providers.png) retain the neutral
+provider candidate's hashes, checks and remaining production limitations.
 
 The fixture creates a fresh game and a separate React project, uses the real
 workshop CLI as an owned child process, imports the plugin, and starts a normal
