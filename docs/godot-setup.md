@@ -128,11 +128,24 @@ The selected text catalog limit follows the profile's theme limit.
 
 Image preparation follows the current snapshot instead of downloading the entire
 theme art library. Atlas recipes reuse one decoded source texture per publication.
+Workshops publish image content hashes. The host verifies downloaded bytes and
+reuses matching decoded textures across revisions, including TSX-only reloads.
+Missing images are fetched in groups of at most eight threaded requests. Failed
+preparation preserves the previous surface and its image references.
 Preparation still completes before a replacement is shown. Community sessions
 allow 16 MiB encoded and 64 MiB decoded image data per revision; trusted sessions
 allow 64 MiB encoded and 256 MiB decoded. Each download is limited to 4 MiB, and
 PNG dimensions are checked before decoding. These are resource ceilings, not a
 startup latency guarantee. Full image recipe rendering remains separate work.
+
+`presentation_metrics` retains the latest 32 snapshot presentation records,
+including package transfer, native admission/worker/layout, image preparation,
+control construction and a frame-post-draw timestamp. Native initialization
+trace offsets distinguish runtime construction from SDK/addon evaluation.
+Measure compilation separately from ready-publication-to-frame latency. These
+diagnostics are host data and add no player-facing controls. The startup and
+post-compilation reload target is below 300 ms; the presence of timing records
+does not establish that target or correct initial viewport presentation.
 
 Current native presentation supports Box, ClipBox, Text, Image and Button.
 Layout uses the shared Yoga coordinator and worker lifecycle. Buttons use Godot's

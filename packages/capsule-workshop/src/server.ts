@@ -51,6 +51,7 @@ export async function startWorkshop(options: WorkshopOptions) {
     apiVersion: number;
     features: unknown[];
     sdkSha256: string;
+    imageHashes: Record<string, string>;
   } | null = null;
   const images = new Map<string, Map<string, Uint8Array>>();
   let result: Awaited<ReturnType<typeof worker.compile>> | null = null;
@@ -183,6 +184,12 @@ export async function startWorkshop(options: WorkshopOptions) {
             apiVersion: manifest.apiVersion,
             features: manifest.features ?? [],
             sdkSha256: createHash('sha256').update(sdk).digest('hex'),
+            imageHashes: Object.fromEntries(
+              [...art].map(([key, bytes]) => [
+                key,
+                createHash('sha256').update(bytes).digest('hex'),
+              ]),
+            ),
           };
           images.set(hash, art);
           while (images.size > 2) images.delete(images.keys().next().value!);

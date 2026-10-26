@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -80,6 +82,8 @@ public sealed class DevelopmentSession : IDisposable
     uint candidateOwner, activeOwner;
     string candidateHash, failedHash, activeHash, error;
     int requests;
+    ConcurrentDictionary<string, double> candidateTimings;
+    static double Milliseconds(long start) => (Stopwatch.GetTimestamp() - start) * 1000d / Stopwatch.Frequency;
     public DevelopmentSession(string resources, bool demo, JObject config = null)
     {
         this.demo = demo;
@@ -121,6 +125,7 @@ public sealed class DevelopmentSession : IDisposable
     }
     void Load(JObject value)
     {
+        long loadStarted = Stopwatch.GetTimestamp();
         if ((int?)value["schemaVersion"] != 1 || (int?)value["apiVersion"] != 1 ||
             value["requires"] is not JObject requires || requires.Count != 0 ||
             value["features"] is not JArray features)
@@ -165,14 +170,23 @@ public sealed class DevelopmentSession : IDisposable
         var featureSession = new UiFeatureSession(selection, activation.OwnerNonce);
         var initial = new Queue<(ushort, UiObservationPayload)>();
         featureSession.PumpSegments((topic, payload) => { initial.Enqueue((topic, payload)); return true; });
+        var timings = new ConcurrentDictionary<string, double>();
+        timings["admissionMs"] = Milliseconds(loadStarted);
         try
         {
-            session.RequestLoad((output, observations, actions) => new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
+            session.RequestLoad((output, observations, actions) => {
+                long factoryStarted = Stopwatch.GetTimestamp();
+                var guest = new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
                 layout => new WasmtimeUiGuest(carrier, sdk, Encoding.UTF8.GetBytes(source), activation, policy, layout, new InitialObservations(initial, observations), actions,
                     scheduling: true, hostCallsPerInvocation: hostCalls, layoutNodeLimit: nodeLimit, scriptModules: modules.ToArray(),
-                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel), layoutNodeLimit: nodeLimit));
+                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel), layoutNodeLimit: nodeLimit);
+                timings["guestFactoryMs"] = Milliseconds(factoryStarted);
+                guest.InitializationTrace = stage => timings[stage] = Milliseconds(factoryStarted);
+                return guest;
+            });
         }
         catch { featureSession.Dispose(); throw; }
+        candidateTimings = timings;
         candidateFeatures?.Dispose(); candidateFeatures = featureSession;
         candidateHash = hash; candidatePolicy = policy; candidateTheme = (JObject)themeJson.DeepClone(); candidateOwner = activation.OwnerNonce; error = null;
     }
@@ -212,6 +226,11 @@ public sealed class DevelopmentSession : IDisposable
         result["sequence"] = pending.Sequence.ToString(); result["generation"] = pending.Generation.ToString();
         result["candidate"] = pending.Candidate; result["revision"] = pending.Candidate ? candidateHash : activeHash;
         result["theme"] = pending.Candidate ? candidateTheme : activeTheme; result["nodes"] = nodes;
+        var timingJson = new JObject { ["workerMs"] = pending.WorkerMilliseconds, ["queueMs"] = pending.QueueMilliseconds,
+            ["layoutMs"] = pending.LayoutMilliseconds, ["coordinatorMs"] = pending.CoordinatorMilliseconds };
+        if (pending.Candidate && candidateTimings != null)
+            foreach (var pair in candidateTimings) timingJson[pair.Key] = pair.Value;
+        result["timings"] = timingJson;
         return result;
     }
     void Acknowledge(JObject value)

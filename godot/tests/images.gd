@@ -19,7 +19,7 @@ func _run() -> void:
 	image.fill(Color.RED)
 	host.data = image.save_png_to_buffer()
 	var first := {"key": "first", "image": "atlas", "path": "atlas.png", "width": 2, "height": 2, "rect": [0, 0, 1, 1]}
-	var second := {"key": "second", "path": "atlas.png", "width": 2, "height": 2, "rect": [1, 1, 1, 1]}
+	var second := {"key": "second", "image": "atlas", "path": "atlas.png", "width": 2, "height": 2, "rect": [1, 1, 1, 1]}
 	var unused := {"key": "unused", "path": "unused.png", "width": 2, "height": 2, "rect": [0, 0, 2, 2]}
 	var result := {"candidate": true, "revision": "neutral", "theme": {"assets": [first, second, unused]}, "nodes": [{"kind": "Image", "asset": "first"}, {"kind": "Image", "asset": "second"}]}
 	var prepared: Dictionary = await host._prepare_images(result)
@@ -30,7 +30,30 @@ func _run() -> void:
 	if prepared.size() != 2 or host.downloads != 1:
 		_fail(host, "Source cache reuse")
 		return
+	var hasher := HashingContext.new()
+	hasher.start(HashingContext.HASH_SHA256)
+	hasher.update(host.data)
+	var digest := hasher.finish().hex_encode()
+	host._candidate_image_hashes = {"atlas": digest}
+	result.revision = "verified"
+	prepared = await host._prepare_images(result)
+	if prepared.size() != 2 or host.downloads != 2:
+		_fail(host, "Verified source was not prepared")
+		return
+	var texture: Texture2D = prepared.first.atlas
+	result.revision = "next"
+	prepared = await host._prepare_images(result)
+	if prepared.size() != 2 or host.downloads != 2 or prepared.first.atlas != texture:
+		_fail(host, "Unchanged content was downloaded again across revisions")
+		return
+	result.revision = "corrupt"
+	host._candidate_image_hashes = {"atlas": "b".repeat(64)}
+	prepared = await host._prepare_images(result)
+	if not prepared.is_empty():
+		_fail(host, "Image content identity mismatch accepted")
+		return
 	result.revision = "invalid"
+	host._candidate_image_hashes = {}
 	host.data[16] = 127 # Impossible width; reject before invoking the decoder.
 	prepared = await host._prepare_images(result)
 	if not prepared.is_empty():

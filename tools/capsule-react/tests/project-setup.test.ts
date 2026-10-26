@@ -1,4 +1,5 @@
 import { test, expect } from 'vitest';
+import { createHash } from 'node:crypto';
 import {
   mkdtemp,
   mkdir,
@@ -95,6 +96,11 @@ test(
       expect(first.addonId).toBe('example.capsule');
       expect(first.compiler.success).toBe(true);
       expect(first.sdkSha256).toMatch(/^[a-f0-9]{64}$/);
+      expect(first.imageHashes.neutral).toBe(
+        createHash('sha256')
+          .update(await readFile(join(root, 'assets/neutral.png')))
+          .digest('hex'),
+      );
       expect(first.entryBundle).toBe(first.bundle);
       expect(first.scriptModules).toEqual([]);
       expect(first.theme.surfaces[0].key).toBe('panel');

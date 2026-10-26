@@ -13,6 +13,7 @@ var generation: String = "0"
 var last_error: String = ""
 var demo_requests: int = 0
 var rendered_nodes: Array = []
+var presentation_metrics: Array = []
 var _runtime: RefCounted
 var _http: HTTPRequest
 var _fetching := false
@@ -25,6 +26,14 @@ var _providers: Dictionary = {}
 var _request_providers: Dictionary = {}
 var _preparing := false
 var _source_images: Dictionary = {}
+var _started_us := 0
+var _open_ms := 0.0
+var _candidate_metrics: Dictionary = {}
+var _image_download_ms := 0.0
+var _image_decode_ms := 0.0
+var _candidate_image_hashes: Dictionary = {}
+var _active_image_hashes: Dictionary = {}
+var _content_images: Dictionary = {}
 
 func register_provider(provider: RefCounted) -> bool:
 	if _runtime != null or not provider.definition is Dictionary or not provider.definition.has("name"):
@@ -61,6 +70,7 @@ static func _parse(text: String) -> Variant:
 	return parser.data if parser.parse(text) == OK else null
 
 func _ready() -> void:
+	_started_us = Time.get_ticks_usec()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if Engine.is_editor_hint() or not OS.is_debug_build():
 		set_process(false)
@@ -84,11 +94,14 @@ func _ready() -> void:
 	var configuration := {"resources": resources, "demo": enable_demo_provider, "providers": provider_descriptors, "firstParty": first_party_profile}
 	if not admitted_addon_id.is_empty():
 		configuration["addonId"] = admitted_addon_id
+	var open_started := Time.get_ticks_usec()
 	if not _runtime.open(resources.path_join("capsule_host.dll"), JSON.stringify(configuration)):
 		_error(str(_call(0).get("error", "Capsule runtime could not start.")))
 		set_process(false)
 		return
+	_open_ms = (Time.get_ticks_usec() - open_started) / 1000.0
 	_http = HTTPRequest.new()
+	_http.use_threads = true
 	_http.timeout = 4.0
 	_http.body_size_limit = 900000
 	_http.max_redirects = 0
@@ -129,17 +142,31 @@ func _call_json(command: int, request: String) -> Dictionary:
 	return response
 
 func _download(path: String, limit: int) -> PackedByteArray:
-	_http.body_size_limit = limit
-	if _http.request(endpoint + path) != OK:
+	var owned := path != "/capsule/dev/v1/package"
+	var request := HTTPRequest.new() if owned else _http
+	if owned:
+		request.use_threads = true
+		request.timeout = 4.0
+		request.max_redirects = 0
+		add_child(request)
+	request.body_size_limit = limit
+	request.download_chunk_size = 1048576
+	if request.request(endpoint + path) != OK:
+		if owned:
+			request.queue_free()
 		return PackedByteArray()
-	var response: Array = await _http.request_completed
+	var response: Array = await request.request_completed
+	if owned:
+		request.queue_free()
 	if response[0] != HTTPRequest.RESULT_SUCCESS or response[1] != 200:
 		return PackedByteArray()
 	return response[3]
 
 func _fetch_publication() -> void:
 	_fetching = true
+	var fetch_started := Time.get_ticks_usec()
 	var bytes := await _download("/capsule/dev/v1/package", 900000)
+	var received := Time.get_ticks_usec()
 	if not is_inside_tree():
 		return
 	var publication = _parse(bytes.get_string_from_utf8())
@@ -158,13 +185,16 @@ func _fetch_publication() -> void:
 		_fetching = false
 		return
 	# Forward original JSON so integer contract fields do not become decimal tokens.
+	var native_started := Time.get_ticks_usec()
 	var result := _call_json(1, bytes.get_string_from_utf8())
 	if result.get("error"):
 		_candidate_revision = revision
 		_error(str(result.error))
 	else:
+		_candidate_metrics = {"fetchStartedUs": fetch_started, "receivedUs": received, "queuedUs": Time.get_ticks_usec(), "downloadMs": (received - fetch_started) / 1000.0, "parseMs": (native_started - received) / 1000.0, "nativeCallMs": (Time.get_ticks_usec() - native_started) / 1000.0}
 		_candidate_revision = revision
 		_candidate_images = {}
+		_candidate_image_hashes = publication.get("imageHashes", {})
 	_fetching = false
 
 func _prepare_images(result: Dictionary) -> Dictionary:
@@ -173,42 +203,112 @@ func _prepare_images(result: Dictionary) -> Dictionary:
 	for recipe in result.theme.get("assets", []):
 		recipes[str(recipe.key)] = recipe
 	var sources: Dictionary = _source_images.get(str(result.revision), {})
+	var hashes: Dictionary = _candidate_image_hashes if result.candidate else _active_image_hashes
 	_source_images[str(result.revision)] = sources
+	var wanted: Dictionary = {}
+	var jobs: Dictionary = {}
 	for node in result.nodes:
 		if node.kind != "Image" or images.has(str(node.asset)):
 			continue
 		var recipe: Dictionary = recipes.get(str(node.asset), {})
 		if recipe.is_empty():
 			return {}
+		wanted[str(node.asset)] = recipe
 		var source: String = str(recipe.path)
 		if not sources.has(source):
-			var data := await _download("/portable-ui/art/" + str(result.revision).uri_encode() + "/" + str(recipe.get("image", recipe.key)).uri_encode(), 4194304)
-			if data.size() < 24 or data.slice(0, 8).hex_encode() != "89504e470d0a1a0a":
-				return {}
-			# Bound decoded allocation before calling the PNG decoder.
-			var width := (int(data[16]) << 24) | (int(data[17]) << 16) | (int(data[18]) << 8) | int(data[19])
-			var height := (int(data[20]) << 24) | (int(data[21]) << 16) | (int(data[22]) << 8) | int(data[23])
-			var decoded := width * height * 4
-			var total := data.size()
-			for cached in sources.values():
-				decoded += int(cached.decoded)
-				total += int(cached.encoded)
-			if width <= 0 or height <= 0 or width > 8192 or height > 8192 or decoded > (268435456 if first_party_profile else 67108864) or total > (67108864 if first_party_profile else 16777216):
-				return {}
-			var image := Image.new()
-			if image.load_png_from_buffer(data) != OK or image.get_width() != int(recipe.width) or image.get_height() != int(recipe.height):
-				return {}
-			sources[source] = {"texture": ImageTexture.create_from_image(image), "encoded": data.size(), "decoded": width * height * 4}
+			jobs[source] = recipe
+	var job_list := jobs.values()
+	for offset in range(0, job_list.size(), 8):
+		var end := mini(offset + 8, job_list.size())
+		var batch := {"remaining": end - offset, "failed": false}
+		for index in range(offset, end):
+			_prepare_source(result, job_list[index], sources, hashes, batch)
+		while int(batch.remaining) > 0:
+			await get_tree().process_frame
+		if batch.failed:
+			return {}
+	for key in wanted:
+		var recipe: Dictionary = wanted[key]
 		var texture := AtlasTexture.new()
-		texture.atlas = sources[source].texture
+		texture.atlas = sources[str(recipe.path)].texture
 		var rect: Array = recipe.rect
 		texture.region = Rect2(rect[0], rect[1], rect[2], rect[3])
-		images[str(node.asset)] = texture
+		images[key] = texture
 	return images
+
+func _prepare_source(result: Dictionary, recipe: Dictionary, sources: Dictionary, hashes: Dictionary, batch: Dictionary) -> void:
+	var digest := str(hashes.get(str(recipe.get("image", recipe.key)), ""))
+	var cached: Dictionary = {}
+	if not digest.is_empty() and not _valid_digest(digest):
+		batch.failed = true
+	elif not digest.is_empty() and _content_images.has(digest):
+		cached = _content_images[digest]
+		if not _image_capacity(sources, int(cached.encoded), int(cached.decoded)) or cached.texture.get_width() != int(recipe.width) or cached.texture.get_height() != int(recipe.height):
+			cached = {}
+	else:
+		cached = await _download_image(result, recipe, sources, digest)
+	if cached.is_empty():
+		batch.failed = true
+	else:
+		sources[str(recipe.path)] = cached
+	batch.remaining = int(batch.remaining) - 1
+
+static func _valid_digest(value: String) -> bool:
+	if value.length() != 64:
+		return false
+	for byte in value.to_ascii_buffer():
+		if not (byte >= 48 and byte <= 57 or byte >= 97 and byte <= 102):
+			return false
+	return true
+
+func _image_capacity(sources: Dictionary, encoded: int, decoded: int) -> bool:
+	for cached in sources.values():
+		decoded += int(cached.decoded)
+		encoded += int(cached.encoded)
+	return decoded <= (268435456 if first_party_profile else 67108864) and encoded <= (67108864 if first_party_profile else 16777216)
+
+func _download_image(result: Dictionary, recipe: Dictionary, sources: Dictionary, digest: String) -> Dictionary:
+	var download_started := Time.get_ticks_usec()
+	var data := await _download("/portable-ui/art/" + str(result.revision).uri_encode() + "/" + str(recipe.get("image", recipe.key)).uri_encode(), 4194304)
+	_image_download_ms += (Time.get_ticks_usec() - download_started) / 1000.0
+	if data.size() < 24 or data.slice(0, 8).hex_encode() != "89504e470d0a1a0a":
+		return {}
+	if not digest.is_empty():
+		var hasher := HashingContext.new()
+		hasher.start(HashingContext.HASH_SHA256)
+		hasher.update(data)
+		if hasher.finish().hex_encode() != digest:
+			return {}
+	# Bound decoded allocation before calling the PNG decoder.
+	var width := (int(data[16]) << 24) | (int(data[17]) << 16) | (int(data[18]) << 8) | int(data[19])
+	var height := (int(data[20]) << 24) | (int(data[21]) << 16) | (int(data[22]) << 8) | int(data[23])
+	if width <= 0 or height <= 0 or width > 8192 or height > 8192 or not _image_capacity(sources, data.size(), width * height * 4):
+		return {}
+	var image := Image.new()
+	var decode_started := Time.get_ticks_usec()
+	if image.load_png_from_buffer(data) != OK or image.get_width() != int(recipe.width) or image.get_height() != int(recipe.height):
+		return {}
+	var cached := {"texture": ImageTexture.create_from_image(image), "encoded": data.size(), "decoded": width * height * 4, "digest": digest}
+	if not digest.is_empty():
+		_content_images[digest] = cached
+	_image_decode_ms += (Time.get_ticks_usec() - decode_started) / 1000.0
+	return cached
+
+func _trim_content_images() -> void:
+	var retained: Dictionary = {}
+	for sources in _source_images.values():
+		for cached in sources.values():
+			if not str(cached.get("digest", "")).is_empty():
+				retained[cached.digest] = cached
+	_content_images = retained
 
 func _present(result: Dictionary) -> void:
 	_preparing = true
+	var preparation_started := Time.get_ticks_usec()
+	_image_download_ms = 0.0
+	_image_decode_ms = 0.0
 	var images := await _prepare_images(result)
+	var controls_started := Time.get_ticks_usec()
 	if not is_inside_tree():
 		return
 	var candidate := Control.new()
@@ -271,6 +371,7 @@ func _present(result: Dictionary) -> void:
 		candidate.queue_free()
 		if result.candidate:
 			_source_images.erase(str(result.revision))
+			_trim_content_images()
 		_error(str(acknowledgment.get("error", "Godot presentation rejected.")))
 		_preparing = false
 		return
@@ -283,8 +384,10 @@ func _present(result: Dictionary) -> void:
 	rendered_nodes = result.nodes
 	if result.candidate:
 		_active_images = images
+		_active_image_hashes = _candidate_image_hashes
 		_candidate_images = {}
 		_source_images = {str(result.revision): _source_images.get(str(result.revision), {})}
+		_trim_content_images()
 		active_revision = str(result.revision)
 		_candidate_revision = ""
 		_call(5, {"width": int(get_viewport_rect().size.x), "height": int(get_viewport_rect().size.y)})
@@ -293,6 +396,24 @@ func _present(result: Dictionary) -> void:
 		_active_images = images
 	_error("")
 	_preparing = false
+	_record_presentation(result, preparation_started, controls_started, _image_download_ms, _image_decode_ms)
+
+func _record_presentation(result: Dictionary, preparation_started: int, controls_started: int, download_ms: float, decode_ms: float) -> void:
+	var metrics := {"revision": str(result.revision), "candidate": result.candidate, "native": result.get("timings", {}), "openMs": _open_ms, "imagesMs": (controls_started - preparation_started) / 1000.0, "imageDownloadMs": download_ms, "imageDecodeMs": decode_ms, "controlsMs": (Time.get_ticks_usec() - controls_started) / 1000.0}
+	if result.candidate:
+		metrics.merge(_candidate_metrics)
+		metrics["nativeWaitMs"] = (preparation_started - int(_candidate_metrics.queuedUs)) / 1000.0
+	await RenderingServer.frame_post_draw
+	if not is_inside_tree():
+		return
+	metrics["hostToFrameMs"] = (Time.get_ticks_usec() - _started_us) / 1000.0
+	metrics["presentedAtUnixMs"] = Time.get_unix_time_from_system() * 1000.0
+	if result.candidate:
+		metrics["receivedToFrameMs"] = (Time.get_ticks_usec() - int(metrics.receivedUs)) / 1000.0
+		metrics["fetchToFrameMs"] = (Time.get_ticks_usec() - int(metrics.fetchStartedUs)) / 1000.0
+	presentation_metrics.append(metrics)
+	if presentation_metrics.size() > 32:
+		presentation_metrics.pop_front()
 
 func _activate(handle: String, owner_generation: String) -> void:
 	_call(4, {"handle": handle, "generation": owner_generation})
@@ -306,8 +427,9 @@ func _error(message: String) -> void:
 		diagnostic_changed.emit(message)
 
 func _exit_tree() -> void:
-	if _http:
-		_http.cancel_request()
+	for child in get_children():
+		if child is HTTPRequest:
+			child.cancel_request()
 	if _runtime:
 		_runtime.close()
 		_runtime = null
