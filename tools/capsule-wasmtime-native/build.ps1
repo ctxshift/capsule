@@ -1,4 +1,4 @@
-param([switch]$Install)
+param([switch]$Install,[string]$OutputDirectory)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $archive=Join-Path $root '.local/wasmtime-c-api.zip'
@@ -11,7 +11,9 @@ if((Get-FileHash -LiteralPath $archive).Hash -ne $archiveHash){throw 'C API arch
 if(!(Test-Path -LiteralPath $api)){Expand-Archive -LiteralPath $archive -DestinationPath (Join-Path $root '.local/wasmtime-c-api')}
 $runtime=Join-Path $api 'lib/wasmtime.dll'
 if((Get-FileHash -LiteralPath $runtime).Hash -ne $runtimeHash){throw 'Pinned runtime DLL hash mismatch.'}
-$output=Join-Path $root '.local/portable_ui_wasmtime.dll'
+if(!$OutputDirectory){$OutputDirectory=Join-Path $root '.local'}
+New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
+$output=Join-Path $OutputDirectory 'portable_ui_wasmtime.dll'
 $argsNative=@('cc','-target','x86_64-windows-gnu','-O2','-shared','-I',(Join-Path $api 'include'),(Join-Path $PSScriptRoot 'bridge.c'),(Join-Path $api 'lib/wasmtime.dll.lib'),'-o',$output)
 & zig @argsNative
 if($LASTEXITCODE -ne 0){throw 'C ABI bridge build failed.'}

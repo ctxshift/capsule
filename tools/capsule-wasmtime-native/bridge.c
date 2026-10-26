@@ -66,7 +66,7 @@ API const char *pui_bootstrap_error(void)
 {
     return bootstrap_error;
 }
-API int pui_bootstrap(const uint8_t *bytes,int length)
+static int bootstrap(const uint8_t *bytes,int length,const uint8_t *compiled,int compiled_length)
 {
     AcquireSRWLockExclusive(&module_lock);
     if(!bytes||length<=0){strcpy(bootstrap_error,"empty carrier");goto failed;}
@@ -78,10 +78,14 @@ API int pui_bootstrap(const uint8_t *bytes,int length)
     wasmtime_config_max_wasm_stack_set(config,524288);
     wasmtime_config_strategy_set(config,WASMTIME_STRATEGY_CRANELIFT);
     wasmtime_config_cranelift_opt_level_set(config,WASMTIME_OPT_LEVEL_SPEED);
+    wasmtime_error_t *target_error=wasmtime_config_target_set(config,"x86_64-pc-windows-msvc");
+    if(target_error){message(bootstrap_error,target_error,NULL);wasm_config_delete(config);goto failed;}
     engine=wasm_engine_new_with_config(config);
     }
     wasmtime_module_t *candidate=NULL;
-    wasmtime_error_t *error=wasmtime_module_new(engine,bytes,length,&candidate);
+    wasmtime_error_t *error=compiled
+        ?wasmtime_module_deserialize(engine,compiled,(size_t)compiled_length,&candidate)
+        :wasmtime_module_new(engine,bytes,length,&candidate);
     if(error)
     {
         message(bootstrap_error,error,NULL);
@@ -98,6 +102,34 @@ API int pui_bootstrap(const uint8_t *bytes,int length)
     return 0;
     failed:ReleaseSRWLockExclusive(&module_lock);return -1;
 }
+API int pui_bootstrap(const uint8_t *bytes,int length)
+{
+    return bootstrap(bytes,length,NULL,0);
+}
+// Serialized modules are executable host artifacts, never addon-provided data.
+API int pui_bootstrap_cached(const uint8_t *bytes,int length,const uint8_t *compiled,int compiled_length)
+{
+    if(!compiled||compiled_length<=0||compiled_length>16777216)return -1;
+    return bootstrap(bytes,length,compiled,compiled_length);
+}
+API int pui_precompile(const uint8_t *bytes,int length,uint8_t **out,int *out_length)
+{
+    if(!out||!out_length)return -1;
+    *out=NULL;*out_length=0;
+    if(pui_bootstrap(bytes,length))return -1;
+    AcquireSRWLockExclusive(&module_lock);
+    wasm_byte_vec_t serialized;
+    wasmtime_error_t *error=wasmtime_module_serialize(module,&serialized);
+    if(error){message(bootstrap_error,error,NULL);ReleaseSRWLockExclusive(&module_lock);return -1;}
+    if(serialized.size>16777216){wasm_byte_vec_delete(&serialized);ReleaseSRWLockExclusive(&module_lock);return -1;}
+    uint8_t *copy=malloc(serialized.size);
+    if(!copy){wasm_byte_vec_delete(&serialized);ReleaseSRWLockExclusive(&module_lock);return -1;}
+    memcpy(copy,serialized.data,serialized.size);*out=copy;*out_length=(int)serialized.size;
+    wasm_byte_vec_delete(&serialized);
+    ReleaseSRWLockExclusive(&module_lock);
+    return 0;
+}
+API void pui_precompiled_free(uint8_t *bytes){free(bytes);}
 static wasm_trap_t *invoke(void *env,wasmtime_caller_t *caller,const wasmtime_val_t *args,size_t nargs,wasmtime_val_t *results,size_t nresults)
 {
     binding *b=env;

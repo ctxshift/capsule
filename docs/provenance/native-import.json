@@ -929,8 +929,10 @@
     {
       "source": "client/Assets/Host/Capsule/Wasmtime/WasmtimeUiGuest.cs",
       "target": "unity/Packages/com.capsule.wasmtime/Runtime/WasmtimeUiGuest.cs",
-      "sha256": "0c04cbc9ab728d08113fb4b2ce4732dda426e39ec32cdea66e6dcd8a68b05e61",
-      "canonicalSha256": "18dc5da989498066f3df1abfe6955289381a47b4f13825786013490b1f633e9c"
+      "sha256": "0c1a912d143a001c6fafae5718f4998e28517ec398fa294f036b82019ae2d980",
+      "canonicalSha256": "924f1c2115826590381accc31bf7c36296cfda0f9794666ad59983974b4f4096",
+      "originalImportSha256": "0c04cbc9ab728d08113fb4b2ce4732dda426e39ec32cdea66e6dcd8a68b05e61",
+      "adaptation": "Allow an explicitly trusted precompiled carrier while preserving the pinned source identity and existing source-only initialization path."
     },
     {
       "source": "client/Assets/Host/Capsule/Wasmtime/WasmtimeUiGuest.cs.meta",

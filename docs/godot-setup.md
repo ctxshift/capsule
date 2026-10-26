@@ -15,7 +15,7 @@ release is implied by a locally built candidate.
 ## Install the addon
 
 Until a GitHub release is promoted, build from the Capsule repository root with
-its pinned tools, .NET SDK, CMake, Git and Visual Studio C++ desktop build tools:
+its pinned tools (including Zig), .NET SDK, CMake, Git and Visual Studio C++ desktop build tools:
 
 ```powershell
 node tools/capsule-godot/build.mjs --output .local/godot-candidate
@@ -29,6 +29,19 @@ not create NuGet packages or publish anything. Build logs stay in the requested
 output directory; NativeAOT currently reports dependency analysis warnings for
 Newtonsoft and its expression infrastructure. The exercised paths require the
 real native consumer gate below; warnings are not suppressed.
+The engine bundle also includes a precompiled trusted QuickJS carrier for the
+pinned Wasmtime runtime and Windows x86_64 baseline target. The builder produces
+it from the pinned source carrier, keeping compilation out of UI startup. The
+host verifies the source, target, runtime and artifact identities before loading
+it; incompatible native code is rejected by Wasmtime. Addons cannot provide a
+compiled carrier. Source-only engine resources remain supported for existing
+adapters. Corrupt or incomplete compiled resources fail explicitly.
+
+The native bridge is built into the fresh candidate directory. Building a Godot
+bundle does not install or replace libraries in an open Unity project. The
+compiled carrier has a separate hash descriptor and is covered by the bundle
+inventory. Matching bytes in repeated local compilation do not establish full
+clean-snapshot release reproducibility.
 The tested C++ build uses Visual Studio 2026 and CMake 4.2. Compiler path mapping
 keeps local checkout paths out of the owned native binaries; the builder rejects
 a binary containing the current checkout or user-profile path.

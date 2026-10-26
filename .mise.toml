@@ -1,6 +1,7 @@
 [tools]
 bun = "1.3.6"
 node = "25.6.1"
+zig = "0.16.0"
 "github:ctxshift/bees" = "0.4.0"
 
 [tasks.install]

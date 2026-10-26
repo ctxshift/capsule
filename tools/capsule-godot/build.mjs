@@ -88,6 +88,14 @@ if (values.generator) configure.push('-G', values.generator);
 run('cmake', configure);
 run('cmake', ['--build', build, '--config', 'Release', '--parallel', '4']);
 const native = join(output, 'native');
+const bridge = join(output, 'bridge');
+run('pwsh', [
+  '-NoProfile',
+  '-File',
+  'tools/capsule-wasmtime-native/build.ps1',
+  '-OutputDirectory',
+  bridge,
+]);
 run('dotnet', [
   'publish',
   'tools/capsule-host-native/Capsule.Host.csproj',
@@ -112,10 +120,7 @@ const resources = {
     root,
     'unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/wasmtime.dll',
   ),
-  'portable_ui_wasmtime.dll': join(
-    root,
-    'unity/Packages/com.capsule.wasmtime/Runtime/Plugins/x86_64/portable_ui_wasmtime.dll',
-  ),
+  'portable_ui_wasmtime.dll': join(bridge, 'portable_ui_wasmtime.dll'),
   'portable_ui_yoga.dll': join(
     root,
     'unity/Packages/com.capsule.yoga/Runtime/Plugins/x86_64/portable_ui_yoga.dll',
@@ -131,7 +136,25 @@ const resources = {
 };
 for (const [name, source] of Object.entries(resources))
   copyFileSync(source, join(bin, name));
-for (const name of ['capsule_godot.dll', 'capsule_host.dll']) {
+run('dotnet', [
+  'run',
+  '--project',
+  'tools/capsule-wasmtime-precompile',
+  '--',
+  '--bridge',
+  join(bin, 'portable_ui_wasmtime.dll'),
+  '--runtime',
+  join(bin, 'wasmtime.dll'),
+  '--source',
+  join(bin, 'CapsuleQuickJs.bytes'),
+  '--output',
+  bin,
+]);
+for (const name of [
+  'capsule_godot.dll',
+  'capsule_host.dll',
+  'portable_ui_wasmtime.dll',
+]) {
   const bytes = readFileSync(join(bin, name));
   for (const prefix of [root.replace(/[\\/]$/, ''), homedir()]) {
     for (const variant of [

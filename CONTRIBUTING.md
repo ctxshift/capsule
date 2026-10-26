@@ -10,7 +10,7 @@ mise run check
 mise run test
 ```
 
-The repository pins Bun, Node and Bees. Native checks also require a .NET SDK
+The repository pins Bun, Node, Zig and Bees. Native checks also require a .NET SDK
 supporting the .NET 9 test runners and .NET Standard 2.1 libraries. The SDK is
 provided separately from mise. Engine validation uses the explicit project and
 the tooling described in [Unity setup](docs/unity-setup.md); ordinary authoring

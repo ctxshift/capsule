@@ -67,7 +67,7 @@ public static unsafe class Exports
 public sealed class DevelopmentSession : IDisposable
 {
     readonly UiAsyncHostSession session;
-    readonly byte[] carrier, sdk;
+    readonly byte[] carrier, sdk, compiledCarrier;
     readonly bool demo;
     readonly FeatureProviders providers;
     readonly UiThemeLimits themeLimits;
@@ -83,14 +83,22 @@ public sealed class DevelopmentSession : IDisposable
     string candidateHash, failedHash, activeHash, error;
     int requests;
     ConcurrentDictionary<string, double> candidateTimings;
+    readonly JObject startupTimings = new();
     static double Milliseconds(long start) => (Stopwatch.GetTimestamp() - start) * 1000d / Stopwatch.Frequency;
     public DevelopmentSession(string resources, bool demo, JObject config = null)
     {
+        long started = Stopwatch.GetTimestamp();
         this.demo = demo;
         carrier = File.ReadAllBytes(Path.Combine(resources, "CapsuleQuickJs.bytes"));
         sdk = File.ReadAllBytes(Path.Combine(resources, "CapsuleReactSdk.txt"));
+        startupTimings["resourcesMs"] = Milliseconds(started);
+        started = Stopwatch.GetTimestamp();
+        compiledCarrier = CompiledCarrier.Read(resources, carrier);
+        startupTimings["compiledVerificationMs"] = Milliseconds(started);
+        started = Stopwatch.GetTimestamp();
         config ??= new JObject();
         providers = new FeatureProviders(config["providers"] as JArray);
+        startupTimings["providersMs"] = Milliseconds(started);
         firstParty = (bool?)config["firstParty"] == true;
         expectedAddon = (string)config["addonId"];
         nodeLimit = firstParty ? UiSession.ExtendedLayoutNodes : UiSession.DefaultLayoutNodes;
@@ -179,7 +187,7 @@ public sealed class DevelopmentSession : IDisposable
                 var guest = new YogaUiGuest(activation.OwnerNonce, policy, metrics, output,
                 layout => new WasmtimeUiGuest(carrier, sdk, Encoding.UTF8.GetBytes(source), activation, policy, layout, new InitialObservations(initial, observations), actions,
                     scheduling: true, hostCallsPerInvocation: hostCalls, layoutNodeLimit: nodeLimit, scriptModules: modules.ToArray(),
-                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel), layoutNodeLimit: nodeLimit);
+                    executionFuel: firstParty ? ulong.MaxValue : WasmtimeUiGuest.AddonExecutionFuel, trustedCompiledCarrier: compiledCarrier), layoutNodeLimit: nodeLimit);
                 timings["guestFactoryMs"] = Milliseconds(factoryStarted);
                 guest.InitializationTrace = stage => timings[stage] = Milliseconds(factoryStarted);
                 return guest;
@@ -227,7 +235,7 @@ public sealed class DevelopmentSession : IDisposable
         result["candidate"] = pending.Candidate; result["revision"] = pending.Candidate ? candidateHash : activeHash;
         result["theme"] = pending.Candidate ? candidateTheme : activeTheme; result["nodes"] = nodes;
         var timingJson = new JObject { ["workerMs"] = pending.WorkerMilliseconds, ["queueMs"] = pending.QueueMilliseconds,
-            ["layoutMs"] = pending.LayoutMilliseconds, ["coordinatorMs"] = pending.CoordinatorMilliseconds };
+            ["layoutMs"] = pending.LayoutMilliseconds, ["coordinatorMs"] = pending.CoordinatorMilliseconds, ["startup"] = startupTimings.DeepClone() };
         if (pending.Candidate && candidateTimings != null)
             foreach (var pair in candidateTimings) timingJson[pair.Key] = pair.Value;
         result["timings"] = timingJson;

@@ -59,4 +59,35 @@ using var queued = new UiFeatureSession(selection, 8);
 queued.Dispatch(queued.FrameRequest("@capsule-example/energy", "Add", 1, new byte[] { 1, 0, 0, 0 }));
 queued.Dispose();
 Check(providers.DrainRequests().Count == 0, "cancelled queued request never reaches game logic");
-Console.WriteLine($"PASS native provider boundary: {checks} checks");
+string temporary = Path.Combine(Path.GetTempPath(), "capsule-runtime-check-" + Guid.NewGuid().ToString("N"));
+Directory.CreateDirectory(temporary);
+string artifactPath = Path.Combine(temporary, "CapsuleQuickJs.cwasm");
+string descriptorPath = Path.Combine(temporary, "CapsuleQuickJs.precompiled.json");
+try
+{
+    byte[] source = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "Fixtures", "CapsuleQuickJs.bytes"));
+    Check(CompiledCarrier.Read(temporary, source) == null, "legacy source carrier remains supported");
+    byte[] artifact = new byte[] { 1, 2, 3, 4 };
+    File.WriteAllBytes(artifactPath, artifact);
+    Refuses(() => CompiledCarrier.Read(temporary, source), "compiled carrier needs its descriptor");
+    var descriptor = new JObject { ["schemaVersion"] = 1, ["target"] = "x86_64-pc-windows-msvc", ["runtimeVersion"] = "48.0.2",
+        ["runtimeSha256"] = "19b3880fbb92f1826c58ac9f5e2a472692b5fc3d012a1a7a41983ccf77544607",
+        ["sourceSha256"] = Capsule.Wasmtime.WasmtimeUiGuest.QuickJsSha256,
+        ["compiledSha256"] = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(artifact)) };
+    void Save() => File.WriteAllText(descriptorPath, descriptor.ToString());
+    Save();
+    Check(CompiledCarrier.Read(temporary, source).SequenceEqual(artifact), "verified engine artifact selected");
+    File.WriteAllBytes(artifactPath, new byte[] { 1, 2, 3, 5 });
+    Refuses(() => CompiledCarrier.Read(temporary, source), "corrupted compiled artifact refused");
+    File.WriteAllBytes(artifactPath, artifact);
+    descriptor["target"] = "different-platform"; Save();
+    Refuses(() => CompiledCarrier.Read(temporary, source), "wrong compiled target refused");
+    descriptor["target"] = "x86_64-pc-windows-msvc"; descriptor["runtimeVersion"] = "different-runtime"; Save();
+    Refuses(() => CompiledCarrier.Read(temporary, source), "wrong compiled runtime refused");
+    descriptor["runtimeVersion"] = "48.0.2"; Save();
+    Refuses(() => CompiledCarrier.Read(temporary, new byte[] { 0 }), "wrong source identity refused");
+    using (var oversized = File.OpenWrite(artifactPath)) oversized.SetLength(16777217);
+    Refuses(() => CompiledCarrier.Read(temporary, source), "compiled artifact size bounded before reading");
+}
+finally { File.Delete(artifactPath); File.Delete(descriptorPath); Directory.Delete(temporary); }
+Console.WriteLine($"PASS native provider/runtime boundary: {checks} checks");

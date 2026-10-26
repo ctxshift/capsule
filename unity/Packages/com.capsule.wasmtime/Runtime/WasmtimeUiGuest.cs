@@ -26,6 +26,7 @@ namespace Capsule.Wasmtime
         static readonly object BootstrapLock = new object();
         static bool bootstrapped;
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern int pui_bootstrap(byte[] bytes, int length);
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern int pui_bootstrap_cached(byte[] bytes, int length, byte[] compiled, int compiledLength);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_bootstrap_error();
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr pui_create_with_host_call_limit(HostCallback callback, IntPtr data, int limit);
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)] static extern ulong pui_host_call_rejections(IntPtr guest);
@@ -78,7 +79,7 @@ namespace Capsule.Wasmtime
             if (index < 0 || index >= operationMetrics.Length) throw new ArgumentOutOfRangeException(nameof(operation));
             return operationMetrics[index];
         }
-        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null, ulong executionFuel = AddonExecutionFuel)
+        public WasmtimeUiGuest(byte[] carrier, byte[] sdk, byte[] source, UiAddonActivation activation, IUiTheme theme, IUiCommitTarget target, IUiObservationAdapter observations, IUiActionAdapter actions, bool scheduling = false, IWasmtimeInvocationRunner invocationRunner = null, int hostCallsPerInvocation = UiHostBridgeContract.MaxCallsPerInvocation, int layoutNodeLimit = UiSession.DefaultLayoutNodes, UiSurfaceAdmission surfaceAdmission = null, byte[][] scriptModules = null, ulong executionFuel = AddonExecutionFuel, byte[] trustedCompiledCarrier = null)
         {
             if (hostCallsPerInvocation != UiHostBridgeContract.MaxCallsPerInvocation && hostCallsPerInvocation != UiHostBridgeContract.ExtendedCallsPerInvocation)
                 throw new ArgumentOutOfRangeException(nameof(hostCallsPerInvocation));
@@ -112,7 +113,10 @@ namespace Capsule.Wasmtime
             {
                 if (!bootstrapped)
                 {
-                    if (pui_bootstrap(carrier, carrier.Length) != 0) throw new InvalidOperationException(Marshal.PtrToStringAnsi(pui_bootstrap_error()));
+                    // The host verifies the compiled engine artifact before supplying it.
+                    int result = trustedCompiledCarrier == null ? pui_bootstrap(carrier, carrier.Length) :
+                        pui_bootstrap_cached(carrier, carrier.Length, trustedCompiledCarrier, trustedCompiledCarrier.Length);
+                    if (result != 0) throw new InvalidOperationException(Marshal.PtrToStringAnsi(pui_bootstrap_error()));
                     bootstrapped = true;
                 }
             }
